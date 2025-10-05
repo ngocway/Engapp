@@ -1,223 +1,209 @@
-# English Learning App for Kids - Version 1.0
+# 🎓 English Learning App - Vocabulary Management System
 
-## 🎯 Overview
-A comprehensive English learning application designed specifically for children, featuring interactive vocabulary learning, reading comprehension, and quiz exercises.
+A comprehensive English learning application with AI-powered vocabulary management system built with React, TypeScript, and Firebase.
 
 ## ✨ Features
 
-### 📚 Core Learning Modules
-- **Vocabulary Learning**: Interactive flashcards with pronunciation
-- **Reading Passages**: Age-appropriate texts with vocabulary highlights
-- **Quiz System**: Multiple choice, true/false, and fill-in-the-blank questions
-- **Progress Tracking**: User progress and achievement system
+### 🎯 Core Features
+- **Vocabulary Management**: Complete CRUD operations for vocabulary words
+- **AI-Powered Pronunciation**: Automatic Vietnamese pronunciation suggestions
+- **Multiple Examples**: Support for multiple example sentences per vocabulary word
+- **Media Upload**: Image and audio upload with drag-and-drop functionality
+- **Real-time Stats**: Live display of questions and vocabulary counts per passage
+- **Modern UI**: Beautiful, responsive design with glass morphism effects
 
-### 🎮 Interactive Features
-- **Audio Pronunciation**: Text-to-speech for vocabulary words
-- **Visual Learning**: Images and illustrations for better retention
-- **Gamification**: Points, levels, and achievement system
-- **Responsive Design**: Works on desktop and mobile devices
+### 🤖 AI Features
+- **Smart Pronunciation**: AI suggests Vietnamese pronunciation for English words
+- **100+ Pre-built Pronunciations**: Database of common words with accurate pronunciations
+- **Fallback Algorithm**: Automatic pronunciation generation for new words
 
-### 🛠️ Admin Panel
-- **Content Management**: Add, edit, and delete topics, passages, and questions
-- **Vocabulary Management**: Manage vocabulary with definitions and examples
-- **Question Management**: Create and manage quiz questions
-- **User Analytics**: Track user progress and performance
+### 🎨 UI/UX Features
+- **Drag & Drop**: File upload with visual feedback
+- **Loading States**: Progress indicators for uploads and AI processing
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Dark Theme**: Modern dark interface with beautiful gradients
 
-## 🚀 Technology Stack
+## 🛠️ Tech Stack
 
-### Frontend
-- **React 18**: Modern React with hooks
-- **TypeScript**: Type-safe development
-- **React Router**: Client-side routing
-- **CSS3**: Responsive styling
-
-### Backend & Database
-- **Firebase Firestore**: NoSQL database
-- **Firebase Storage**: File storage for images and audio
-- **Firebase Authentication**: User management
-
-### Development Tools
-- **Create React App**: Development environment
-- **ESLint**: Code linting
-- **Prettier**: Code formatting
+- **Frontend**: React 18, TypeScript, CSS3
+- **Backend**: Firebase (Firestore, Storage, Authentication)
+- **Styling**: Custom CSS with modern animations
+- **Build Tool**: Create React App
+- **Version Control**: Git
 
 ## 📁 Project Structure
 
 ```
 src/
-├── components/          # React components
-│   ├── AdminPanel.tsx   # Admin dashboard
-│   ├── QuizSection.tsx  # Quiz functionality
-│   ├── VocabularyCard.tsx # Vocabulary display
+├── components/           # Reusable UI components
+│   ├── AdminPanel.tsx
+│   ├── AdminVocabularyPage.tsx
+│   ├── PassageEditModal.tsx
 │   └── ...
-├── pages/              # Page components
-│   ├── PassageList.tsx     # Passage listing
+├── pages/               # Main application pages
+│   ├── HomePage.tsx
+│   ├── AdminPage.tsx
 │   └── ...
-├── firebase/           # Firebase services
-│   ├── config.ts       # Firebase configuration
-│   ├── questionService.ts # Question CRUD
+├── firebase/            # Firebase services
+│   ├── config.ts
+│   ├── authService.ts
 │   └── ...
-├── types/              # TypeScript interfaces
-│   └── index.ts        # Type definitions
-├── data/               # Sample data
-│   ├── topics.ts       # Topic and passage data
-│   └── ...
-└── App.tsx             # Main application
+├── services/            # External services
+│   └── pronunciationService.ts
+├── types/               # TypeScript interfaces
+│   └── index.ts
+└── data/                # Sample data
+    └── ...
 ```
 
-## 🎯 Key Components
-
-### 1. Vocabulary System
-- **Flashcard Interface**: Interactive vocabulary cards
-- **Audio Integration**: Pronunciation support
-- **Progress Tracking**: Learned words tracking
-
-### 2. Reading System
-- **Passage Display**: Formatted text with vocabulary highlights
-- **Interactive Elements**: Clickable vocabulary terms
-- **Audio Support**: Text-to-speech for passages
-
-### 3. Quiz System
-- **Multiple Question Types**: 
-  - Multiple Choice
-  - True/False
-  - Fill in the Blank
-- **Scoring System**: Points and level progression
-- **Results Display**: Detailed feedback and explanations
-
-### 4. Admin Panel
-- **Content Management**: Full CRUD operations
-- **User Management**: Progress tracking and analytics
-- **Data Import/Export**: Bulk operations support
-
-## 🔧 Installation & Setup
+## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js 16+ 
+- Node.js (v14 or higher)
 - npm or yarn
-- Firebase project
+- Firebase project setup
 
 ### Installation
-```bash
-# Clone the repository
-git clone <repository-url>
-cd EngApp
 
-# Install dependencies
-npm install
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/eng-app-vocabulary.git
+   cd eng-app-vocabulary
+   ```
 
-# Set up Firebase
-# 1. Create Firebase project
-# 2. Enable Firestore and Authentication
-# 3. Copy firebase config to src/firebase/config.ts
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-# Start development server
-npm start
+3. **Configure Firebase**
+   - Create a Firebase project
+   - Enable Firestore, Storage, and Authentication
+   - Update `src/firebase/config.ts` with your Firebase config
+
+4. **Run the development server**
+   ```bash
+   npm start
+   ```
+
+5. **Open your browser**
+   ```
+   http://localhost:3000
+   ```
+
+## 🔧 Configuration
+
+### Firebase Setup
+1. Create a new Firebase project
+2. Enable the following services:
+   - **Firestore Database**
+   - **Storage**
+   - **Authentication**
+3. Update `src/firebase/config.ts`:
+   ```typescript
+   const firebaseConfig = {
+     apiKey: "your-api-key",
+     authDomain: "your-project.firebaseapp.com",
+     projectId: "your-project-id",
+     storageBucket: "your-project.appspot.com",
+     messagingSenderId: "your-sender-id",
+     appId: "your-app-id"
+   };
+   ```
+
+### Environment Variables
+Create a `.env` file in the root directory:
+```
+REACT_APP_FIREBASE_API_KEY=your-api-key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+REACT_APP_FIREBASE_PROJECT_ID=your-project-id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+REACT_APP_FIREBASE_APP_ID=your-app-id
 ```
 
-### Firebase Configuration
-1. Create a Firebase project
-2. Enable Firestore Database
-3. Enable Authentication
-4. Update `src/firebase/config.ts` with your config
+## 📚 Usage
 
-## 🚀 Deployment
+### Admin Features
+1. **Access Admin Panel**: Navigate to Admin section
+2. **Manage Passages**: Create, edit, delete reading passages
+3. **Manage Vocabulary**: Add vocabulary with images, audio, and examples
+4. **AI Pronunciation**: Use AI to suggest Vietnamese pronunciations
+5. **Upload Media**: Drag and drop images and audio files
 
-### Build for Production
-```bash
-npm run build
-```
+### Student Features
+1. **Browse Topics**: Select learning topics
+2. **Read Passages**: Interactive reading experience
+3. **Learn Vocabulary**: Study words with examples and pronunciations
+4. **Practice Exercises**: Complete vocabulary and comprehension exercises
 
-### Deploy to Firebase Hosting
-```bash
-npm install -g firebase-tools
-firebase login
-firebase init hosting
-firebase deploy
-```
+## 🤖 AI Pronunciation Service
 
-## 📊 Version 1.0 Features
+The app includes a smart pronunciation service that:
+- Provides 100+ pre-built Vietnamese pronunciations for common English words
+- Uses AI algorithms to generate pronunciations for new words
+- Supports easy editing and customization
+- Ready for integration with external AI APIs (OpenAI, Claude, etc.)
 
-### ✅ Completed Features
-- [x] User authentication system
-- [x] Vocabulary learning with flashcards
-- [x] Reading passages with vocabulary highlights
-- [x] Quiz system with 3 question types
-- [x] Admin panel for content management
-- [x] Progress tracking system
-- [x] Responsive design
-- [x] Audio pronunciation support
-- [x] Firebase integration
-- [x] TypeScript implementation
+## 📱 Screenshots
 
-### 🔄 Future Enhancements (v2.0+)
-- [ ] Advanced analytics dashboard
-- [ ] Social learning features
-- [ ] Offline mode support
-- [ ] Advanced gamification
-- [ ] Multi-language support
-- [ ] Parent/teacher portal
+### Admin Panel
+- Modern vocabulary management interface
+- Drag-and-drop file upload
+- AI pronunciation suggestions
+- Multiple examples support
 
-## 🎨 UI/UX Features
+### Student Interface
+- Beautiful passage reading experience
+- Interactive vocabulary learning
+- Progress tracking
+- Responsive design
 
-### Design Principles
-- **Child-Friendly**: Bright colors and engaging visuals
-- **Accessibility**: Screen reader support and keyboard navigation
-- **Responsive**: Works on all device sizes
-- **Intuitive**: Easy-to-use interface for children
+## 🔄 Version History
 
-### Color Scheme
-- Primary: #00B894 (Green)
-- Secondary: #636E72 (Gray)
-- Accent: #FD79A8 (Pink)
-- Background: #F8F9FA (Light Gray)
+### v2.0.0 (Current)
+- ✅ Complete vocabulary management system
+- ✅ AI-powered pronunciation suggestions
+- ✅ Multiple examples support
+- ✅ Image and audio upload
+- ✅ Real-time stats display
+- ✅ Modern UI with drag-drop functionality
+- ✅ Firebase integration
+- ✅ TypeScript support
 
-## 🔒 Security Features
-
-- **Firebase Authentication**: Secure user management
-- **Firestore Security Rules**: Data access control
-- **Input Validation**: Client and server-side validation
-- **XSS Protection**: Sanitized content rendering
-
-## 📈 Performance Optimizations
-
-- **Code Splitting**: Lazy loading of components
-- **Image Optimization**: Compressed and optimized images
-- **Bundle Optimization**: Minimized JavaScript bundles
-- **Caching**: Efficient data caching strategies
-
-## 🧪 Testing
-
-### Test Coverage
-- Unit tests for utility functions
-- Integration tests for Firebase services
-- Component tests for React components
-
-### Running Tests
-```bash
-npm test
-```
-
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+### v1.0.0
+- Basic passage reading functionality
+- Simple vocabulary display
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
+
+## 🙏 Acknowledgments
+
+- Firebase for backend services
+- React community for excellent documentation
+- AI services for pronunciation assistance
 
 ## 📞 Support
 
-For support and questions:
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
+If you have any questions or need help, please:
+- Open an issue on GitHub
+- Contact: [your-email@example.com]
+- Documentation: [Wiki](https://github.com/YOUR_USERNAME/eng-app-vocabulary/wiki)
 
 ---
 
-**Version 1.0** - Released: December 2024
-**Built with ❤️ for children's English learning**
+**⭐ Star this repository if you found it helpful!**
