@@ -443,17 +443,6 @@ const AdminVocabularyPage: React.FC = () => {
         </h2>
       </div>
 
-      {/* Debug Info */}
-      <div style={{ 
-        backgroundColor: '#f8f9fa', 
-        padding: '10px', 
-        borderRadius: '5px', 
-        marginBottom: '15px',
-        fontSize: '12px',
-        color: '#666'
-      }}>
-        <strong>Debug Info:</strong> Passage ID: {passageId} | Vocabularies Count: {vocabularies.length}
-      </div>
 
       {/* Vocabulary List */}
       <div style={{ marginBottom: '20px' }}>
