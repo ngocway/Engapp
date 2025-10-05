@@ -496,13 +496,7 @@ const AdminVocabularyPage: React.FC = () => {
         ) : (
           <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
             {vocabularies.map((vocab, index) => (
-              <div key={vocab.id} style={{
-                border: '1px solid #dee2e6',
-                borderRadius: '8px',
-                padding: '20px',
-                backgroundColor: 'white',
-                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              <div key={vocab.id} className="vocabulary-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
                   <div style={{ flex: 1 }}>
                     <div style={{ 
