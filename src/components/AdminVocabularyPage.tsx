@@ -497,8 +497,8 @@ const AdminVocabularyPage: React.FC = () => {
           <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
             {vocabularies.map((vocab, index) => (
               <div key={vocab.id} className="vocabulary-card">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '15px' }}>
-                  <div style={{ flex: 1 }}>
+                <div className="card-header">
+                  <div>
                     <div style={{ 
                       display: 'inline-block',
                       backgroundColor: '#007bff',
@@ -511,59 +511,13 @@ const AdminVocabularyPage: React.FC = () => {
                     }}>
                       Từ #{index + 1}
                     </div>
-                    <h4 style={{ margin: '0 0 10px 0', color: '#333', fontSize: '1.2rem' }}>
+                    <h4 style={{ margin: '0 0 10px 0', color: '#333', fontSize: '1.2rem', width: '100%', textAlign: 'left' }}>
                       {vocab.word}
                     </h4>
-                    <p style={{ margin: '0 0 10px 0', color: '#666' }}>
-                      <strong>Nghĩa:</strong> {vocab.meaning}
-                    </p>
-                    
-                    {vocab.pronunciation && (
-                      <p style={{ margin: '0 0 10px 0', color: '#666' }}>
-                        <strong>Phiên âm:</strong> {vocab.pronunciation}
-                      </p>
-                    )}
-                    
-                    {vocab.vietnamesePronunciation && (
-                      <p style={{ margin: '0 0 10px 0', color: '#28a745', fontStyle: 'italic' }}>
-                        <strong>Đọc:</strong> {vocab.vietnamesePronunciation}
-                      </p>
-                    )}
-                    
-                    {(vocab.examples && vocab.examples.length > 0 && vocab.examples[0]) || vocab.example ? (
-                      <div style={{ marginBottom: '10px' }}>
-                        <strong>Ví dụ:</strong>
-                        {(vocab.examples && vocab.examples.length > 0) ? (
-                          <div style={{ marginTop: '5px' }}>
-                            {vocab.examples.filter(ex => ex && ex.trim()).map((example, index) => (
-                              <div key={index} style={{ 
-                                padding: '8px', 
-                                backgroundColor: '#e9ecef', 
-                                borderRadius: '4px',
-                                marginBottom: index < vocab.examples!.filter(ex => ex && ex.trim()).length - 1 ? '5px' : '0',
-                                fontSize: '0.9rem'
-                              }}>
-                                {index + 1}. {example}
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div style={{ 
-                            padding: '8px', 
-                            backgroundColor: '#e9ecef', 
-                            borderRadius: '4px',
-                            marginTop: '5px',
-                            fontSize: '0.9rem'
-                          }}>
-                            {vocab.example}
-                          </div>
-                        )}
-                      </div>
-                    ) : null}
                     
                   </div>
                   
-                  <div style={{ display: 'flex', gap: '10px', marginLeft: '15px' }}>
+                  <div className="card-actions">
                     <button
                       onClick={() => handleEdit(vocab)}
                       style={{
@@ -593,6 +547,59 @@ const AdminVocabularyPage: React.FC = () => {
                       🗑️ Xóa
                     </button>
                   </div>
+                </div>
+                
+                <div className="card-content">
+                  <p style={{ margin: '0 0 10px 0', color: '#666', width: '100%', textAlign: 'left' }}>
+                    <strong>Nghĩa:</strong> {vocab.meaning}
+                  </p>
+                  
+                  {vocab.pronunciation && (
+                    <p style={{ margin: '0 0 10px 0', color: '#666', width: '100%', textAlign: 'left' }}>
+                      <strong>Phiên âm:</strong> {vocab.pronunciation}
+                    </p>
+                  )}
+                  
+                  {vocab.vietnamesePronunciation && (
+                    <p style={{ margin: '0 0 10px 0', color: '#28a745', fontStyle: 'italic', width: '100%', textAlign: 'left' }}>
+                      <strong>Đọc:</strong> {vocab.vietnamesePronunciation}
+                    </p>
+                  )}
+                  
+                  {(vocab.examples && vocab.examples.length > 0 && vocab.examples[0]) || vocab.example ? (
+                    <div style={{ marginBottom: '10px', width: '100%', textAlign: 'left' }}>
+                      <strong>Ví dụ:</strong>
+                      {(vocab.examples && vocab.examples.length > 0) ? (
+                        <div style={{ marginTop: '5px' }}>
+                          {vocab.examples.filter(ex => ex && ex.trim()).map((example, index) => (
+                              <div key={index} style={{ 
+                                padding: '8px', 
+                                backgroundColor: '#e9ecef', 
+                                borderRadius: '4px',
+                                marginBottom: index < vocab.examples!.filter(ex => ex && ex.trim()).length - 1 ? '5px' : '0',
+                                fontSize: '0.9rem',
+                                width: '100%',
+                                textAlign: 'left'
+                              }}>
+                              {index + 1}. {example}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                          <div style={{ 
+                            padding: '8px', 
+                            backgroundColor: '#e9ecef', 
+                            borderRadius: '4px',
+                            marginTop: '5px',
+                            fontSize: '0.9rem',
+                            width: '100%',
+                            textAlign: 'left'
+                          }}>
+                          {vocab.example}
+                        </div>
+                      )}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             ))}

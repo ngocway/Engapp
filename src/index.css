@@ -526,6 +526,77 @@ body {
   box-shadow: 0 4px 12px rgba(220, 53, 69, 0.15) !important;
   position: relative !important;
   transition: all 0.3s ease !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+}
+
+.vocabulary-card .card-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  margin-bottom: 15px !important;
+  width: 100% !important;
+}
+
+.vocabulary-card .card-header > div:first-child {
+  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  margin-right: 15px !important;
+  text-align: left !important;
+  align-items: flex-start !important;
+}
+
+.vocabulary-card .card-content {
+  flex: 1 !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+.vocabulary-card .card-content p,
+.vocabulary-card .card-content h4,
+.vocabulary-card .card-content div {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  text-align: left !important;
+  text-align-last: left !important;
+}
+
+.vocabulary-card .card-content strong {
+  display: inline-block !important;
+  width: auto !important;
+  text-align: left !important;
+}
+
+.vocabulary-card .card-header h4 {
+  width: 100% !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.vocabulary-card .card-header > div:first-child > div:first-of-type {
+  width: auto !important;
+  display: inline-block !important;
+  align-self: flex-start !important;
+  text-align: left !important;
+}
+
+.vocabulary-card .card-content div[style*="backgroundColor: #e9ecef"] {
+  text-align: left !important;
+  text-align-last: left !important;
+}
+
+.vocabulary-card .card-content div[style*="marginTop: 5px"] {
+  text-align: left !important;
+  text-align-last: left !important;
+}
+
+.vocabulary-card .card-actions {
+  display: flex !important;
+  gap: 8px !important;
+  margin-left: 10px !important;
 }
 
 .vocabulary-card:hover {
