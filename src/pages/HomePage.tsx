@@ -6,7 +6,7 @@ import { useAuth } from '../contexts/AuthContext';
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
-  const { user, login, logout } = useAuth();
+  const { user, isAdmin, login, logout } = useAuth();
 
   const handleModeSelect = (mode: GameMode) => {
     if (mode === 'topicSelect') {

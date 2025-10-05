@@ -1,12 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Topic } from '../types';
+import { Topic, Passage } from '../types';
 import PassageListComponent from '../components/PassageList';
+import { useAuth } from '../contexts/AuthContext';
 
 const PassageList: React.FC = () => {
   const { topicSlug } = useParams<{ topicSlug: string }>();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [topic, setTopic] = useState<Topic | null>(null);
+
+  const handleCreatePassage = () => {
+    // TODO: Implement create passage functionality
+    console.log('Create new passage for topic:', topic?.name);
+    // Có thể navigate đến trang tạo đoạn văn mới
+    // navigate(`/create-passage/${topicSlug}`);
+  };
+
+  const handleEditPassage = (passage: Passage) => {
+    // TODO: Implement edit passage functionality
+    console.log('Edit passage:', passage.title);
+    // Có thể navigate đến trang chỉnh sửa đoạn văn
+    // navigate(`/edit-passage/${passage.id}`);
+  };
+
+  const handleDeletePassage = (passage: Passage) => {
+    // TODO: Implement delete passage functionality
+    if (window.confirm(`Bạn có chắc chắn muốn xóa đoạn văn "${passage.title}"?`)) {
+      console.log('Delete passage:', passage.title);
+      // Có thể gọi API để xóa đoạn văn
+    }
+  };
 
   useEffect(() => {
     if (topicSlug) {
@@ -33,31 +57,36 @@ const PassageList: React.FC = () => {
   return (
     <div className="app">
       <header className="header">
-        <h1>🌟 Học Tiếng Anh Vui Vẻ</h1>
-        <p>Ứng dụng học tiếng Anh dành cho trẻ em</p>
-        <div style={{ marginTop: 10 }}>
-          <button 
-            className="button" 
-            onClick={() => navigate('/my-vocab')} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
-          >
-            🗂️ Từ vựng của tôi
-          </button>
-          <button 
-            className="button" 
-            onClick={() => navigate('/admin')} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
-          >
-            🛠️ Admin Panel
-          </button>
+        <div className="header-content">
+          <h1>🌟 Học Tiếng Anh Vui Vẻ</h1>
+          <p>Ứng dụng học tiếng Anh dành cho trẻ em</p>
+          <div className="header-actions">
+            <button 
+              className="header-button" 
+              onClick={() => navigate('/my-vocab')}
+            >
+              🗂️ Từ vựng của tôi
+            </button>
+            {isAdmin && (
+              <button 
+                className="header-button" 
+                onClick={() => navigate('/admin')}
+              >
+                🛠️ Admin Panel
+              </button>
+            )}
+          </div>
         </div>
       </header>
       
-      <main className="main">
+      <main className="main-content">
         <PassageListComponent 
           topic={topic}
-          onBack={() => {}}
+          onBack={() => navigate('/topics')}
           onOpen={(passage) => navigate(`/passage/${passage.id}`)}
+          onCreatePassage={handleCreatePassage}
+          onEditPassage={handleEditPassage}
+          onDeletePassage={handleDeletePassage}
         />
       </main>
     </div>

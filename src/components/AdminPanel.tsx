@@ -6,7 +6,6 @@ import { topicService } from '../firebase/topicService';
 import { passageService } from '../firebase/passageService';
 import { vocabService } from '../firebase/vocabService';
 import { vocabSeeds } from '../data/vocab';
-import { questionSeeds } from '../data/questions';
 import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
 
@@ -138,15 +137,8 @@ const AdminPanel: React.FC = () => {
         if (p.title.includes('Morning by the Lake')) passageMap.set('temp-nature-1', p.id);
       });
 
-      let uploaded = 0;
-      for (const q of questionSeeds) {
-        const realPassageId = passageMap.get(q.passageId);
-        if (realPassageId) {
-          await questionService.add({ ...q, passageId: realPassageId });
-          uploaded++;
-        }
-      }
-      alert(`✅ Đã upload ${uploaded} câu hỏi!`);
+      // Questions will be added manually through the admin interface
+      console.log('✅ Questions can be added through the admin interface');
     } catch (e) {
       console.error(e);
       alert('❌ Lỗi khi upload câu hỏi');

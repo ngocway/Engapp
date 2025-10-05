@@ -60,8 +60,24 @@ export const authService = {
   // Lấy user hiện tại
   getCurrentUser() {
     return auth.currentUser;
+  },
+
+  // Kiểm tra xem user có phải admin không
+  isAdmin(user: User | null): boolean {
+    if (!user) return false;
+    
+    // Danh sách email admin (có thể lưu trong database sau này)
+    const adminEmails = [
+      'admin@engapp.com',
+      'admin@gmail.com',
+      'test@admin.com'
+    ];
+    
+    return adminEmails.includes(user.email || '');
   }
 };
+
+
 
 
 

@@ -3,10 +3,12 @@ export interface Vocabulary {
   word: string;
   meaning: string;
   pronunciation?: string;
+  vietnamesePronunciation?: string; // Phiên âm đọc cho người Việt
   audioUrl?: string;
   imageUrl?: string;
   image?: string; // for backward compatibility
-  example?: string;
+  example?: string; // for backward compatibility
+  examples?: string[]; // new field for multiple examples
   category?: string;
   level?: number;
   learned?: boolean;

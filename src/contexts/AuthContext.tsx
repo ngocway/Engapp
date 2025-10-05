@@ -6,6 +6,7 @@ import LoginForm from '../components/LoginForm';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   login: () => void;
   logout: () => void;
 }
@@ -28,10 +29,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [showLoginForm, setShowLoginForm] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged((user) => {
       setUser(user);
+      setIsAdmin(authService.isAdmin(user));
       setLoading(false);
     });
 
@@ -53,6 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const value = {
     user,
     loading,
+    isAdmin,
     login,
     logout
   };

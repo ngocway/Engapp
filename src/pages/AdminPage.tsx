@@ -1,136 +1,116 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import AdminVocabPage from '../components/AdminVocabPage';
-import AdminQuestionsPage from '../components/AdminQuestionsPage';
-import AdminTopicsPage from '../components/AdminTopicsPage';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { Topic, Passage } from '../types';
+import PassageListComponent from '../components/PassageList';
+import PassageEditModal from '../components/PassageEditModal';
 
 const AdminPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'vocab' | 'questions' | 'topics'>('vocab');
+  const navigate = useNavigate();
+  const { user, isAdmin } = useAuth();
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [editingPassage, setEditingPassage] = useState<Passage | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [topics] = useState<Topic[]>([
+    { id: '1', title: 'Thiên nhiên', name: 'Thiên nhiên', slug: 'nature', thumbnail: '', description: 'Chủ đề về thiên nhiên', level: 1 },
+    { id: '2', title: 'Hoạt động hàng ngày', name: 'Hoạt động hàng ngày', slug: 'daily-activities', thumbnail: '', description: 'Chủ đề về hoạt động hàng ngày', level: 1 },
+    { id: '3', title: 'Du lịch', name: 'Du lịch', slug: 'travel', thumbnail: '', description: 'Chủ đề về du lịch', level: 1 }
+  ]);
+
+  useEffect(() => {
+    // Mặc định chọn topic đầu tiên
+    if (topics.length > 0 && !selectedTopic) {
+      setSelectedTopic(topics[0]);
+    }
+  }, [topics, selectedTopic]);
+
+  const handleCreatePassage = () => {
+    console.log('Create new passage for topic:', selectedTopic?.name);
+  };
+
+  const handleEditPassage = (passage: Passage) => {
+    setEditingPassage(passage);
+    setIsEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditModalOpen(false);
+    setEditingPassage(null);
+  };
+
+  const handleSavePassage = (updatedPassage: Passage) => {
+    console.log('Passage updated:', updatedPassage);
+    // Có thể thêm logic refresh data ở đây nếu cần
+  };
+
+  const handleDeletePassage = (passage: any) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa đoạn văn "${passage.title}"?`)) {
+      console.log('Delete passage:', passage.title);
+    }
+  };
+
+  // Trong giai đoạn phát triển, cho phép truy cập admin mà không cần đăng nhập
+  // TODO: Bật lại kiểm tra auth khi deploy production
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {/* Header */}
-      <header style={{
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
-        padding: '20px 0',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.1)'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div>
-              <h1 style={{ margin: 0, fontSize: '2rem', fontWeight: 'bold' }}>
-                🛠️ Admin Panel
-              </h1>
-              <p style={{ margin: '5px 0 0 0', opacity: 0.9 }}>
-                Quản lý nội dung học tiếng Anh
-              </p>
-            </div>
-            <Link 
-              to="/" 
-              style={{
-                color: 'white',
-                textDecoration: 'none',
-                padding: '10px 20px',
-                backgroundColor: 'rgba(255,255,255,0.2)',
-                borderRadius: '25px',
-                transition: 'all 0.3s ease'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.3)'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+    <div className="app">
+      <header className="header">
+        <div className="header-content">
+          <h1>🛠️ Admin Panel</h1>
+          <p>Quản lý nội dung học tiếng Anh</p>
+          <div className="dev-notice">
+            🔧 Development Mode - Auth disabled
+          </div>
+          <div className="header-actions">
+            <button 
+              className="header-button" 
+              onClick={() => navigate('/')}
             >
-              ← Về trang chủ
-            </Link>
+              ← Quay về trang chủ
+            </button>
           </div>
         </div>
       </header>
-
-      {/* Navigation Tabs */}
-      <div style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid #e0e0e0',
-        boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
-      }}>
-        <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 20px' }}>
-          <div style={{ display: 'flex', gap: '0' }}>
-            <button
-              onClick={() => setActiveTab('vocab')}
-              style={{
-                padding: '15px 30px',
-                border: 'none',
-                backgroundColor: activeTab === 'vocab' ? '#667eea' : 'transparent',
-                color: activeTab === 'vocab' ? 'white' : '#666',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '500',
-                borderBottom: activeTab === 'vocab' ? '3px solid #667eea' : '3px solid transparent',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              📚 Quản lý từ vựng
-            </button>
-            <button
-              onClick={() => setActiveTab('questions')}
-              style={{
-                padding: '15px 30px',
-                border: 'none',
-                backgroundColor: activeTab === 'questions' ? '#667eea' : 'transparent',
-                color: activeTab === 'questions' ? 'white' : '#666',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '500',
-                borderBottom: activeTab === 'questions' ? '3px solid #667eea' : '3px solid transparent',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              ❓ Quản lý câu hỏi
-            </button>
-            <button
-              onClick={() => setActiveTab('topics')}
-              style={{
-                padding: '15px 30px',
-                border: 'none',
-                backgroundColor: activeTab === 'topics' ? '#667eea' : 'transparent',
-                color: activeTab === 'topics' ? 'white' : '#666',
-                cursor: 'pointer',
-                fontSize: '1rem',
-                fontWeight: '500',
-                borderBottom: activeTab === 'topics' ? '3px solid #667eea' : '3px solid transparent',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              🏷️ Quản lý chủ đề
-            </button>
+      
+      <main className="main-content">
+        {/* Topic Selection */}
+        <div className="admin-topic-selector">
+          <h2>Chọn chủ đề để quản lý:</h2>
+          <div className="topic-tabs">
+            {topics.map(topic => (
+              <button
+                key={topic.id}
+                className={`topic-tab ${selectedTopic?.id === topic.id ? 'active' : ''}`}
+                onClick={() => setSelectedTopic(topic)}
+              >
+                {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'} {topic.name}
+              </button>
+            ))}
           </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-        {activeTab === 'vocab' ? (
-          <AdminVocabPage />
-        ) : activeTab === 'questions' ? (
-          <AdminQuestionsPage />
-        ) : (
-          <AdminTopicsPage />
+        {/* Passage List */}
+        {selectedTopic && (
+          <PassageListComponent 
+            topic={selectedTopic}
+            onBack={() => {}}
+            onOpen={(passage) => console.log('Open passage:', passage.title)}
+            onCreatePassage={handleCreatePassage}
+            onEditPassage={handleEditPassage}
+            onDeletePassage={handleDeletePassage}
+          />
         )}
-      </main>
 
-      {/* Footer */}
-      <footer style={{
-        backgroundColor: '#333',
-        color: 'white',
-        textAlign: 'center',
-        padding: '20px',
-        marginTop: '40px'
-      }}>
-        <p style={{ margin: 0, opacity: 0.8 }}>
-          © 2024 Học Tiếng Anh Vui Vẻ - Admin Panel
-        </p>
-      </footer>
+        {/* Edit Passage Modal */}
+        <PassageEditModal
+          passage={editingPassage}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSavePassage}
+        />
+      </main>
     </div>
   );
 };
 
 export default AdminPage;
-
