@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Topic, Passage } from '../types';
 import PassageListComponent from '../components/PassageList';
 import PassageEditModal from '../components/PassageEditModal';
+import Header from '../components/Header';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -54,60 +55,45 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="header-content">
-          <h1>🛠️ Admin Panel</h1>
-          <p>Quản lý nội dung học tiếng Anh</p>
-          <div className="dev-notice">
-            🔧 Development Mode - Auth disabled
-          </div>
-          <div className="header-actions">
-            <button 
-              className="header-button" 
-              onClick={() => navigate('/')}
-            >
-              ← Quay về trang chủ
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
       
-      <main className="main-content">
-        {/* Topic Selection */}
-        <div className="admin-topic-selector">
-          <h2>Chọn chủ đề để quản lý:</h2>
-          <div className="topic-tabs">
-            {topics.map(topic => (
-              <button
-                key={topic.id}
-                className={`topic-tab ${selectedTopic?.id === topic.id ? 'active' : ''}`}
-                onClick={() => setSelectedTopic(topic)}
-              >
-                {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'} {topic.name}
-              </button>
-            ))}
+      <main className="main">
+        <div className="admin-page-container">
+          {/* Topic Selection */}
+          <div className="admin-topic-selector">
+            <div className="topic-tabs">
+              {topics.map(topic => (
+                <button
+                  key={topic.id}
+                  className={`topic-tab ${selectedTopic?.id === topic.id ? 'active' : ''}`}
+                  onClick={() => setSelectedTopic(topic)}
+                >
+                  {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'} {topic.name}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Passage List */}
-        {selectedTopic && (
-          <PassageListComponent 
-            topic={selectedTopic}
-            onBack={() => {}}
-            onOpen={(passage) => console.log('Open passage:', passage.title)}
-            onCreatePassage={handleCreatePassage}
-            onEditPassage={handleEditPassage}
-            onDeletePassage={handleDeletePassage}
+          {/* Passage List */}
+          {selectedTopic && (
+            <PassageListComponent 
+              topic={selectedTopic}
+              onBack={() => {}}
+              onOpen={(passage) => console.log('Open passage:', passage.title)}
+              onCreatePassage={handleCreatePassage}
+              onEditPassage={handleEditPassage}
+              onDeletePassage={handleDeletePassage}
+            />
+          )}
+
+          {/* Edit Passage Modal */}
+          <PassageEditModal
+            passage={editingPassage}
+            isOpen={isEditModalOpen}
+            onClose={handleCloseEditModal}
+            onSave={handleSavePassage}
           />
-        )}
-
-        {/* Edit Passage Modal */}
-        <PassageEditModal
-          passage={editingPassage}
-          isOpen={isEditModalOpen}
-          onClose={handleCloseEditModal}
-          onSave={handleSavePassage}
-        />
+        </div>
       </main>
     </div>
   );

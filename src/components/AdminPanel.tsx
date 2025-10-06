@@ -243,124 +243,99 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div style={{ 
-      position: 'fixed', 
-      top: '10px', 
-      right: '10px', 
-      background: 'white', 
-      padding: '10px', 
-      borderRadius: '10px',
-      boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
-      zIndex: 1000
-    }}>
-      <h4 style={{ margin: '0 0 10px 0', color: '#333' }}>🔧 Admin Panel</h4>
-      <button 
-        className="button" 
-        onClick={uploadSampleData}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Upload dữ liệu mẫu
-      </button>
+    <div className="admin-panel-container">
+      <div className="admin-header">
+        <div className="admin-title">
+          <span className="admin-icon">🔧</span>
+          <h1>Admin Panel</h1>
+        </div>
+        <p className="admin-subtitle">Quản lý nội dung học tiếng Anh</p>
+        <div className="admin-status">
+          <span className="status-icon">⚠️</span>
+          <span className="status-text">Development Mode - Auth disabled</span>
+        </div>
+      </div>
 
-      <div style={{ height: 8 }} />
+      <div className="admin-content">
+        {/* Data Management Section */}
+        <div className="admin-section">
+          <h2 className="section-title">📊 Quản lý dữ liệu</h2>
+          <div className="admin-grid">
+            <button className="admin-button primary" onClick={uploadSampleData}>
+              <span className="button-icon">📤</span>
+              <span className="button-text">Upload dữ liệu mẫu</span>
+            </button>
+            
+            <button className="admin-button primary" onClick={uploadTopicsAndPassages}>
+              <span className="button-icon">📚</span>
+              <span className="button-text">Upload Topics & Passages</span>
+            </button>
+            
+            <button className="admin-button primary" onClick={uploadLongPassages}>
+              <span className="button-icon">📄</span>
+              <span className="button-text">Upload đoạn văn dài</span>
+            </button>
+            
+            <button className="admin-button primary" onClick={reuploadLongPassagesWithVocabDetails}>
+              <span className="button-icon">🎴</span>
+              <span className="button-text">Upload Flashcard details</span>
+            </button>
+          </div>
+        </div>
 
-      <button 
-        className="button" 
-        onClick={uploadTopicsAndPassages}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Upload Topics & Passages
-      </button>
+        {/* Vocabulary Management Section */}
+        <div className="admin-section">
+          <h2 className="section-title">📝 Quản lý từ vựng</h2>
+          <div className="admin-grid">
+            <button className="admin-button secondary" onClick={seedVocabCollection}>
+              <span className="button-icon">➕</span>
+              <span className="button-text">Tạo collection vocab</span>
+            </button>
+            
+            <button className="admin-button secondary" onClick={quickSetVocabImage}>
+              <span className="button-icon">🖼️</span>
+              <span className="button-text">Gán ảnh từ vựng</span>
+            </button>
+            
+            <button className="admin-button secondary" onClick={checkVocabData}>
+              <span className="button-icon">🔍</span>
+              <span className="button-text">Kiểm tra dữ liệu vocab</span>
+            </button>
+            
+            <button className="admin-button danger" onClick={forceRefreshVocab}>
+              <span className="button-icon">🔄</span>
+              <span className="button-text">Làm mới vocab hoàn toàn</span>
+            </button>
+          </div>
+        </div>
 
-      <div style={{ height: 8 }} />
+        {/* Questions Management Section */}
+        <div className="admin-section">
+          <h2 className="section-title">❓ Quản lý câu hỏi</h2>
+          <div className="admin-grid">
+            <button className="admin-button secondary" onClick={uploadQuestions}>
+              <span className="button-icon">📝</span>
+              <span className="button-text">Upload câu hỏi</span>
+            </button>
+            
+            <button className="admin-button info" onClick={checkQuestionsData}>
+              <span className="button-icon">📊</span>
+              <span className="button-text">Kiểm tra câu hỏi database</span>
+            </button>
+          </div>
+        </div>
 
-      <button
-        className="button"
-        onClick={fixDuplicatesAndUpdateTravel}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Dọn trùng & cập nhật ảnh Travel
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={uploadLongPassages}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Upload các đoạn văn dài (400-500 chữ)
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={reuploadLongPassagesWithVocabDetails}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Upload bản có Flashcard details (ảnh/IPA/giải thích/ví dụ)
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={quickSetVocabImage}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Gán ảnh nhanh cho 1 từ vựng
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={seedVocabCollection}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Tạo collection vocab (car, mist)
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={checkVocabData}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Kiểm tra dữ liệu vocab hiện tại
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={forceRefreshVocab}
-        style={{ fontSize: '0.9rem', padding: '8px 15px', backgroundColor: '#ff6b6b' }}
-      >
-        🔄 Làm mới dữ liệu vocab hoàn toàn
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={uploadQuestions}
-        style={{ fontSize: '0.9rem', padding: '8px 15px' }}
-      >
-        Upload câu hỏi cho đoạn văn
-      </button>
-
-      <div style={{ height: 8 }} />
-
-      <button
-        className="button"
-        onClick={checkQuestionsData}
-        style={{ fontSize: '0.9rem', padding: '8px 15px', backgroundColor: '#74b9ff' }}
-      >
-        Kiểm tra câu hỏi trong database
-      </button>
+        {/* Maintenance Section */}
+        <div className="admin-section">
+          <h2 className="section-title">🔧 Bảo trì hệ thống</h2>
+          <div className="admin-grid">
+            <button className="admin-button warning" onClick={fixDuplicatesAndUpdateTravel}>
+              <span className="button-icon">🧹</span>
+              <span className="button-text">Dọn trùng & cập nhật ảnh</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

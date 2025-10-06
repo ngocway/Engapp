@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Vocabulary } from '../types';
 import { vocabularyService } from '../firebase/vocabularyService';
+import { vocabService, VocabDoc } from '../firebase/vocabService';
 import { passageService } from '../firebase/passageService';
 import { Passage } from '../types';
 import { storage } from '../firebase/config';
@@ -12,10 +13,10 @@ const AdminVocabularyPage: React.FC = () => {
   const { passageId } = useParams<{ passageId: string }>();
   const navigate = useNavigate();
   const [passage, setPassage] = useState<Passage | null>(null);
-  const [vocabularies, setVocabularies] = useState<Vocabulary[]>([]);
+  const [vocabularies, setVocabularies] = useState<VocabDoc[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingVocab, setEditingVocab] = useState<Vocabulary | null>(null);
+  const [editingVocab, setEditingVocab] = useState<VocabDoc | null>(null);
   const [formData, setFormData] = useState({
     word: '',
     meaning: '',
@@ -232,61 +233,46 @@ const AdminVocabularyPage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [passageData, allVocabData] = await Promise.all([
-        passageService.getAll().then(passages => passages.find(p => p.id === passageId)),
-        vocabularyService.getAllVocabulary()
-      ]);
       
-      setPassage(passageData || null);
-      
-      // Load vocabularies from passage.vocab array if it exists
-      let passageVocabularies: Vocabulary[] = [];
-      if (passageData?.vocab && Array.isArray(passageData.vocab)) {
-        // Convert passage vocab format to Vocabulary format
-        passageVocabularies = passageData.vocab.map((vocabItem: any, index: number) => {
-          // Handle examples - prioritize examples array, fallback to single example
-          let examples: string[] = [];
-          if (vocabItem.examples && Array.isArray(vocabItem.examples)) {
-            examples = vocabItem.examples.filter((ex: string) => ex && ex.trim());
-          } else if (vocabItem.example) {
-            examples = [vocabItem.example];
-          }
-          
-          // Ensure at least one empty example if none exist
-          if (examples.length === 0) {
-            examples = [''];
-          }
-
-          return {
-            id: `passage_${passageData.id}_${index}`, // Generate ID
-            word: vocabItem.term || vocabItem.word || '',
-            meaning: vocabItem.meaning || '',
-            pronunciation: vocabItem.pronunciation || vocabItem.phonetics?.us || vocabItem.us || '',
-            vietnamesePronunciation: vocabItem.vietnamesePronunciation || '',
-            audioUrl: vocabItem.audio || vocabItem.audioUrl || '',
-            imageUrl: vocabItem.image || vocabItem.imageUrl || '',
-            example: vocabItem.example || (examples.length > 0 ? examples[0] : ''), // for backward compatibility
-            examples: examples,
-            learned: false
-          };
-        });
+      if (!passageId) {
+        console.error('No passageId provided');
+        alert('Không tìm thấy ID đoạn văn');
+        navigate('/admin');
+        return;
       }
       
-      // Also include all vocabularies from the general vocabulary collection
-      // This allows admin to see both passage-specific and general vocabularies
-      const allVocabularies = [...passageVocabularies, ...allVocabData];
-      setVocabularies(allVocabularies);
+      console.log('Loading data for passageId:', passageId);
+      
+      // Test Firebase connection first
+      const isConnected = await vocabService.testConnection();
+      if (!isConnected) {
+        console.warn('Firebase connection test failed, but continuing...');
+      }
+      
+      const [passageData, passageVocabularies] = await Promise.all([
+        passageService.getAll().then(passages => passages.find(p => p.id === passageId)),
+        vocabService.getByPassageId(passageId)
+      ]);
+      
+      if (!passageData) {
+        console.error('Passage not found:', passageId);
+        alert('Không tìm thấy đoạn văn');
+        navigate('/admin');
+        return;
+      }
+      
+      setPassage(passageData);
+      setVocabularies(passageVocabularies);
       
       console.log('📚 Loaded vocabularies:', {
-        passageId: passageData?.id,
-        passageTitle: passageData?.title,
-        passageVocabCount: passageVocabularies.length,
-        generalVocabCount: allVocabData.length,
-        totalCount: allVocabularies.length
+        passageId: passageData.id,
+        passageTitle: passageData.title,
+        passageVocabCount: passageVocabularies.length
       });
     } catch (error) {
       console.error('Error loading data:', error);
-      alert('Lỗi khi tải dữ liệu');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      alert(`Lỗi khi tải dữ liệu: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -330,10 +316,31 @@ const AdminVocabularyPage: React.FC = () => {
       };
 
       if (editingVocab) {
-        await vocabularyService.updateVocabulary(editingVocab.id, vocabData);
+        // Update existing vocab
+        const updateData = {
+          term: vocabData.word,
+          definitionEn: vocabData.meaning,
+          translationVi: vocabData.vietnamesePronunciation,
+          imageUrl: vocabData.imageUrl,
+          phonetics: { us: vocabData.pronunciation },
+          examples: vocabData.examples,
+          passageId: passageId
+        };
+        await vocabService.update(editingVocab.id!, updateData);
         alert('Đã cập nhật từ vựng');
       } else {
-        await vocabularyService.addVocabulary(vocabData);
+        // Add new vocab
+        const newVocabData = {
+          term: vocabData.word,
+          definitionEn: vocabData.meaning,
+          translationVi: vocabData.vietnamesePronunciation,
+          imageUrl: vocabData.imageUrl,
+          phonetics: { us: vocabData.pronunciation },
+          examples: vocabData.examples,
+          passageId: passageId,
+          createdAt: Date.now()
+        };
+        await vocabService.add(newVocabData);
         alert('Đã thêm từ vựng mới');
       }
 
@@ -350,7 +357,7 @@ const AdminVocabularyPage: React.FC = () => {
   const handleDeleteVocab = async (vocabId: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa từ vựng này?')) {
       try {
-        await vocabularyService.deleteVocabulary(vocabId);
+        await vocabService.delete(vocabId);
         loadData();
         alert('Đã xóa từ vựng');
       } catch (error) {
@@ -379,15 +386,13 @@ const AdminVocabularyPage: React.FC = () => {
     setIsAudioDragOver(false);
   };
 
-  const handleEdit = (vocab: Vocabulary) => {
+  const handleEdit = (vocab: VocabDoc) => {
     setEditingVocab(vocab);
     
     // Handle examples - prioritize examples array, fallback to single example
     let examples: string[] = [];
     if (vocab.examples && Array.isArray(vocab.examples)) {
       examples = vocab.examples.filter(ex => ex && ex.trim());
-    } else if (vocab.example) {
-      examples = [vocab.example];
     }
     
     // Ensure at least one empty example if none exist
@@ -396,19 +401,19 @@ const AdminVocabularyPage: React.FC = () => {
     }
     
     setFormData({
-      word: vocab.word,
-      meaning: vocab.meaning,
-      pronunciation: vocab.pronunciation || '',
-      vietnamesePronunciation: vocab.vietnamesePronunciation || '',
-      audioUrl: vocab.audioUrl || '',
-      imageUrl: vocab.imageUrl || vocab.image || '',
-      example: vocab.example || '',
+      word: vocab.term,
+      meaning: vocab.definitionEn,
+      pronunciation: vocab.phonetics?.us || '',
+      vietnamesePronunciation: vocab.translationVi || '',
+      audioUrl: '', // VocabDoc doesn't have audioUrl
+      imageUrl: vocab.imageUrl || '',
+      example: examples.length > 0 ? examples[0] : '',
       examples: examples
     });
-    setImagePreviewUrl(vocab.imageUrl || vocab.image || null);
+    setImagePreviewUrl(vocab.imageUrl || null);
     setImageFile(null); // Reset file when editing
     setIsDragOver(false);
-    setAudioPreviewUrl(vocab.audioUrl || null);
+    setAudioPreviewUrl(null); // VocabDoc doesn't have audioUrl
     setAudioFile(null); // Reset file when editing
     setIsAudioDragOver(false);
     setShowForm(true);
@@ -418,6 +423,9 @@ const AdminVocabularyPage: React.FC = () => {
     return (
       <div style={{ padding: '20px', textAlign: 'center' }}>
         <div>Đang tải dữ liệu...</div>
+        <div style={{ marginTop: '10px', fontSize: '14px', color: '#666' }}>
+          Passage ID: {passageId}
+        </div>
       </div>
     );
   }
@@ -443,28 +451,55 @@ const AdminVocabularyPage: React.FC = () => {
         </h2>
       </div>
 
-
       {/* Vocabulary List */}
       <div style={{ marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
           <h3>Danh sách từ vựng ({vocabularies.length})</h3>
-          <button 
-            onClick={() => {
-              resetForm();
-              setEditingVocab(null);
-              setShowForm(true);
-            }}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer'
-            }}
-          >
-            ➕ Thêm từ vựng mới
-          </button>
+          <div style={{ display: 'flex', gap: '10px' }}>
+            {vocabularies.length === 0 && passageId && (
+              <button 
+                onClick={async () => {
+                  if (window.confirm('Tạo từ vựng mẫu cho đoạn văn này?')) {
+                    try {
+                      await vocabService.createSampleVocabulary(passageId);
+                      loadData();
+                      alert('Đã tạo từ vựng mẫu thành công!');
+                    } catch (error) {
+                      console.error('Error creating sample vocabulary:', error);
+                      alert('Lỗi khi tạo từ vựng mẫu');
+                    }
+                  }
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                🎯 Tạo từ vựng mẫu
+              </button>
+            )}
+            <button 
+              onClick={() => {
+                resetForm();
+                setEditingVocab(null);
+                setShowForm(true);
+              }}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '5px',
+                cursor: 'pointer'
+              }}
+            >
+              ➕ Thêm từ vựng mới
+            </button>
+          </div>
         </div>
 
         {vocabularies.length === 0 ? (
@@ -501,7 +536,7 @@ const AdminVocabularyPage: React.FC = () => {
                       Từ #{index + 1}
                     </div>
                     <h4 style={{ margin: '0 0 10px 0', color: '#333', fontSize: '1.2rem', width: '100%', textAlign: 'left' }}>
-                      {vocab.word}
+                      {vocab.term}
                     </h4>
                     
                   </div>
@@ -522,7 +557,7 @@ const AdminVocabularyPage: React.FC = () => {
                       ✏️ Sửa
                     </button>
                     <button
-                      onClick={() => handleDeleteVocab(vocab.id)}
+                      onClick={() => vocab.id && handleDeleteVocab(vocab.id)}
                       style={{
                         padding: '8px 12px',
                         backgroundColor: '#dc3545',
@@ -540,22 +575,22 @@ const AdminVocabularyPage: React.FC = () => {
                 
                 <div className="card-content">
                   <p style={{ margin: '0 0 10px 0', color: '#666', width: '100%', textAlign: 'left' }}>
-                    <strong>Nghĩa:</strong> {vocab.meaning}
+                    <strong>Nghĩa:</strong> {vocab.definitionEn}
                   </p>
                   
-                  {vocab.pronunciation && (
+                  {vocab.phonetics?.us && (
                     <p style={{ margin: '0 0 10px 0', color: '#666', width: '100%', textAlign: 'left' }}>
-                      <strong>Phiên âm:</strong> {vocab.pronunciation}
+                      <strong>Phiên âm:</strong> {vocab.phonetics.us}
                     </p>
                   )}
                   
-                  {vocab.vietnamesePronunciation && (
+                  {vocab.translationVi && (
                     <p style={{ margin: '0 0 10px 0', color: '#28a745', fontStyle: 'italic', width: '100%', textAlign: 'left' }}>
-                      <strong>Đọc:</strong> {vocab.vietnamesePronunciation}
+                      <strong>Đọc:</strong> {vocab.translationVi}
                     </p>
                   )}
                   
-                  {(vocab.examples && vocab.examples.length > 0 && vocab.examples[0]) || vocab.example ? (
+                  {vocab.examples && vocab.examples.length > 0 && vocab.examples[0] ? (
                     <div style={{ marginBottom: '10px', width: '100%', textAlign: 'left' }}>
                       <strong>Ví dụ:</strong>
                       {(vocab.examples && vocab.examples.length > 0) ? (
@@ -574,19 +609,7 @@ const AdminVocabularyPage: React.FC = () => {
                             </div>
                           ))}
                         </div>
-                      ) : (
-                          <div style={{ 
-                            padding: '8px', 
-                            backgroundColor: '#e9ecef', 
-                            borderRadius: '4px',
-                            marginTop: '5px',
-                            fontSize: '0.9rem',
-                            width: '100%',
-                            textAlign: 'left'
-                          }}>
-                          {vocab.example}
-                        </div>
-                      )}
+                      ) : null}
                     </div>
                   ) : null}
                 </div>

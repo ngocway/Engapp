@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Passage, Topic } from '../types';
 import { passageService } from '../firebase/passageService';
 import { questionService } from '../firebase/questionService';
+import { vocabService } from '../firebase/vocabService';
 
 interface PassageListProps {
   topic: Topic;
@@ -39,25 +40,20 @@ const PassageList: React.FC<PassageListProps> = ({
         const stats: Record<string, { questions: number; vocabularies: number }> = {};
         for (const passage of data) {
           try {
-            const questions = await questionService.getByPassageId(passage.id);
-            
-            // Count vocabularies from passage.vocab array if it exists
-            let vocabCount = 0;
-            if (passage.vocab && Array.isArray(passage.vocab)) {
-              vocabCount = passage.vocab.length;
-            }
+            const [questions, vocabularies] = await Promise.all([
+              questionService.getByPassageId(passage.id),
+              vocabService.getByPassageId(passage.id)
+            ]);
             
             stats[passage.id] = {
               questions: questions.length,
-              vocabularies: vocabCount
+              vocabularies: vocabularies.length
             };
             
             console.log(`📊 Passage ${passage.id} stats:`, {
               title: passage.title,
               questions: questions.length,
-              vocabularies: vocabCount,
-              hasVocabArray: !!passage.vocab,
-              vocabArrayLength: passage.vocab?.length || 0
+              vocabularies: vocabularies.length
             });
           } catch (error) {
             console.error(`Error loading stats for passage ${passage.id}:`, error);
@@ -80,17 +76,14 @@ const PassageList: React.FC<PassageListProps> = ({
     const stats: Record<string, { questions: number; vocabularies: number }> = {};
     for (const passage of passages) {
       try {
-        const questions = await questionService.getByPassageId(passage.id);
-        
-        // Count vocabularies from passage.vocab array if it exists
-        let vocabCount = 0;
-        if (passage.vocab && Array.isArray(passage.vocab)) {
-          vocabCount = passage.vocab.length;
-        }
+        const [questions, vocabularies] = await Promise.all([
+          questionService.getByPassageId(passage.id),
+          vocabService.getByPassageId(passage.id)
+        ]);
         
         stats[passage.id] = {
           questions: questions.length,
-          vocabularies: vocabCount
+          vocabularies: vocabularies.length
         };
       } catch (error) {
         console.error(`Error refreshing stats for passage ${passage.id}:`, error);
@@ -125,27 +118,22 @@ const PassageList: React.FC<PassageListProps> = ({
   }
 
   return (
-    <div className="passage-list-container">
-      <div className="passage-header">
-        <button className="modern-back-button" onClick={onBack}>
-          <span className="back-icon">←</span>
-          <span>Quay lại</span>
-        </button>
-        
-        <div className="topic-info">
-          <div className="topic-icon">
+    <div className="admin-passage-list-container">
+      <div className="admin-passage-header">
+        <div className="admin-topic-info">
+          <div className="admin-topic-icon">
             {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'}
           </div>
-          <div className="topic-details">
-            <h1 className="topic-title">{topic.name}</h1>
-            <p className="topic-description">{topic.description}</p>
-            <div className="passage-count">
-              {passages.length} đoạn văn
-            </div>
+          <div className="admin-topic-details">
+            <h2 className="admin-topic-title">{topic.name}</h2>
+            <p className="admin-topic-description">{topic.description}</p>
+          </div>
+          <div className="admin-passage-count">
+            {passages.length} đoạn văn
           </div>
           {onCreatePassage && (
             <button 
-              className="create-passage-button"
+              className="admin-create-passage-button"
               onClick={onCreatePassage}
               title="Thêm đoạn văn mới"
             >
