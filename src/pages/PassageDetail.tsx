@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { passageService } from '../firebase/passageService';
 import { Passage } from '../types';
 import PassageDetailComponent from '../components/PassageDetail';
+import Header from '../components/Header';
 
 const PassageDetail: React.FC = () => {
   const { passageId } = useParams<{ passageId: string }>();
@@ -49,31 +50,12 @@ const PassageDetail: React.FC = () => {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>🌟 Học Tiếng Anh Vui Vẻ</h1>
-        <p>Ứng dụng học tiếng Anh dành cho trẻ em</p>
-        <div style={{ marginTop: 10 }}>
-          <button 
-            className="button" 
-            onClick={() => navigate('/my-vocab')} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
-          >
-            🗂️ Từ vựng của tôi
-          </button>
-          <button 
-            className="button" 
-            onClick={() => navigate('/admin')} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
-          >
-            🛠️ Admin Panel
-          </button>
-        </div>
-      </header>
+      <Header />
       
       <main className="main">
         <PassageDetailComponent 
           passage={passage}
-          onBack={() => {}}
+          onBack={() => navigate('/topics')}
         />
       </main>
     </div>
