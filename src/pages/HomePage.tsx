@@ -22,18 +22,54 @@ const HomePage: React.FC = () => {
         <div style={{ marginTop: 10 }}>
           <button 
             className="button" 
-            onClick={() => navigate('/my-vocab')} 
+            onClick={() => {
+              console.log('My Vocab button clicked!');
+              navigate('/my-vocab');
+            }} 
             style={{ padding: '8px 14px', marginRight: '8px' }}
           >
             🗂️ Từ vựng của tôi
           </button>
           <button 
             className="button" 
-            onClick={() => navigate('/admin')} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
+            onClick={(e) => {
+              e.preventDefault();
+              console.log('Admin Panel button clicked!');
+              try {
+                navigate('/admin');
+                console.log('Navigation to /admin successful');
+              } catch (error) {
+                console.error('Navigation error:', error);
+                alert('Có lỗi khi chuyển đến trang admin. Vui lòng thử lại.');
+              }
+            }} 
+            style={{ 
+              padding: '8px 14px', 
+              marginRight: '8px',
+              position: 'relative',
+              zIndex: 10,
+              cursor: 'pointer'
+            }}
           >
             🛠️ Admin Panel
           </button>
+          
+          {/* Test button để kiểm tra navigation */}
+          <button 
+            className="button" 
+            onClick={() => {
+              console.log('Test button clicked!');
+              alert('Test button hoạt động!');
+            }} 
+            style={{ 
+              padding: '8px 14px', 
+              marginRight: '8px',
+              backgroundColor: '#ff6b6b'
+            }}
+          >
+            🧪 Test Button
+          </button>
+          
           {user ? (
             <div style={{ display: 'inline-block' }}>
               <span style={{ color: 'white', marginRight: '10px' }}>
