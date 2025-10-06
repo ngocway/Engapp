@@ -9,6 +9,7 @@ import TopicSelect from './pages/TopicSelect';
 import PassageList from './pages/PassageList';
 import PassageDetail from './pages/PassageDetail';
 import MyVocab from './pages/MyVocab';
+import ReviewPage from './pages/ReviewPage';
 import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
@@ -25,6 +26,7 @@ function App() {
           <Route path="/topics/:topicSlug" element={<PassageList />} />
           <Route path="/passage/:passageId" element={<PassageDetail />} />
           <Route path="/my-vocab" element={<MyVocab />} />
+          <Route path="/review" element={<ReviewPage />} />
         </Routes>
       </Router>
     </AuthProvider>

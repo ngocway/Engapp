@@ -295,6 +295,13 @@ body {
   padding: var(--spacing-6);
 }
 
+/* Review Page - Full width without side gaps */
+.main-review {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
 /* Hero section */
 .hero-section {
   text-align: center;
@@ -326,9 +333,13 @@ body {
 
 /* Topics Section - Parroto style */
 .topics-section {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0;
+  background: var(--white);
+  border-radius: var(--radius-2xl);
+  padding: var(--spacing-8);
+  margin: var(--spacing-8) 0;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
+  width: 100%;
 }
 
 .topic-group {
@@ -338,28 +349,15 @@ body {
 
 .topic-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-6);
-}
-
-.topic-title {
-  display: flex;
   align-items: center;
   gap: var(--spacing-3);
+  margin-bottom: var(--spacing-6);
 }
 
 .topic-icon {
   font-size: var(--font-size-2xl);
 }
 
-.topic-title h2 {
-  margin: 0;
-  font-size: var(--font-size-2xl);
-  font-weight: 600;
-  color: var(--gray-900);
-  letter-spacing: -0.025em;
-}
 
 .lesson-count {
   color: var(--gray-500);
@@ -2302,6 +2300,10 @@ body {
     padding: var(--spacing-5);
   }
   
+  .main-review {
+    padding: 0;
+  }
+  
   .topics-section {
     max-width: 100%;
   }
@@ -2330,6 +2332,15 @@ body {
   .main {
     max-width: 100%;
     padding: var(--spacing-4);
+  }
+  
+  .main-review {
+    padding: 0;
+  }
+  
+  .topics-section {
+    padding: var(--spacing-4);
+    margin: var(--spacing-4) 0;
   }
   
   .topics-section {
@@ -2393,10 +2404,6 @@ body {
     gap: var(--spacing-2);
   }
   
-  .topic-title h2 {
-    font-size: var(--font-size-xl);
-  }
-  
   .passages-grid {
     gap: var(--spacing-3);
   }
@@ -2445,7 +2452,8 @@ body {
     flex-direction: column;
   }
   
-  .main-content {
+  .main-content,
+  .topics-section {
     padding: var(--spacing-6);
   }
   
@@ -2477,4 +2485,137 @@ body {
     padding: var(--spacing-2) var(--spacing-4);
     font-size: var(--font-size-sm);
   }
+}
+
+/* Review Page Styling - Match Topics Section */
+.review-tabs-container {
+  display: flex;
+  gap: var(--spacing-4);
+  margin: var(--spacing-6) 0;
+  padding: 0;
+}
+
+.review-tab-button {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  padding: var(--spacing-3) var(--spacing-4);
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-lg);
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.review-tab-button:hover {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.review-tab-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+}
+
+.tab-icon {
+  font-size: var(--font-size-lg);
+}
+
+.tab-text {
+  font-weight: 600;
+}
+
+.tab-count {
+  background: var(--gray-300);
+  color: var(--gray-600);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  min-width: 20px;
+  text-align: center;
+}
+
+.review-tab-button.active .tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+/* Empty State for Topics Style */
+.empty-state-topics {
+  text-align: center;
+  padding: var(--spacing-16) var(--spacing-8);
+  background: var(--gray-50);
+  border: 2px dashed var(--gray-300);
+  border-radius: var(--radius-lg);
+  margin: var(--spacing-6) 0;
+}
+
+.empty-state-topics .empty-icon {
+  font-size: 4rem;
+  margin-bottom: var(--spacing-4);
+  opacity: 0.6;
+}
+
+.empty-state-topics h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-2);
+}
+
+.empty-state-topics p {
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-2);
+}
+
+.empty-state-topics .empty-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--gray-500);
+  margin-bottom: var(--spacing-6);
+}
+
+/* Vocabulary specific styles */
+.vocab-meaning {
+  color: var(--gray-600);
+  font-size: var(--font-size-sm);
+  margin: var(--spacing-2) 0;
+  line-height: 1.4;
+}
+
+.vocab-pronunciation {
+  color: var(--gray-500);
+  font-size: var(--font-size-xs);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  color: var(--gray-600);
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--gray-200);
+  border-top: 3px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-4);
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

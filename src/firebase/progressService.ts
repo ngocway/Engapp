@@ -73,6 +73,29 @@ export const progressService = {
       console.error('Error adding completed sentence:', error);
       return false;
     }
+  },
+
+  // Cập nhật passage đã hoàn thành (đã trả lời hết câu hỏi)
+  async addCompletedPassage(userId: string, passageId: string): Promise<boolean> {
+    try {
+      const progress = await this.getUserProgress(userId);
+      if (progress) {
+        // Khởi tạo completedPassages nếu chưa có
+        if (!progress.completedPassages) {
+          progress.completedPassages = [];
+        }
+        
+        if (!progress.completedPassages.includes(passageId)) {
+          progress.completedPassages.push(passageId);
+          progress.score += 20; // Mỗi passage hoàn thành được 20 điểm
+          return await this.saveUserProgress(progress);
+        }
+      }
+      return true;
+    } catch (error) {
+      console.error('Error adding completed passage:', error);
+      return false;
+    }
   }
 };
 

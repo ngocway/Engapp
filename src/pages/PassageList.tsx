@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Topic, Passage } from '../types';
 import PassageListComponent from '../components/PassageList';
 import { useAuth } from '../contexts/AuthContext';
+import Header from '../components/Header';
 
 const PassageList: React.FC = () => {
   const { topicSlug } = useParams<{ topicSlug: string }>();
@@ -56,28 +57,7 @@ const PassageList: React.FC = () => {
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="header-content">
-          <h1>🌟 Học Tiếng Anh Vui Vẻ</h1>
-          <p>Ứng dụng học tiếng Anh dành cho trẻ em</p>
-          <div className="header-actions">
-            <button 
-              className="header-button" 
-              onClick={() => navigate('/my-vocab')}
-            >
-              🗂️ Từ vựng của tôi
-            </button>
-            {isAdmin && (
-              <button 
-                className="header-button" 
-                onClick={() => navigate('/admin')}
-              >
-                🛠️ Admin Panel
-              </button>
-            )}
-          </div>
-        </div>
-      </header>
+      <Header />
       
       <main className="main-content">
         <PassageListComponent 

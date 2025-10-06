@@ -1,9 +1,10 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, login, logout } = useAuth();
 
   return (
@@ -21,12 +22,17 @@ const Header: React.FC = () => {
           {/* Navigation - sát bên tên app */}
           <nav className="header-nav">
             <button 
-              className="nav-button active"
+              className={`nav-button ${location.pathname === '/topics' || location.pathname.startsWith('/topics/') || location.pathname.startsWith('/passage/') ? 'active' : ''}`}
               onClick={() => navigate('/topics')}
             >
               Chủ đề
             </button>
-            <span className="nav-text">Ôn tập</span>
+            <button 
+              className={`nav-button ${location.pathname === '/review' ? 'active' : ''}`}
+              onClick={() => navigate('/review')}
+            >
+              Ôn tập
+            </button>
           </nav>
         </div>
 

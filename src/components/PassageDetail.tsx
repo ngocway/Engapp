@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Passage } from '../types';
+import { Passage, Question } from '../types';
 import { topicService } from '../firebase/topicService';
+import { questionService } from '../firebase/questionService';
+import HighlightedText from './HighlightedText';
+import QuizSection from './QuizSection';
 
 interface PassageDetailProps {
   passage: Passage;
@@ -14,6 +17,8 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const [userInput, setUserInput] = useState('');
   const [showAllWords, setShowAllWords] = useState(false);
   const [topicName, setTopicName] = useState<string>('');
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [loadingQuestions, setLoadingQuestions] = useState(false);
 
   const getDifficultyColor = (level: number) => {
     switch (level) {
@@ -34,6 +39,36 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
       default: return 'N/A';
     }
   };
+
+  // Hàm xử lý khi click vào từ vựng được highlight
+  const handleVocabularyClick = (word: string) => {
+    // Phát âm từ vựng
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.8;
+      utterance.pitch = 1.2;
+      speechSynthesis.speak(utterance);
+    }
+  };
+
+  // Load questions when transcript tab is active
+  useEffect(() => {
+    if (activeTab === 'transcript') {
+      const loadQuestions = async () => {
+        try {
+          setLoadingQuestions(true);
+          const passageQuestions = await questionService.getByPassageId(passage.id);
+          setQuestions(passageQuestions);
+        } catch (error) {
+          console.error('Error loading questions:', error);
+        } finally {
+          setLoadingQuestions(false);
+        }
+      };
+      loadQuestions();
+    }
+  }, [activeTab, passage.id]);
 
   // Load topic name
   useEffect(() => {
@@ -176,12 +211,30 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
             </div>
           </div>
 
-          <div className="lesson-content">
-            <h3>Nội dung bài học</h3>
-            <div className="content-text">
-              {passage.text}
+          {activeTab === 'dictation' ? (
+            <div className="lesson-content">
+              <h3>Nội dung bài học</h3>
+              <div className="content-text">
+                <HighlightedText 
+                  text={passage.text} 
+                  onVocabularyClick={handleVocabularyClick}
+                  passageVocab={passage.vocab || []}
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            <>
+              {loadingQuestions ? (
+                <div style={{ textAlign: 'center', padding: '40px' }}>
+                  <p style={{ color: '#666', fontSize: '1.2rem' }}>
+                    🔄 Đang tải câu hỏi...
+                  </p>
+                </div>
+              ) : (
+                <QuizSection questions={questions} passageId={passage.id} />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>

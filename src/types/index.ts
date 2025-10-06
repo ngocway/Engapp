@@ -83,6 +83,7 @@ export interface Sentence {
 export interface UserProgress {
   userId: string;
   completedSentences: string[];
+  completedPassages?: string[]; // passages that user has completed all questions
   learnedWords?: string[]; // for backward compatibility
   score: number;
   level: number;
