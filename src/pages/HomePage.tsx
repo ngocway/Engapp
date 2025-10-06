@@ -21,12 +21,12 @@ const HomePage: React.FC = () => {
         <p>Ứng dụng học tiếng Anh dành cho trẻ em</p>
         <div style={{ marginTop: 10 }}>
           <button 
-            className="button" 
+            className="button button-secondary" 
             onClick={() => {
               console.log('My Vocab button clicked!');
               navigate('/my-vocab');
             }} 
-            style={{ padding: '8px 14px', marginRight: '8px' }}
+            style={{ marginRight: '8px' }}
           >
             🗂️ Từ vựng của tôi
           </button>
@@ -43,42 +43,19 @@ const HomePage: React.FC = () => {
                 alert('Có lỗi khi chuyển đến trang admin. Vui lòng thử lại.');
               }
             }} 
-            style={{ 
-              padding: '8px 14px', 
-              marginRight: '8px',
-              position: 'relative',
-              zIndex: 10,
-              cursor: 'pointer'
-            }}
+            style={{ marginRight: '8px' }}
           >
             🛠️ Admin Panel
           </button>
           
-          {/* Test button để kiểm tra navigation */}
-          <button 
-            className="button" 
-            onClick={() => {
-              console.log('Test button clicked!');
-              alert('Test button hoạt động!');
-            }} 
-            style={{ 
-              padding: '8px 14px', 
-              marginRight: '8px',
-              backgroundColor: '#ff6b6b'
-            }}
-          >
-            🧪 Test Button
-          </button>
-          
           {user ? (
-            <div style={{ display: 'inline-block' }}>
-              <span style={{ color: 'white', marginRight: '10px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: 'var(--gray-600)', fontSize: 'var(--font-size-sm)' }}>
                 👋 {user.displayName || user.email}
               </span>
               <button 
-                className="button" 
+                className="button button-secondary" 
                 onClick={logout}
-                style={{ padding: '8px 14px' }}
               >
                 🚪 Đăng xuất
               </button>
@@ -87,7 +64,6 @@ const HomePage: React.FC = () => {
             <button 
               className="button" 
               onClick={login}
-              style={{ padding: '8px 14px' }}
             >
               🔐 Đăng nhập
             </button>
