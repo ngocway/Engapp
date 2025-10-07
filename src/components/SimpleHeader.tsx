@@ -2,14 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-type TabType = 'topics' | 'review';
-
-interface HeaderProps {
-  onTabChange: (tab: TabType) => void;
-  activeTab: TabType;
-}
-
-const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
+const SimpleHeader: React.FC = () => {
   const navigate = useNavigate();
   const { user, login, logout } = useAuth();
 
@@ -24,22 +17,6 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
             </div>
             <span className="logo-text">EngApp</span>
           </div>
-
-          {/* Navigation - sát bên tên app */}
-          <nav className="header-nav">
-            <button 
-              className={`nav-button ${activeTab === 'topics' ? 'active' : ''}`}
-              onClick={() => onTabChange('topics')}
-            >
-              Chủ đề
-            </button>
-            <button 
-              className={`nav-button ${activeTab === 'review' ? 'active' : ''}`}
-              onClick={() => onTabChange('review')}
-            >
-              Ôn tập
-            </button>
-          </nav>
         </div>
 
         {/* User section - bên phải */}
@@ -79,4 +56,4 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
   );
 };
 
-export default Header;
+export default SimpleHeader;

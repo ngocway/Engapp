@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { Topic, Passage } from '../types';
 import PassageListComponent from '../components/PassageList';
 import PassageEditModal from '../components/PassageEditModal';
-import Header from '../components/Header';
+import SimpleHeader from '../components/SimpleHeader';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -25,10 +25,6 @@ const AdminPage: React.FC = () => {
     }
   }, [topics, selectedTopic]);
 
-  const handleCreatePassage = () => {
-    console.log('Create new passage for topic:', selectedTopic?.name);
-  };
-
   const handleEditPassage = (passage: Passage) => {
     setEditingPassage(passage);
     setIsEditModalOpen(true);
@@ -44,18 +40,13 @@ const AdminPage: React.FC = () => {
     // Có thể thêm logic refresh data ở đây nếu cần
   };
 
-  const handleDeletePassage = (passage: any) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa đoạn văn "${passage.title}"?`)) {
-      console.log('Delete passage:', passage.title);
-    }
-  };
 
   // Trong giai đoạn phát triển, cho phép truy cập admin mà không cần đăng nhập
   // TODO: Bật lại kiểm tra auth khi deploy production
 
   return (
     <div className="app">
-      <Header />
+      <SimpleHeader />
       
       <main className="main">
         <div className="admin-page-container">
@@ -80,9 +71,6 @@ const AdminPage: React.FC = () => {
               topic={selectedTopic}
               onBack={() => {}}
               onOpen={(passage) => console.log('Open passage:', passage.title)}
-              onCreatePassage={handleCreatePassage}
-              onEditPassage={handleEditPassage}
-              onDeletePassage={handleDeletePassage}
             />
           )}
 

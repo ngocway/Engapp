@@ -1,32 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Passage, Topic } from '../types';
 import { passageService } from '../firebase/passageService';
-import { questionService } from '../firebase/questionService';
-import { vocabService } from '../firebase/vocabService';
 
 interface PassageListProps {
   topic: Topic;
   onBack: () => void;
   onOpen: (passage: Passage) => void;
-  onCreatePassage?: () => void;
-  onEditPassage?: (passage: Passage) => void;
-  onDeletePassage?: (passage: Passage) => void;
 }
 
 const PassageList: React.FC<PassageListProps> = ({ 
   topic, 
   onBack, 
-  onOpen, 
-  onCreatePassage, 
-  onEditPassage, 
-  onDeletePassage 
+  onOpen
 }) => {
-  const navigate = useNavigate();
   const [passages, setPassages] = useState<Passage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [passageStats, setPassageStats] = useState<Record<string, { questions: number; vocabularies: number }>>({});
-  const [statsLoading, setStatsLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -35,210 +23,105 @@ const PassageList: React.FC<PassageListProps> = ({
         const data = await passageService.getByTopicSlug(topic.slug);
         setPassages(data);
         
-        // Load stats for each passage
-        setStatsLoading(true);
-        const stats: Record<string, { questions: number; vocabularies: number }> = {};
-        for (const passage of data) {
-          try {
-            const [questions, vocabularies] = await Promise.all([
-              questionService.getByPassageId(passage.id),
-              vocabService.getByPassageId(passage.id)
-            ]);
-            
-            stats[passage.id] = {
-              questions: questions.length,
-              vocabularies: vocabularies.length
-            };
-            
-            console.log(`📊 Passage ${passage.id} stats:`, {
-              title: passage.title,
-              questions: questions.length,
-              vocabularies: vocabularies.length
-            });
-          } catch (error) {
-            console.error(`Error loading stats for passage ${passage.id}:`, error);
-            stats[passage.id] = { questions: 0, vocabularies: 0 };
-          }
-        }
-        setPassageStats(stats);
-        setStatsLoading(false);
         setLoading(false);
       }
     };
     load();
   }, [topic?.slug]);
 
-  // Function to refresh stats (can be called when returning from management pages)
-  const refreshStats = async () => {
-    if (passages.length === 0) return;
-    
-    setStatsLoading(true);
-    const stats: Record<string, { questions: number; vocabularies: number }> = {};
-    for (const passage of passages) {
-      try {
-        const [questions, vocabularies] = await Promise.all([
-          questionService.getByPassageId(passage.id),
-          vocabService.getByPassageId(passage.id)
-        ]);
-        
-        stats[passage.id] = {
-          questions: questions.length,
-          vocabularies: vocabularies.length
-        };
-      } catch (error) {
-        console.error(`Error refreshing stats for passage ${passage.id}:`, error);
-        stats[passage.id] = { questions: 0, vocabularies: 0 };
-      }
-    }
-    setPassageStats(stats);
-    setStatsLoading(false);
-  };
-
-  // Refresh stats when component becomes visible (when returning from other pages)
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (!document.hidden && passages.length > 0) {
-        refreshStats();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [passages]);
 
   if (loading) {
     return (
-      <div className="passage-list-container">
+      <div className="topics-section">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p className="loading-text">Đang tải đoạn văn...</p>
+          <p>Đang tải nội dung...</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="admin-passage-list-container">
-      <div className="admin-passage-header">
-        <div className="admin-topic-info">
-          <div className="admin-topic-icon">
-            {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'}
-          </div>
-          <div className="admin-topic-details">
-            <h2 className="admin-topic-title">{topic.name}</h2>
-            <p className="admin-topic-description">{topic.description}</p>
-          </div>
-          <div className="admin-passage-count">
-            {passages.length} đoạn văn
-          </div>
-          {onCreatePassage && (
-            <button 
-              className="admin-create-passage-button"
-              onClick={onCreatePassage}
-              title="Thêm đoạn văn mới"
-            >
-              <span className="create-icon">+</span>
-              <span>Tạo đoạn văn mới</span>
-            </button>
-          )}
-        </div>
-      </div>
+  const getTopicIcon = (slug: string | undefined) => {
+    switch (slug) {
+      case 'nature': return '🌿';
+      case 'travel': return '✈️';
+      case 'daily-activities': return '🏠';
+      default: return '📚';
+    }
+  };
 
-      <div className="passages-grid">
-        {passages.map((passage, index) => (
-          <div 
-            key={passage.id} 
-            className="modern-passage-card"
-            onClick={() => onOpen(passage)}
-            style={{ 
-              animationDelay: `${index * 0.1}s`,
-              cursor: 'pointer' 
-            }}
-          >
-            <div className="card-header">
-              <div className="card-number">#{index + 1}</div>
-              <div className="card-actions">
-                <button 
-                  className="action-button read-button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpen(passage);
-                  }}
-                  title="Đọc đoạn văn"
-                >
-                  📖
-                </button>
-                {onEditPassage && (
-                  <button 
-                    className="action-button edit-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditPassage(passage);
-                    }}
-                    title="Sửa đoạn văn"
-                  >
-                    ✏️
-                  </button>
-                )}
-                {onDeletePassage && (
-                  <button 
-                    className="action-button delete-button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeletePassage(passage);
-                    }}
-                    title="Xóa đoạn văn"
-                  >
-                    🗑️
-                  </button>
-                )}
-              </div>
-            </div>
-            
-            <div className="card-content">
-              <h3 className="passage-title">{passage.title}</h3>
-              <p className="passage-excerpt">{passage.excerpt}</p>
-            </div>
-            
-            <div className="card-stats">
-              <div className="stat-item">
-                <span className="stat-icon">❓</span>
-                <span className="stat-text">
-                  {statsLoading ? '...' : (passageStats[passage.id]?.questions || 0)} câu hỏi
-                </span>
-              </div>
-              <div 
-                className="stat-item"
-                style={{ cursor: 'pointer' }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/admin/vocabulary/${passage.id}`);
-                }}
-                title="Quản lý từ vựng của đoạn văn"
-              >
-                <span className="stat-icon">📚</span>
-                <span className="stat-text">
-                  {statsLoading ? '...' : (passageStats[passage.id]?.vocabularies || 0)} từ vựng
-                </span>
-              </div>
-            </div>
-            
-            <div className="card-footer">
-              <button 
-                className="manage-button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/admin/questions/${passage.id}`);
-                }}
-              >
-                <span>Quản lý câu hỏi</span>
-                <span className="button-icon">→</span>
-              </button>
-            </div>
-            
-            <div className="card-gradient"></div>
+  const getDifficultyColor = (level: number) => {
+    switch (level) {
+      case 1: return '#10b981'; // Green for A1
+      case 2: return '#3b82f6'; // Blue for A2
+      case 3: return '#f59e0b'; // Orange for B1
+      case 4: return '#ef4444'; // Red for B2
+      default: return '#6b7280'; // Gray
+    }
+  };
+
+  const getDifficultyText = (level: number) => {
+    switch (level) {
+      case 1: return 'A1';
+      case 2: return 'A2';
+      case 3: return 'B1';
+      case 4: return 'B2';
+      default: return 'A1';
+    }
+  };
+
+  return (
+    <div className="topics-section">
+      <div className="topic-group">
+        <div className="topic-header">
+          <div className="topic-title">
+            <span className="topic-icon">{getTopicIcon(topic.slug)}</span>
+            <h2>{topic.name}</h2>
+            <span className="lesson-count">({passages.length} bài học)</span>
           </div>
-        ))}
+          <button 
+            className="view-all-button"
+            onClick={onBack}
+          >
+            ← Quay lại
+          </button>
+        </div>
+
+        <div className="passages-grid">
+          {passages.map((passage) => (
+            <div 
+              key={passage.id} 
+              className="passage-card-parroto"
+              onClick={() => onOpen(passage)}
+            >
+              <div className="passage-thumbnail">
+                {passage.thumbnail ? (
+                  <img src={passage.thumbnail} alt={passage.title} />
+                ) : (
+                  <div className="thumbnail-placeholder">
+                    {getTopicIcon(topic.slug)}
+                  </div>
+                )}
+              </div>
+              
+              <div className="passage-content">
+                <div className="passage-meta">
+                  <span className="passage-views">0</span>
+                  <span 
+                    className="passage-level"
+                    style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
+                  >
+                    {getDifficultyText(passage.level || 1)}
+                  </span>
+                  <span className="passage-source">Youtube</span>
+                  <span className="passage-duration">2:30 phút</span>
+                </div>
+                
+                <h3 className="passage-title">{passage.title}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

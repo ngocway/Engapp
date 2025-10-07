@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { passageService } from '../firebase/passageService';
 import { Passage } from '../types';
 import PassageDetailComponent from '../components/PassageDetail';
-import Header from '../components/Header';
+import SimpleHeader from '../components/SimpleHeader';
 
 const PassageDetail: React.FC = () => {
   const { passageId } = useParams<{ passageId: string }>();
@@ -50,7 +50,7 @@ const PassageDetail: React.FC = () => {
 
   return (
     <div className="app">
-      <Header />
+      <SimpleHeader />
       
       <main className="main">
         <PassageDetailComponent 

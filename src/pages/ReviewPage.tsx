@@ -5,7 +5,6 @@ import { progressService } from '../firebase/progressService';
 import { topicService } from '../firebase/topicService';
 import { vocabularyService } from '../firebase/vocabularyService';
 import { useAuth } from '../contexts/AuthContext';
-import Header from '../components/Header';
 
 const ReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -64,23 +63,16 @@ const ReviewPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="app">
-        <Header />
-        <div className="main-content">
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-            <h2>Đang tải dữ liệu ôn tập...</h2>
-          </div>
+      <div className="topics-section">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <h2>Đang tải dữ liệu ôn tập...</h2>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="app">
-      <Header />
-      
-      <main className="main main-review">
         <div className="topics-section">
           {/* Page Header */}
           <div className="topic-group">
@@ -206,8 +198,6 @@ const ReviewPage: React.FC = () => {
             )}
           </div>
         </div>
-      </main>
-    </div>
   );
 };
 

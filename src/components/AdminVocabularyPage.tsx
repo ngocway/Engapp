@@ -431,7 +431,7 @@ const AdminVocabularyPage: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+    <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
         <button 
           onClick={() => navigate('/admin')}

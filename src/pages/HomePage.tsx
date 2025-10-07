@@ -1,19 +1,8 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
-import TopicsSection from '../components/TopicsSection';
-import { useAuth } from '../contexts/AuthContext';
+import MainLayout from '../components/MainLayout';
 
 const HomePage: React.FC = () => {
-  return (
-    <div className="app">
-      <Header />
-      
-      <main className="main">
-        <TopicsSection />
-      </main>
-    </div>
-  );
+  return <MainLayout />;
 };
 
 export default HomePage;

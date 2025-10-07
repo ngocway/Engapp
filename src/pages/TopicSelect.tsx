@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopicSelectComponent from '../components/TopicSelect';
-import Header from '../components/Header';
+import SimpleHeader from '../components/SimpleHeader';
 
 const TopicSelect: React.FC = () => {
   const navigate = useNavigate();
 
   return (
     <div className="app">
-      <Header />
+      <SimpleHeader />
       
       <main className="main">
         <TopicSelectComponent 

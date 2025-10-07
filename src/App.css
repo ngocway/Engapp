@@ -1,4 +1,5 @@
 /* App.css - Modern design inspired by Parroto */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   /* Color palette inspired by Parroto */
@@ -23,16 +24,41 @@
   --gray-800: #1e293b;
   --gray-900: #0f172a;
   
-  /* Typography */
+  /* Typography - Parroto-inspired */
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-lg: 1.125rem;
-  --font-size-xl: 1.25rem;
-  --font-size-2xl: 1.5rem;
-  --font-size-3xl: 1.875rem;
-  --font-size-4xl: 2.25rem;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  /* Font sizes - Reduced for better readability */
+  --font-size-xs: 0.75rem;     /* 12px */
+  --font-size-sm: 0.875rem;    /* 14px */
+  --font-size-base: 0.9rem;    /* 14.4px - giảm từ 16px */
+  --font-size-lg: 1rem;        /* 16px - giảm từ 18px */
+  --font-size-xl: 1.125rem;    /* 18px - giảm từ 20px */
+  --font-size-2xl: 1.25rem;    /* 20px - giảm từ 24px */
+  --font-size-3xl: 1.5rem;     /* 24px - giảm từ 30px */
+  --font-size-4xl: 1.875rem;   /* 30px - giảm từ 36px */
+  --font-size-5xl: 2.25rem;    /* 36px - giảm từ 48px */
+  --font-size-6xl: 3rem;       /* 48px - giảm từ 60px */
+
+  /* Line heights */
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  /* Letter spacing */
+  --letter-spacing-tighter: -0.05em;
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+  --letter-spacing-wider: 0.05em;
+  --letter-spacing-widest: 0.1em;
   
   /* Spacing */
   --spacing-1: 0.25rem;
@@ -64,13 +90,78 @@
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
 body {
   font-family: var(--font-family);
-  line-height: 1.6;
-  color: var(--gray-800);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-normal);
+  line-height: var(--line-height-normal);
+  color: var(--gray-900);
   background-color: var(--gray-50);
+  letter-spacing: var(--letter-spacing-normal);
   margin: 0;
   padding: 0;
+}
+
+/* Typography styles - Parroto-inspired */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--gray-900);
+}
+
+h1 {
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-extrabold);
+  line-height: var(--line-height-tight);
+}
+
+h2 {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+}
+
+h3 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h4 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+}
+
+h5 {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+h6 {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+}
+
+p {
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  color: var(--gray-700);
+}
+
+small {
+  font-size: var(--font-size-sm);
+  color: var(--gray-600);
+}
+
+strong, b {
+  font-weight: var(--font-weight-semibold);
 }
 
 .app {
@@ -130,7 +221,7 @@ body {
 
 .logo-text {
   font-size: var(--font-size-xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--primary-color);
   letter-spacing: -0.025em;
 }
@@ -150,32 +241,39 @@ body {
 }
 
 .nav-button {
-  background: var(--primary-color);
-  color: var(--white);
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #9ca3af; /* Màu xám cho chữ khi inactive */
+  border: 2px solid #9ca3af; /* Viền xám khi inactive */
   padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
-  font-family: var(--font-family);
 }
 
 .nav-button:hover {
-  background: var(--primary-hover);
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #d1d5db; /* Viền xám nhạt hơn khi hover */
+  color: #d1d5db; /* Chữ xám nhạt hơn khi hover */
   transform: translateY(-1px);
 }
 
 .nav-button.active {
-  background: var(--primary-color);
-  box-shadow: var(--shadow-sm);
+  background: #1e40af; /* Xanh đậm như trong ảnh */
+  border-color: #1e40af;
+  color: white;
+  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
 }
 
 .nav-text {
   color: var(--gray-600);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: color 0.2s ease;
 }
@@ -224,7 +322,9 @@ body {
 .user-name {
   font-size: var(--font-size-sm);
   color: var(--gray-700);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .login-button {
@@ -234,7 +334,9 @@ body {
   padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -253,7 +355,9 @@ body {
   padding: var(--spacing-1) var(--spacing-3);
   border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: var(--font-family);
@@ -277,7 +381,7 @@ body {
 .header h1 {
   margin: 0;
   font-size: var(--font-size-4xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--gray-900);
   letter-spacing: -0.025em;
 }
@@ -290,17 +394,19 @@ body {
 }
 
 .main {
+  width: 70%;
+  margin: 0 auto;
+  padding: var(--spacing-4);
+  flex-grow: 1;
+}
+
+/* Review Page - Cùng kích thước như màn hình Nature - Force refresh */
+.main-review {
   max-width: 1400px;
   margin: 0 auto;
   padding: var(--spacing-6);
 }
 
-/* Review Page - Full width without side gaps */
-.main-review {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-}
 
 /* Hero section */
 .hero-section {
@@ -311,7 +417,7 @@ body {
 
 .hero-title {
   font-size: var(--font-size-4xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-4) 0;
   letter-spacing: -0.025em;
@@ -333,10 +439,10 @@ body {
 
 /* Topics Section - Parroto style */
 .topics-section {
-  background: var(--white);
+  background: white;
   border-radius: var(--radius-2xl);
-  padding: var(--spacing-8);
-  margin: var(--spacing-8) 0;
+  padding: var(--spacing-4);
+  margin: var(--spacing-6) 0;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   width: 100%;
@@ -345,13 +451,25 @@ body {
 .topic-group {
   margin-bottom: var(--spacing-12);
   padding: 0;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .topic-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-3);
-  margin-bottom: var(--spacing-6);
+  margin-bottom: var(--spacing-3);
+  width: 100%;
+}
+
+.topic-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  flex: 1;
 }
 
 .topic-icon {
@@ -370,7 +488,9 @@ body {
   border: none;
   color: var(--primary-color);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: color 0.2s ease;
   padding: var(--spacing-2) 0;
@@ -381,18 +501,24 @@ body {
 }
 
 .passages-grid {
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  gap: var(--spacing-4);
-  /* Ẩn thanh scroll nhưng vẫn có thể cuộn */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: auto;
+  gap: var(--spacing-3);
+  padding: var(--spacing-2) 0;
+  overflow: hidden;
+  justify-content: space-evenly;
 }
 
-.passages-grid::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+/* Đảm bảo desktop luôn có 4 cột */
+@media (min-width: 1024px) {
+  .passages-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: var(--spacing-3) !important;
+    justify-content: space-evenly !important;
+  }
 }
+
 
 .passage-card-parroto {
   background: var(--white);
@@ -400,10 +526,12 @@ body {
   overflow: hidden;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   border: 1px solid var(--gray-200);
-  flex-shrink: 0;
-  width: 280px;
+  width: 100%;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
 }
 
 .passage-card-parroto:hover {
@@ -461,26 +589,33 @@ body {
 
 .passage-info {
   padding: var(--spacing-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100px;
 }
 
 .passage-meta {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  margin-bottom: var(--spacing-2);
+  margin-bottom: var(--spacing-3);
   flex-wrap: wrap;
+  font-size: var(--font-size-xs);
 }
 
 .view-count {
   color: var(--gray-500);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .difficulty-badge {
   color: var(--white);
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
   text-transform: uppercase;
@@ -489,25 +624,30 @@ body {
 .source {
   color: var(--gray-500);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .duration {
   color: var(--gray-500);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .passage-title {
   margin: 0;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
-  line-height: 1.4;
+  line-height: 1.3;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
 }
 
 /* Loading styles */
@@ -543,7 +683,9 @@ body {
   padding: var(--spacing-3) var(--spacing-6);
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -669,7 +811,7 @@ body {
 .menu-card h2 {
   margin: 0 0 var(--spacing-4) 0;
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   letter-spacing: -0.025em;
 }
@@ -711,9 +853,9 @@ body {
 .topic-card h3 {
   margin: 0;
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
-  letter-spacing: -0.025em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 /* Passage cards - Parroto style */
@@ -753,16 +895,17 @@ body {
 .passage-card h3 {
   margin: 0 0 var(--spacing-2) 0;
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
-  letter-spacing: -0.025em;
+  letter-spacing: var(--letter-spacing-tight);
 }
 
 .passage-card p {
   margin: 0;
   color: var(--gray-600);
   font-size: var(--font-size-sm);
-  line-height: 1.5;
+  line-height: var(--line-height-normal);
+  font-family: var(--font-family);
 }
 
 /* Main content - Parroto style */
@@ -779,7 +922,7 @@ body {
   color: var(--gray-900);
   font-size: var(--font-size-3xl);
   margin-bottom: var(--spacing-6);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   letter-spacing: -0.025em;
 }
 
@@ -834,7 +977,7 @@ body {
   margin: 0 0 var(--spacing-2) 0;
   color: var(--gray-900);
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   letter-spacing: -0.025em;
 }
 
@@ -869,15 +1012,17 @@ body {
 }
 
 .font-bold {
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
 }
 
 .font-semibold {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .font-medium {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .text-primary {
@@ -946,7 +1091,7 @@ body {
 
 .panel-title {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-4) 0;
   padding: var(--spacing-6) var(--spacing-6) 0 var(--spacing-6);
@@ -1004,7 +1149,7 @@ body {
 
 .video-title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: var(--spacing-1);
 }
 
@@ -1015,7 +1160,7 @@ body {
 
 .video-controls h4 {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-3) 0;
 }
@@ -1033,7 +1178,9 @@ body {
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -1067,7 +1214,7 @@ body {
 
 .vocabulary-section h4 {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-4) 0;
 }
@@ -1100,7 +1247,7 @@ body {
   display: inline-block;
   position: relative;
   transition: 0.5s;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   white-space: nowrap;
 }
 
@@ -1152,7 +1299,7 @@ body {
 
 .lesson-title h2 {
   font-size: var(--font-size-2xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0;
 }
@@ -1215,7 +1362,7 @@ body {
   font-size: 12px;
   background: #ffffff;
   color: var(--primary-color);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   transition: 0.5s ease-in-out;
 }
@@ -1237,7 +1384,7 @@ body {
 
 .lesson-content h3 {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-4) 0;
 }
@@ -1285,7 +1432,7 @@ body {
 
 .admin-title h1 {
   font-size: var(--font-size-3xl);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--gray-900);
   margin: 0;
   font-family: var(--font-family);
@@ -1307,7 +1454,9 @@ body {
   padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   border: 1px solid #fbbf24;
 }
 
@@ -1339,7 +1488,7 @@ body {
 
 .section-title {
   font-size: var(--font-size-xl);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-6) 0;
   display: flex;
@@ -1361,7 +1510,9 @@ body {
   border: none;
   border-radius: var(--radius-lg);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   font-family: var(--font-family);
   cursor: pointer;
   transition: all 0.3s ease;
@@ -1487,7 +1638,9 @@ body {
   background: var(--white);
   color: var(--gray-700);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-family);
@@ -1589,7 +1742,7 @@ body {
 
 .admin-topic-title {
   font-size: var(--font-size-lg);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-1) 0;
 }
@@ -1606,7 +1759,9 @@ body {
   padding: var(--spacing-1) var(--spacing-3);
   border-radius: var(--radius-full);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   flex-shrink: 0;
 }
 
@@ -1620,7 +1775,9 @@ body {
   border-radius: var(--radius-lg);
   padding: var(--spacing-2) var(--spacing-4);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-family);
@@ -1635,7 +1792,7 @@ body {
 
 .create-icon {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Admin Passage Cards - Uniform Style */
@@ -1680,7 +1837,7 @@ body {
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   min-width: 32px;
   text-align: center;
 }
@@ -1736,7 +1893,7 @@ body {
 
 .passage-title {
   font-size: var(--font-size-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0;
   line-height: 1.4;
@@ -1783,7 +1940,9 @@ body {
 }
 
 .stat-text {
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 .card-footer {
@@ -1802,7 +1961,9 @@ body {
   border-radius: var(--radius-md);
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-family);
@@ -1887,7 +2048,9 @@ body {
   border-radius: var(--radius-md);
   padding: var(--spacing-2) var(--spacing-3);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-family);
@@ -1917,7 +2080,7 @@ body {
 
 .detected-words h4 {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-900);
   margin: 0 0 var(--spacing-2) 0;
 }
@@ -1934,7 +2097,9 @@ body {
   padding: var(--spacing-1) var(--spacing-2);
   border-radius: var(--radius-full);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-1);
@@ -1984,7 +2149,7 @@ body {
 
 .category-title {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin: 0 0 var(--spacing-2) 0;
   display: flex;
   align-items: center;
@@ -2081,7 +2246,7 @@ body {
   border-radius: var(--radius-sm);
   color: white;
   font-size: var(--font-size-xs);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .playback-controls {
@@ -2204,7 +2369,9 @@ body {
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -2221,7 +2388,9 @@ body {
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--font-size-base);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -2272,7 +2441,7 @@ body {
 
 .segment-number {
   font-size: var(--font-size-sm);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--gray-600);
   min-width: 30px;
 }
@@ -2296,12 +2465,12 @@ body {
   }
   
   .main {
-    max-width: 100%;
-    padding: var(--spacing-5);
+    width: 80%;
+    padding: var(--spacing-3);
   }
   
   .main-review {
-    padding: 0;
+    padding: var(--spacing-4);
   }
   
   .topics-section {
@@ -2309,7 +2478,8 @@ body {
   }
   
   .topic-group {
-    padding: 0 var(--spacing-5);
+    padding: 0;
+    width: 100%;
   }
   
   .passage-detail-container {
@@ -2319,6 +2489,11 @@ body {
   .passage-detail-layout {
     grid-template-columns: 1fr;
     gap: var(--spacing-6);
+  }
+  
+  .passages-grid {
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: var(--spacing-1);
   }
 }
 
@@ -2330,12 +2505,12 @@ body {
   }
   
   .main {
-    max-width: 100%;
-    padding: var(--spacing-4);
+    width: 85%;
+    padding: var(--spacing-3);
   }
   
   .main-review {
-    padding: 0;
+    padding: var(--spacing-3);
   }
   
   .topics-section {
@@ -2349,6 +2524,7 @@ body {
   
   .topic-group {
     padding: 0 var(--spacing-4);
+    width: 95%;
   }
   
   .header-left {
@@ -2370,6 +2546,12 @@ body {
   
   .logo-text {
     font-size: var(--font-size-lg);
+  }
+  
+  .passages-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-3);
+    justify-content: space-evenly;
   }
   
   .logo-icon {
@@ -2396,20 +2578,24 @@ body {
   
   .topic-group {
     margin-bottom: var(--spacing-8);
+    width: 95%;
   }
   
   .topic-header {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-2);
+    margin-bottom: var(--spacing-2);
   }
   
   .passages-grid {
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing-3);
+    justify-content: space-evenly;
   }
   
   .passage-card-parroto {
-    width: 260px;
+    min-height: 260px;
   }
   
   .passage-thumbnail {
@@ -2428,7 +2614,8 @@ body {
   }
   
   .main {
-    padding: var(--spacing-4);
+    width: 98%;
+    padding: var(--spacing-3);
   }
   
   .passage-detail-container {
@@ -2487,39 +2674,46 @@ body {
   }
 }
 
-/* Review Page Styling - Match Topics Section */
+/* Review Page Styling - Cùng layout như màn hình Nature */
 .review-tabs-container {
   display: flex;
   gap: var(--spacing-4);
-  margin: var(--spacing-6) 0;
+  margin: 0 0 var(--spacing-6) 0;
   padding: 0;
+  justify-content: flex-start;
+  align-items: flex-start;
 }
 
 .review-tab-button {
   display: flex;
   align-items: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
+  padding: var(--spacing-2) var(--spacing-4);
   background: var(--gray-100);
-  border: 1px solid var(--gray-200);
+  border: 2px solid var(--gray-200);
   border-radius: var(--radius-lg);
   color: var(--gray-600);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  justify-content: flex-start;
 }
 
 .review-tab-button:hover {
   background: var(--gray-200);
   color: var(--gray-700);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .review-tab-button.active {
   background: var(--primary-color);
   color: white;
   border-color: var(--primary-color);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
 }
 
 .tab-icon {
@@ -2527,17 +2721,17 @@ body {
 }
 
 .tab-text {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .tab-count {
   background: var(--gray-300);
   color: var(--gray-600);
-  padding: 2px 8px;
-  border-radius: var(--radius-sm);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--radius-md);
   font-size: var(--font-size-xs);
-  font-weight: 600;
-  min-width: 20px;
+  font-weight: var(--font-weight-medium);
+  min-width: 28px;
   text-align: center;
 }
 
@@ -2546,38 +2740,71 @@ body {
   color: white;
 }
 
-/* Empty State for Topics Style */
+/* Empty State for Topics Style - Cùng layout như màn hình Nature */
 .empty-state-topics {
   text-align: center;
-  padding: var(--spacing-16) var(--spacing-8);
-  background: var(--gray-50);
+  padding: var(--spacing-20) var(--spacing-12);
+  background: white;
   border: 2px dashed var(--gray-300);
   border-radius: var(--radius-lg);
   margin: var(--spacing-6) 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: none;
 }
 
 .empty-state-topics .empty-icon {
   font-size: 4rem;
-  margin-bottom: var(--spacing-4);
-  opacity: 0.6;
+  margin-bottom: var(--spacing-6);
+  opacity: 0.9;
 }
 
 .empty-state-topics h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  color: var(--gray-700);
-  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--gray-900);
+  margin-bottom: var(--spacing-4);
 }
 
 .empty-state-topics p {
-  color: var(--gray-600);
-  margin-bottom: var(--spacing-2);
+  font-size: var(--font-size-lg);
+  color: var(--gray-700);
+  margin-bottom: var(--spacing-3);
+  line-height: var(--line-height-relaxed);
 }
 
 .empty-state-topics .empty-subtitle {
-  font-size: var(--font-size-sm);
-  color: var(--gray-500);
-  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-base);
+  color: var(--gray-600);
+  margin-bottom: var(--spacing-10);
+  font-style: italic;
+}
+
+.empty-state-topics .view-all-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family);
+  letter-spacing: var(--letter-spacing-normal);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
+  min-width: 200px;
+}
+
+.empty-state-topics .view-all-button:hover {
+  background: var(--primary-hover);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(30, 64, 175, 0.4);
 }
 
 /* Vocabulary specific styles */
