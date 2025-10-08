@@ -8,33 +8,70 @@ const TopicsSection: React.FC = () => {
   const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [passagesByTopic, setPassagesByTopic] = useState<Record<string, Passage[]>>({});
-  const [loading, setLoading] = useState(true);
+  const [topicsLoading, setTopicsLoading] = useState(true);
+  const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    loadTopicsAndPassages();
+    loadTopics();
   }, []);
 
-  const loadTopicsAndPassages = async () => {
+  const loadTopics = async () => {
     try {
-      setLoading(true);
+      setTopicsLoading(true);
       
-      // Load topics
+      // Load topics first
       const topicsData = await topicService.getAll();
       setTopics(topicsData);
-
+      
+      // Initialize loading state for each topic
+      const loadingState: Record<string, boolean> = {};
+      topicsData.forEach(topic => {
+        if (topic.slug) {
+          loadingState[topic.slug] = true;
+        }
+      });
+      setPassagesLoading(loadingState);
+      
       // Load passages for each topic
+      loadPassagesForTopics(topicsData);
+    } catch (error) {
+      console.error('Error loading topics:', error);
+    } finally {
+      setTopicsLoading(false);
+    }
+  };
+
+  const loadPassagesForTopics = async (topicsData: Topic[]) => {
+    try {
       const passagesMap: Record<string, Passage[]> = {};
+      
       for (const topic of topicsData) {
         if (topic.slug) {
-          const passages = await passageService.getByTopicSlug(topic.slug);
-          passagesMap[topic.slug] = passages.slice(0, 4); // Chỉ lấy 4 passages đầu tiên
+          try {
+            const passages = await passageService.getByTopicSlug(topic.slug);
+            passagesMap[topic.slug] = passages.slice(0, 4); // Chỉ lấy 4 passages đầu tiên
+            
+            // Update loading state for this topic
+            setPassagesLoading(prev => ({
+              ...prev,
+              [topic.slug!]: false
+            }));
+          } catch (error) {
+            console.error(`Error loading passages for topic ${topic.slug}:`, error);
+            passagesMap[topic.slug] = [];
+            
+            // Update loading state for this topic
+            setPassagesLoading(prev => ({
+              ...prev,
+              [topic.slug!]: false
+            }));
+          }
         }
       }
+      
       setPassagesByTopic(passagesMap);
     } catch (error) {
-      console.error('Error loading topics and passages:', error);
-    } finally {
-      setLoading(false);
+      console.error('Error loading passages:', error);
     }
   };
 
@@ -67,12 +104,13 @@ const TopicsSection: React.FC = () => {
     }
   };
 
-  if (loading) {
+  // Hiển thị loading cho topics
+  if (topicsLoading) {
     return (
       <div className="topics-section">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Đang tải nội dung...</p>
+          <p>Đang tải chủ đề...</p>
         </div>
       </div>
     );
@@ -82,62 +120,75 @@ const TopicsSection: React.FC = () => {
     <div className="topics-section">
       {topics.map((topic) => {
         const topicPassages = topic.slug ? passagesByTopic[topic.slug] || [] : [];
+        const isPassagesLoading = topic.slug ? passagesLoading[topic.slug] : false;
         
-        // Chỉ hiển thị topic nếu có ít nhất 1 passage
-        if (topicPassages.length === 0) {
-          return null;
-        }
-
         return (
           <div key={topic.id} className="topic-group">
             <div className="topic-header">
               <div className="topic-title">
                 <span className="topic-icon">{getTopicIcon(topic.slug)}</span>
                 <h2>{topic.name}</h2>
-                <span className="lesson-count">({topicPassages.length} bài học)</span>
+                <span className="lesson-count">
+                  {isPassagesLoading ? '...' : `(${topicPassages.length} bài học)`}
+                </span>
               </div>
               <button 
                 className="view-all-button"
                 onClick={() => topic.slug && navigate(`/topics/${topic.slug}`)}
+                disabled={isPassagesLoading}
               >
                 Xem tất cả →
               </button>
             </div>
 
             <div className="passages-grid">
-              {topicPassages.map((passage: Passage) => (
-                <div 
-                  key={passage.id} 
-                  className="passage-card-parroto"
-                  onClick={() => navigate(`/passage/${passage.id}`)}
-                >
-                  <div className="passage-thumbnail">
-                    {passage.thumbnail ? (
-                      <img src={passage.thumbnail} alt={passage.title} />
-                    ) : (
-                      <div className="thumbnail-placeholder">
-                        {getTopicIcon(topic.slug)}
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="passage-info">
-                    <div className="passage-meta">
-                      <span className="view-count">{Math.floor(Math.random() * 10000) + 1000}</span>
-                      <span 
-                        className="difficulty-badge"
-                        style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
-                      >
-                        {getDifficultyText(passage.level || 1)}
-                      </span>
-                      <span className="source">Youtube</span>
-                      <span className="duration">•{Math.floor(Math.random() * 3) + 1}:{Math.floor(Math.random() * 60).toString().padStart(2, '0')} phút</span>
+              {isPassagesLoading ? (
+                // Hiển thị loading cho passages của topic này
+                <div className="topic-loading">
+                  <div className="loading-spinner-small"></div>
+                  <span>Đang tải bài học...</span>
+                </div>
+              ) : topicPassages.length > 0 ? (
+                // Hiển thị passages
+                topicPassages.map((passage: Passage) => (
+                  <div 
+                    key={passage.id} 
+                    className="passage-card-parroto"
+                    onClick={() => navigate(`/passage/${passage.id}`)}
+                  >
+                    <div className="passage-thumbnail">
+                      {passage.thumbnail ? (
+                        <img src={passage.thumbnail} alt={passage.title} />
+                      ) : (
+                        <div className="thumbnail-placeholder">
+                          {getTopicIcon(topic.slug)}
+                        </div>
+                      )}
                     </div>
                     
-                    <h3 className="passage-title">{passage.title}</h3>
+                    <div className="passage-info">
+                      <div className="passage-meta">
+                        <span className="view-count">{Math.floor(Math.random() * 10000) + 1000}</span>
+                        <span 
+                          className="difficulty-badge"
+                          style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
+                        >
+                          {getDifficultyText(passage.level || 1)}
+                        </span>
+                        <span className="source">Youtube</span>
+                        <span className="duration">•{Math.floor(Math.random() * 3) + 1}:{Math.floor(Math.random() * 60).toString().padStart(2, '0')} phút</span>
+                      </div>
+                      
+                      <h3 className="passage-title">{passage.title}</h3>
+                    </div>
                   </div>
+                ))
+              ) : (
+                // Hiển thị thông báo không có passage
+                <div className="no-passages">
+                  <span>Chưa có bài học nào</span>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         );

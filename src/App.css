@@ -675,6 +675,38 @@ strong, b {
   100% { transform: rotate(360deg); }
 }
 
+/* Topic loading styles */
+.topic-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  color: var(--gray-500);
+  min-height: 120px;
+  grid-column: 1 / -1; /* Span full width of grid */
+}
+
+.loading-spinner-small {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--gray-200);
+  border-top: 2px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: var(--spacing-2);
+}
+
+.no-passages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-8);
+  color: var(--gray-400);
+  font-style: italic;
+  grid-column: 1 / -1; /* Span full width of grid */
+}
+
 /* Buttons - Modern Parroto style */
 .button {
   background: var(--primary-color);
