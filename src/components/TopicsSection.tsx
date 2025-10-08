@@ -8,7 +8,6 @@ const TopicsSection: React.FC = () => {
   const navigate = useNavigate();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [passagesByTopic, setPassagesByTopic] = useState<Record<string, Passage[]>>({});
-  const [topicsLoading, setTopicsLoading] = useState(true);
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -17,8 +16,6 @@ const TopicsSection: React.FC = () => {
 
   const loadTopics = async () => {
     try {
-      setTopicsLoading(true);
-      
       // Load topics first
       const topicsData = await topicService.getAll();
       setTopics(topicsData);
@@ -36,8 +33,6 @@ const TopicsSection: React.FC = () => {
       loadPassagesForTopics(topicsData);
     } catch (error) {
       console.error('Error loading topics:', error);
-    } finally {
-      setTopicsLoading(false);
     }
   };
 
@@ -104,21 +99,15 @@ const TopicsSection: React.FC = () => {
     }
   };
 
-  // Hiển thị loading cho topics
-  if (topicsLoading) {
-    return (
-      <div className="topics-section">
-        <div className="loading-container">
+  return (
+    <div className="topics-section">
+      {topics.length === 0 ? (
+        <div className="topics-loading">
           <div className="loading-spinner"></div>
           <p>Đang tải chủ đề...</p>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="topics-section">
-      {topics.map((topic) => {
+      ) : (
+        topics.map((topic) => {
         const topicPassages = topic.slug ? passagesByTopic[topic.slug] || [] : [];
         const isPassagesLoading = topic.slug ? passagesLoading[topic.slug] : false;
         
@@ -192,7 +181,8 @@ const TopicsSection: React.FC = () => {
             </div>
           </div>
         );
-      })}
+        })
+      )}
     </div>
   );
 };
