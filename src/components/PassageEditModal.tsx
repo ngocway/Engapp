@@ -47,6 +47,10 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
 
   useEffect(() => {
     if (passage) {
+      console.log('🔍 PassageEditModal - Loading passage data:', passage);
+      console.log('🔍 PassageEditModal - Passage topicId:', passage.topicId);
+      console.log('🔍 PassageEditModal - Passage topicSlug:', passage.topicSlug);
+      
       setFormData({
         title: passage.title || '',
         text: passage.text || '',
@@ -57,6 +61,7 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       });
       setPreviewUrl(passage.thumbnail || '');
       setAudioPreviewUrl(passage.audioUrl || '');
+      
     } else {
       setFormData({
         title: '',
@@ -72,6 +77,7 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     setSelectedFile(null);
     setSelectedAudioFile(null);
   }, [passage]);
+
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -224,39 +230,73 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     }
   };
 
+
   // Function to update vocabulary for the passage
   const updatePassageVocabulary = async (passageId: string) => {
     try {
-      // Get current detected words
+      console.log('📚 Auto-processing vocabulary from text...');
+      
+      // Extract vocabulary from current text
       const detectedWords = extractVocabularyFromText(formData.text);
-      const existingWords = await getExistingVocabulary();
-      const comparison = compareVocabulary(detectedWords, existingWords);
-
-      // Delete words that should be removed
-      if (comparison.wordsToRemove.length > 0) {
-        console.log('Deleting vocabulary:', comparison.wordsToRemove);
-        // Get all vocabularies for this passage
-        const allVocabularies = await vocabService.getByPassageId(passageId);
-        // Delete only the ones that should be removed
-        const vocabToDelete = allVocabularies.filter(vocab => 
-          comparison.wordsToRemove.includes(vocab.term)
-        );
-        await Promise.all(vocabToDelete.map(vocab => vocabService.delete(vocab.id!)));
+      console.log('📚 Detected words from text:', detectedWords);
+      
+      if (detectedWords.length === 0) {
+        console.log('📚 No vocabulary detected in text');
+        return;
       }
-
+      
+      // Get current passage data to check existing vocab
+      const { passageService } = await import('../firebase/passageService');
+      const currentPassage = await passageService.getPassageById(passageId);
+      
+      if (!currentPassage) {
+        console.error('❌ Could not load current passage');
+        return;
+      }
+      
+      const existingVocab = currentPassage.vocab || [];
+      const existingTerms = existingVocab.map(vocab => vocab.term);
+      
+      console.log('📚 Existing vocabulary terms:', existingTerms);
+      
+      // Find new words to add
+      const newWords = detectedWords.filter(word => !existingTerms.includes(word));
+      
+      // Find words to remove (words that were in vocab but not in text anymore)
+      const wordsToRemove = existingTerms.filter(term => !detectedWords.includes(term));
+      
+      console.log('📚 New words to add:', newWords);
+      console.log('📚 Words to remove:', wordsToRemove);
+      
+      // Prepare updated vocab list
+      let updatedVocab = [...existingVocab];
+      
       // Add new words
-      if (comparison.newWords.length > 0) {
-        console.log('Adding new vocabulary:', comparison.newWords);
-        await vocabService.addMultipleForPassage(passageId, comparison.newWords);
-      }
-
-      console.log('Vocabulary update completed:', {
-        new: comparison.newWords,
-        removed: comparison.wordsToRemove,
-        kept: comparison.wordsToKeep
+      newWords.forEach(word => {
+        const newVocab = {
+          term: word,
+          meaning: `Nghĩa của ${word}`,
+          definitionEn: `Definition of ${word}`
+        };
+        updatedVocab.push(newVocab);
+        console.log('📚 Added new vocabulary:', newVocab);
       });
+      
+      // Remove words that are no longer in text
+      updatedVocab = updatedVocab.filter(vocab => !wordsToRemove.includes(vocab.term));
+      
+      // Update passage with new vocabulary
+      await passageService.update(passageId, { vocab: updatedVocab });
+      
+      console.log('✅ Vocabulary updated successfully:', {
+        total: updatedVocab.length,
+        added: newWords.length,
+        removed: wordsToRemove.length,
+        kept: updatedVocab.length - newWords.length
+      });
+      
     } catch (error) {
-      console.error('Error updating vocabulary:', error);
+      console.error('❌ Error updating vocabulary:', error);
       throw error;
     }
   };
@@ -265,6 +305,10 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     e.preventDefault();
     if (!passage) return;
 
+    console.log('🔄 Starting passage update...');
+    console.log('📝 Passage ID:', passage.id);
+    console.log('📝 Form data:', formData);
+
     setLoading(true);
     try {
       let thumbnailUrl = formData.thumbnail;
@@ -272,9 +316,11 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       
       // Upload image file if selected
       if (selectedFile) {
+        console.log('📤 Uploading image file...');
         const uploadedUrl = await uploadImage(selectedFile);
         if (uploadedUrl) {
           thumbnailUrl = uploadedUrl;
+          console.log('✅ Image uploaded:', uploadedUrl);
         } else {
           alert('Lỗi khi upload ảnh. Vui lòng thử lại.');
           setLoading(false);
@@ -284,9 +330,11 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
 
       // Upload audio file if selected
       if (selectedAudioFile) {
+        console.log('📤 Uploading audio file...');
         const uploadedAudioUrl = await uploadAudio(selectedAudioFile);
         if (uploadedAudioUrl) {
           audioUrl = uploadedAudioUrl;
+          console.log('✅ Audio uploaded:', uploadedAudioUrl);
         } else {
           alert('Lỗi khi upload audio. Vui lòng thử lại.');
           setLoading(false);
@@ -294,8 +342,9 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
         }
       }
 
-      const updatedPassage: Passage = {
-        ...passage,
+      // Prepare update data WITHOUT the id field (Firebase doesn't allow updating document ID)
+      // Ensure topicId is not undefined
+      const updateData = {
         title: formData.title,
         text: formData.text,
         excerpt: formData.excerpt,
@@ -303,21 +352,48 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
         thumbnail: thumbnailUrl,
         audioUrl: audioUrl,
         level: passage.level,
-        topicId: passage.topicId
+        topicId: passage.topicId || '' // Fallback to empty string if undefined
       };
 
+      // Remove undefined values to prevent Firebase errors
+      Object.keys(updateData).forEach(key => {
+        if (updateData[key as keyof typeof updateData] === undefined) {
+          delete updateData[key as keyof typeof updateData];
+        }
+      });
+
+      console.log('💾 Updating passage in database...');
+      console.log('💾 Update data (without id):', updateData);
+      console.log('💾 Passage ID to update:', passage.id);
+
       // Update passage
-      await passageService.update(passage.id, updatedPassage);
+      const updateResult = await passageService.update(passage.id, updateData);
+      console.log('✅ Passage update result:', updateResult);
       
-      // Update vocabulary
+      // Update vocabulary (auto-processing from text)
+      console.log('📚 Auto-processing vocabulary from text...');
       await updatePassageVocabulary(passage.id);
+      console.log('✅ Vocabulary auto-processing completed');
+      
+      
+      console.log('🎉 All updates completed successfully!');
+      
+      // Create the updated passage object for the callback (with id)
+      const updatedPassage: Passage = {
+        ...passage,
+        ...updateData
+      };
       
       onSave(updatedPassage);
       onClose();
       alert('Đã cập nhật đoạn văn và từ vựng thành công!');
     } catch (error) {
-      console.error('Error updating passage:', error);
-      alert('Lỗi khi cập nhật đoạn văn');
+      console.error('❌ Error updating passage:', error);
+      console.error('❌ Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      alert(`Lỗi khi cập nhật đoạn văn: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setLoading(false);
     }
@@ -442,6 +518,7 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
               )}
             </div>
           </div>
+
 
           <div className="form-group">
             <label htmlFor="topicSlug">Chủ đề:</label>

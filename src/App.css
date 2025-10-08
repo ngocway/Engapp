@@ -686,6 +686,681 @@ strong, b {
   min-height: 400px;
 }
 
+/* Admin Passage Manager Styles */
+.admin-passage-manager {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-6);
+  margin: var(--spacing-4);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.admin-passage-manager .admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.admin-passage-manager .admin-header h2 {
+  margin: 0;
+  color: var(--gray-900);
+  font-size: 1.5rem;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--gray-500);
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  transition: all 0.2s;
+}
+
+.close-button:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.passage-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.filter-section {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.filter-section label {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.filter-section select {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  background: white;
+  font-size: 0.9rem;
+}
+
+.add-button {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-button:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.passages-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
+.passage-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: var(--spacing-4);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  background: white;
+  transition: all 0.2s;
+}
+
+.passage-item:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--primary-color);
+}
+
+.passage-info {
+  flex: 1;
+  margin-right: var(--spacing-4);
+}
+
+.passage-info h3 {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--gray-900);
+  font-size: 1.1rem;
+}
+
+.passage-meta {
+  margin: 0 0 var(--spacing-2) 0;
+  color: var(--gray-600);
+  font-size: 0.9rem;
+}
+
+.passage-content {
+  margin: 0;
+  color: var(--gray-700);
+  line-height: 1.5;
+}
+
+.passage-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.edit-btn, .delete-btn {
+  padding: var(--spacing-2) var(--spacing-3);
+  border: none;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.edit-btn {
+  background: var(--blue-500);
+  color: white;
+}
+
+.edit-btn:hover {
+  background: var(--blue-600);
+}
+
+.delete-btn {
+  background: var(--red-500);
+  color: white;
+}
+
+.delete-btn:hover {
+  background: var(--red-600);
+}
+
+.no-passages {
+  text-align: center;
+  padding: var(--spacing-8);
+  color: var(--gray-500);
+}
+
+/* Form Styles */
+.passage-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.form-group label {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  padding: var(--spacing-3);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.vocab-input-group {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.vocab-input-group input {
+  flex: 1;
+}
+
+.vocab-input-group button {
+  background: var(--red-500);
+  color: white;
+  border: none;
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.vocab-input-group button:hover {
+  background: var(--red-600);
+}
+
+.add-vocab-btn {
+  background: var(--green-500);
+  color: white;
+  border: none;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-top: var(--spacing-2);
+}
+
+.add-vocab-btn:hover {
+  background: var(--green-600);
+}
+
+.form-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: flex-end;
+  margin-top: var(--spacing-4);
+}
+
+.form-actions button {
+  padding: var(--spacing-3) var(--spacing-4);
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-actions button[type="button"] {
+  background: white;
+  color: var(--gray-700);
+}
+
+.form-actions button[type="button"]:hover {
+  background: var(--gray-50);
+}
+
+.submit-btn {
+  background: var(--primary-color) !important;
+  color: white !important;
+  border-color: var(--primary-color) !important;
+}
+
+.submit-btn:hover {
+  background: var(--primary-dark) !important;
+}
+
+/* Admin Controls Styles */
+.admin-controls {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-6);
+  padding: var(--spacing-4);
+  background: var(--gray-50);
+  border-radius: var(--border-radius);
+}
+
+.add-passage-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-passage-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.admin-panel-btn {
+  background: var(--gray-600);
+  color: white;
+  border: none;
+  padding: var(--spacing-3) var(--spacing-4);
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.admin-panel-btn:hover {
+  background: var(--gray-700);
+  transform: translateY(-1px);
+}
+
+/* Passage Admin Actions */
+.passage-admin-actions {
+  position: absolute;
+  top: var(--spacing-2);
+  right: var(--spacing-2);
+  display: flex;
+  gap: var(--spacing-1);
+}
+
+.edit-passage-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.edit-passage-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.delete-passage-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.delete-passage-btn:hover {
+  background: #ffebee;
+  color: #d32f2f;
+  transform: scale(1.1);
+}
+
+.manage-vocab-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.manage-vocab-btn:hover {
+  background: #e3f2fd;
+  color: #1976d2;
+  transform: scale(1.1);
+}
+
+.passage-card-parroto {
+  position: relative;
+}
+
+.passage-card-content {
+  cursor: pointer;
+}
+
+/* Manual Vocabulary Management Styles */
+.manual-vocab-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-4);
+}
+
+.vocab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-2);
+  border-bottom: 1px solid #dee2e6;
+}
+
+.vocab-header span {
+  font-weight: 600;
+  color: var(--gray-700);
+}
+
+.add-vocab-btn {
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.add-vocab-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.no-vocab-message {
+  text-align: center;
+  padding: var(--spacing-6);
+  color: var(--gray-600);
+  font-style: italic;
+}
+
+.vocab-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--spacing-3);
+  padding: var(--spacing-2);
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .vocab-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-2);
+    padding: var(--spacing-1);
+  }
+}
+
+@media (min-width: 1200px) {
+  .vocab-list {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  }
+}
+
+.vocab-item {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: var(--border-radius);
+  padding: var(--spacing-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  transition: all 0.2s;
+  min-height: 200px;
+}
+
+.vocab-item:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.vocab-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  min-height: 120px;
+}
+
+.vocab-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.vocab-field label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+.vocab-field input {
+  padding: var(--spacing-2);
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.vocab-field input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.remove-vocab-btn {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: var(--spacing-2);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  align-self: flex-start;
+  margin-top: var(--spacing-2);
+}
+
+.remove-vocab-btn:hover {
+  background: #c82333;
+  transform: scale(1.1);
+}
+
+.vocab-info {
+  margin-top: var(--spacing-3);
+  padding-top: var(--spacing-2);
+  border-top: 1px solid #dee2e6;
+}
+
+.vocab-info p {
+  margin: 0;
+  color: var(--gray-600);
+}
+
+/* Responsive design for vocab fields */
+@media (min-width: 768px) {
+  .vocab-fields {
+    flex-direction: row;
+    gap: var(--spacing-3);
+  }
+  
+  .vocab-field {
+    flex: 1;
+  }
+  
+  .remove-vocab-btn {
+    align-self: center;
+    margin-top: 0;
+  }
+}
+
+/* Vocab Management Modal */
+.vocab-management-modal {
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+}
+
+.vocab-management-modal .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* Enhanced Vocab Item Styles */
+.vocab-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-2);
+  padding-bottom: var(--spacing-1);
+  border-bottom: 1px solid #e9ecef;
+}
+
+.vocab-index {
+  font-weight: 600;
+  color: var(--primary-color);
+  background: rgba(99, 102, 241, 0.1);
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius);
+  font-size: 0.8rem;
+}
+
+/* Edit button styles */
+.edit-vocab-btn {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #dee2e6;
+  padding: var(--spacing-1);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-vocab-btn:hover {
+  background: #e3f2fd;
+  color: #1976d2;
+  transform: scale(1.1);
+}
+
+/* Read-only field styles */
+.readonly-field {
+  background-color: #f8f9fa !important;
+  border-color: #e9ecef !important;
+  color: #6c757d !important;
+  cursor: not-allowed !important;
+}
+
+.readonly-field:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  border-color: #e9ecef !important;
+}
+
+/* Enhanced Field Styles */
+.vocab-field textarea {
+  padding: var(--spacing-2);
+  border: 1px solid #ced4da;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  resize: vertical;
+  min-height: 60px;
+  font-family: inherit;
+}
+
+.vocab-field textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
+}
+
+.required-field {
+  border-color: #dc3545 !important;
+  background-color: #fff5f5;
+}
+
+.field-warning {
+  color: #dc3545;
+  font-size: 0.75rem;
+  margin-top: var(--spacing-1);
+  display: block;
+}
+
+.field-help {
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  margin-top: var(--spacing-1);
+  display: block;
+}
+
+/* Enhanced vocabulary display in PassageDetail */
+.vocab-meaning {
+  font-size: 0.85rem;
+  color: var(--gray-600);
+  margin-top: var(--spacing-1);
+  font-style: italic;
+}
+
+.vocab-pronunciation {
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  margin-top: var(--spacing-1);
+  font-family: monospace;
+}
+
 /* Topic loading styles */
 .topic-loading {
   display: flex;

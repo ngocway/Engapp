@@ -162,20 +162,47 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
             <h4>Từ mới</h4>
             <div className="vocabulary-list">
               {(() => {
-                // Mock vocabulary data for demonstration
-                const mockVocabulary = [
-                  { term: "star", meaning: "ngôi sao", pronunciation: "stɑːr" },
-                  { term: "tonight", meaning: "tối nay", pronunciation: "təˈnaɪt" },
-                  { term: "coffee", meaning: "cà phê", pronunciation: "ˈkɔːfi" },
-                  { term: "wood", meaning: "gỗ", pronunciation: "wʊd" },
-                  { term: "control", meaning: "kiểm soát", pronunciation: "kənˈtroʊl" }
-                ];
-
-                return mockVocabulary.map((vocab, index) => (
-                  <div key={index} className="vocabulary-item">
-                    <div className="vocab-word">{vocab.term}</div>
-                  </div>
-                ));
+                // Use passage.vocab if available, otherwise fallback to extracting from text
+                if (passage.vocab && passage.vocab.length > 0) {
+                  return passage.vocab.map((vocab, index) => (
+                    <div key={index} className="vocabulary-item">
+                      <div className="vocab-word">{vocab.term}</div>
+                      {vocab.meaning && (
+                        <div className="vocab-meaning">{vocab.meaning}</div>
+                      )}
+                      {vocab.phonetics?.us && (
+                        <div className="vocab-pronunciation">{vocab.phonetics.us}</div>
+                      )}
+                    </div>
+                  ));
+                } else {
+                  // Fallback: Extract vocabulary from text (same logic as HighlightedText)
+                  const bracketRegex = /\[([^\]]+)\]/g;
+                  const matches = passage.text.match(bracketRegex);
+                  
+                  if (matches && matches.length > 0) {
+                    const vocabularyWords = matches.map(match => {
+                      const word = match.slice(1, -1).trim(); // Remove brackets
+                      return word;
+                    }).filter(word => word.length > 0);
+                    
+                    // Remove duplicates
+                    const uniqueWords = Array.from(new Set(vocabularyWords));
+                    
+                    return uniqueWords.map((word, index) => (
+                      <div key={index} className="vocabulary-item">
+                        <div className="vocab-word">{word}</div>
+                      </div>
+                    ));
+                  } else {
+                    return (
+                      <div className="no-vocabulary">
+                        <p>Không có từ vựng nào được định nghĩa trong bài học này.</p>
+                        <p><small>💡 Để thêm từ vựng, sử dụng chức năng "Quản lý từ vựng" trong admin</small></p>
+                      </div>
+                    );
+                  }
+                }
               })()}
             </div>
           </div>

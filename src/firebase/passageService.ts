@@ -76,7 +76,7 @@ export const passageService = {
       console.log('✅ passageService.update - Document exists, proceeding with update');
       
       // Remove id field before updating (Firestore doesn't allow updating document ID)
-      const { id, ...passageDataWithoutId } = passage;
+      const { id, ...passageDataWithoutId } = passage as any;
       console.log('🔍 passageService.update - passage data without id:', passageDataWithoutId);
       
       await updateDoc(docRef, passageDataWithoutId);
@@ -173,6 +173,55 @@ export const passageService = {
       return null;
     }
   },
+
+  // Xóa passage theo Document ID
+  async delete(passageId: string): Promise<boolean> {
+    try {
+      console.log('🗑️ passageService.delete - Deleting passage ID:', passageId);
+      
+      // Check if document exists first
+      const docRef = doc(db, PASSAGES_COLLECTION, passageId);
+      console.log('🔍 passageService.delete - Document path:', docRef.path);
+      
+      // Check if document exists
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) {
+        console.error('❌ passageService.delete - Document does not exist:', passageId);
+        
+        // List all documents in collection for debugging
+        const allDocs = await getDocs(collection(db, PASSAGES_COLLECTION));
+        console.log('🔍 Available documents in collection:');
+        allDocs.forEach(doc => {
+          console.log('  - Document ID:', doc.id, 'Title:', doc.data().title);
+        });
+        
+        throw new Error(`Document with ID ${passageId} does not exist in collection ${PASSAGES_COLLECTION}`);
+      }
+      
+      console.log('✅ passageService.delete - Document exists, proceeding with deletion');
+      
+      // Delete the document
+      await deleteDoc(docRef);
+      console.log('✅ passageService.delete - Successfully deleted from Firestore');
+      
+      return true;
+    } catch (error) {
+      console.error('❌ passageService.delete - Error deleting passage:', error);
+      
+      // Type-safe error handling
+      if (error instanceof Error) {
+        console.error('❌ passageService.delete - Error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+      } else {
+        console.error('❌ passageService.delete - Unknown error type:', typeof error, error);
+      }
+      
+      return false;
+    }
+  }
 
 };
 

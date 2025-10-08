@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import HomePage from './pages/HomePage';
 import AdminPage from './pages/AdminPage';
+import AdminPanel from './components/AdminPanel';
 import AdminQuestionsPage from './pages/AdminQuestionsPage';
 import AdminVocabularyPage from './pages/AdminVocabularyPage';
 import TopicSelect from './pages/TopicSelect';
@@ -19,6 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/panel" element={<AdminPanel />} />
           <Route path="/admin/questions" element={<AdminQuestionsPage />} />
           <Route path="/admin/questions/:passageId" element={<AdminQuestionsPage />} />
           <Route path="/admin/vocabulary/:passageId" element={<AdminVocabularyPage />} />

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { vocabularyData } from '../data/vocabulary';
 import { vocabularyService } from '../firebase/vocabularyService';
 import { topicSeeds, passageSeeds, longPassageSeeds } from '../data/topics';
@@ -8,8 +9,21 @@ import { vocabService } from '../firebase/vocabService';
 import { vocabSeeds } from '../data/vocab';
 import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
+import AdminPassageManager from './AdminPassageManager';
+import Header from './Header';
 
 const AdminPanel: React.FC = () => {
+  const navigate = useNavigate();
+  const [showPassageManager, setShowPassageManager] = useState(false);
+
+  const handleTabChange = (tab: 'topics' | 'review') => {
+    if (tab === 'topics') {
+      navigate('/');
+    } else if (tab === 'review') {
+      navigate('/review');
+    }
+  };
+
   const uploadSampleData = async () => {
     console.log('🚀 Bắt đầu upload dữ liệu mẫu lên Firebase...');
     
@@ -242,8 +256,22 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  if (showPassageManager) {
+    return (
+      <div className="app">
+        <Header onTabChange={handleTabChange} activeTab="topics" />
+        <main className="main">
+          <AdminPassageManager onClose={() => setShowPassageManager(false)} />
+        </main>
+      </div>
+    );
+  }
+
   return (
-    <div className="admin-panel-container">
+    <div className="app">
+      <Header onTabChange={handleTabChange} activeTab="topics" />
+      <main className="main">
+        <div className="admin-panel-container">
       <div className="admin-header">
         <div className="admin-title">
           <span className="admin-icon">🔧</span>
@@ -257,6 +285,17 @@ const AdminPanel: React.FC = () => {
       </div>
 
       <div className="admin-content">
+        {/* Passage Management Section */}
+        <div className="admin-section">
+          <h2 className="section-title">📚 Quản lý bài học</h2>
+          <div className="admin-grid">
+            <button className="admin-button primary" onClick={() => setShowPassageManager(true)}>
+              <span className="button-icon">📝</span>
+              <span className="button-text">Quản lý bài học</span>
+            </button>
+          </div>
+        </div>
+
         {/* Data Management Section */}
         <div className="admin-section">
           <h2 className="section-title">📊 Quản lý dữ liệu</h2>
@@ -336,6 +375,8 @@ const AdminPanel: React.FC = () => {
           </div>
         </div>
       </div>
+      </div>
+    </main>
     </div>
   );
 };

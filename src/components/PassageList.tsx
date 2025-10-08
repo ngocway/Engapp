@@ -6,12 +6,18 @@ interface PassageListProps {
   topic: Topic;
   onBack: () => void;
   onOpen: (passage: Passage) => void;
+  onEdit?: (passage: Passage) => void;
+  onDelete?: (passage: Passage) => void; // Added optional onDelete prop
+  onManageVocab?: (passage: Passage) => void; // Added optional onManageVocab prop
 }
 
 const PassageList: React.FC<PassageListProps> = ({ 
   topic, 
   onBack, 
-  onOpen
+  onOpen,
+  onEdit,
+  onDelete,
+  onManageVocab
 }) => {
   const [passages, setPassages] = useState<Passage[]>([]);
   const [loading, setLoading] = useState(true);
@@ -92,33 +98,75 @@ const PassageList: React.FC<PassageListProps> = ({
             <div 
               key={passage.id} 
               className="passage-card-parroto"
-              onClick={() => onOpen(passage)}
             >
-              <div className="passage-thumbnail">
-                {passage.thumbnail ? (
-                  <img src={passage.thumbnail} alt={passage.title} />
-                ) : (
-                  <div className="thumbnail-placeholder">
-                    {getTopicIcon(topic.slug)}
-                  </div>
-                )}
-              </div>
-              
-              <div className="passage-content">
-                <div className="passage-meta">
-                  <span className="passage-views">0</span>
-                  <span 
-                    className="passage-level"
-                    style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
-                  >
-                    {getDifficultyText(passage.level || 1)}
-                  </span>
-                  <span className="passage-source">Youtube</span>
-                  <span className="passage-duration">2:30 phút</span>
+              <div className="passage-card-content" onClick={() => onOpen(passage)}>
+                <div className="passage-thumbnail">
+                  {passage.thumbnail ? (
+                    <img src={passage.thumbnail} alt={passage.title} />
+                  ) : (
+                    <div className="thumbnail-placeholder">
+                      {getTopicIcon(topic.slug)}
+                    </div>
+                  )}
                 </div>
                 
-                <h3 className="passage-title">{passage.title}</h3>
+                <div className="passage-content">
+                  <div className="passage-meta">
+                    <span className="passage-views">0</span>
+                    <span 
+                      className="passage-level"
+                      style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
+                    >
+                      {getDifficultyText(passage.level || 1)}
+                    </span>
+                    <span className="passage-source">Youtube</span>
+                    <span className="passage-duration">2:30 phút</span>
+                  </div>
+                  
+                  <h3 className="passage-title">{passage.title}</h3>
+                </div>
               </div>
+              
+              {(onEdit || onDelete || onManageVocab) && (
+                <div className="passage-admin-actions">
+                  {onEdit && (
+                    <button 
+                      className="edit-passage-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEdit(passage);
+                      }}
+                      title="Chỉnh sửa bài học"
+                    >
+                      ✏️
+                    </button>
+                  )}
+                  {onManageVocab && (
+                    <button 
+                      className="manage-vocab-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onManageVocab(passage);
+                      }}
+                      title="Quản lý từ vựng"
+                    >
+                      📚
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button 
+                      className="delete-passage-btn"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDelete(passage);
+                      }}
+                      title="Xóa bài học"
+                    >
+                      🗑️
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>
