@@ -1,14 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import TopicSelectComponent from '../components/TopicSelect';
-import SimpleHeader from '../components/SimpleHeader';
+import Header from '../components/Header';
 
 const TopicSelect: React.FC = () => {
   const navigate = useNavigate();
 
+  const handleTabChange = (tab: 'topics' | 'review') => {
+    if (tab === 'topics') {
+      navigate('/');
+    } else if (tab === 'review') {
+      navigate('/review');
+    }
+  };
+
   return (
     <div className="app">
-      <SimpleHeader />
+      <Header onTabChange={handleTabChange} activeTab="topics" />
       
       <main className="main">
         <TopicSelectComponent 

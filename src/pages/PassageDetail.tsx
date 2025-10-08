@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { passageService } from '../firebase/passageService';
 import { Passage } from '../types';
 import PassageDetailComponent from '../components/PassageDetail';
-import SimpleHeader from '../components/SimpleHeader';
+import Header from '../components/Header';
 
 const PassageDetail: React.FC = () => {
   const { passageId } = useParams<{ passageId: string }>();
@@ -48,14 +48,22 @@ const PassageDetail: React.FC = () => {
     return <div>Passage not found</div>;
   }
 
+  const handleTabChange = (tab: 'topics' | 'review') => {
+    if (tab === 'topics') {
+      navigate('/');
+    } else if (tab === 'review') {
+      navigate('/review');
+    }
+  };
+
   return (
     <div className="app">
-      <SimpleHeader />
+      <Header onTabChange={handleTabChange} activeTab="topics" />
       
       <main className="main">
         <PassageDetailComponent 
           passage={passage}
-          onBack={() => navigate('/topics')}
+          onBack={() => navigate('/')}
         />
       </main>
     </div>

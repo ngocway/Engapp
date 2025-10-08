@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Topic } from '../types';
 import PassageListComponent from '../components/PassageList';
-import SimpleHeader from '../components/SimpleHeader';
+import Header from '../components/Header';
 
 const PassageList: React.FC = () => {
   const { topicSlug } = useParams<{ topicSlug: string }>();
@@ -32,9 +32,17 @@ const PassageList: React.FC = () => {
     return <div>Loading...</div>;
   }
 
+  const handleTabChange = (tab: 'topics' | 'review') => {
+    if (tab === 'topics') {
+      navigate('/');
+    } else if (tab === 'review') {
+      navigate('/review');
+    }
+  };
+
   return (
     <div className="app">
-      <SimpleHeader />
+      <Header onTabChange={handleTabChange} activeTab="topics" />
       
       <main className="main">
         <PassageListComponent 
