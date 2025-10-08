@@ -28,6 +28,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
     } else {
+      // Luôn hiển thị kết quả khi đến câu cuối
+      calculateScore();
+      setShowResults(true);
+      
       // Kiểm tra xem user đã trả lời hết tất cả câu hỏi chưa
       const allQuestionsAnswered = questions.every(question => 
         userAnswers[question.id] !== undefined && userAnswers[question.id] !== ''
@@ -41,10 +45,9 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
         } catch (error) {
           console.error('❌ Error marking passage as completed:', error);
         }
+      } else {
+        console.log('❌ Not all questions answered. Questions answered:', Object.keys(userAnswers).length, 'Total questions:', questions.length);
       }
-      
-      calculateScore();
-      setShowResults(true);
     }
   };
 
@@ -85,7 +88,24 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
     );
   }
 
+  const handleCompletePassage = async () => {
+    if (user) {
+      try {
+        await progressService.addCompletedPassage(user.uid, passageId);
+        console.log('✅ Passage manually marked as completed:', passageId);
+        alert('🎉 Đã đánh dấu đoạn văn hoàn thành! Bạn có thể xem lại trong mục Ôn tập.');
+      } catch (error) {
+        console.error('❌ Error marking passage as completed:', error);
+        alert('❌ Có lỗi xảy ra khi đánh dấu hoàn thành. Vui lòng thử lại.');
+      }
+    }
+  };
+
   if (showResults) {
+    const allQuestionsAnswered = questions.every(question => 
+      userAnswers[question.id] !== undefined && userAnswers[question.id] !== ''
+    );
+    
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
         <h3 style={{ color: '#333', marginBottom: '20px' }}>🎉 Kết quả bài kiểm tra</h3>
@@ -104,6 +124,36 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
         }}>
           Điểm số: {Math.round((score / questions.length) * 100)}%
         </div>
+        
+        {!allQuestionsAnswered && (
+          <div style={{ 
+            backgroundColor: '#fff3cd', 
+            border: '1px solid #ffeaa7',
+            borderRadius: '8px',
+            padding: '15px',
+            marginBottom: '20px',
+            color: '#856404'
+          }}>
+            <p style={{ margin: '0 0 10px 0' }}>
+              ⚠️ Bạn chưa trả lời hết tất cả câu hỏi ({Object.keys(userAnswers).length}/{questions.length})
+            </p>
+            <button 
+              onClick={handleCompletePassage}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '0.9rem',
+                cursor: 'pointer'
+              }}
+            >
+              ✅ Hoàn thành bài học
+            </button>
+          </div>
+        )}
+        
         <button 
           onClick={resetQuiz}
           style={{

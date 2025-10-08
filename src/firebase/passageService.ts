@@ -140,7 +140,40 @@ export const passageService = {
       }
     }
     return updates;
-  }
+  },
+
+  // Lấy passage theo ID
+  async getPassageById(passageId: string): Promise<Passage | null> {
+    try {
+      console.log('🔍 passageService.getPassageById - Looking for passage ID:', passageId);
+      const docRef = doc(db, PASSAGES_COLLECTION, passageId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        const passage = {
+          id: docSnap.id,
+          ...docSnap.data()
+        } as Passage;
+        console.log('✅ passageService.getPassageById - Found passage:', passage.title);
+        return passage;
+      } else {
+        console.log('❌ passageService.getPassageById - Passage not found:', passageId);
+        
+        // Debug: List all available passages
+        console.log('🔍 Available passages in database:');
+        const allDocs = await getDocs(collection(db, PASSAGES_COLLECTION));
+        allDocs.forEach(doc => {
+          console.log(`  - ID: ${doc.id}, Title: ${doc.data().title || 'No title'}`);
+        });
+        
+        return null;
+      }
+    } catch (error) {
+      console.error('❌ passageService.getPassageById - Error getting passage by ID:', error);
+      return null;
+    }
+  },
+
 };
 
 

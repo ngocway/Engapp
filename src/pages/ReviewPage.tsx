@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Passage, Vocabulary } from '../types';
 import { progressService } from '../firebase/progressService';
-import { topicService } from '../firebase/topicService';
+import { passageService } from '../firebase/passageService';
 import { vocabularyService } from '../firebase/vocabularyService';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -22,22 +22,67 @@ const ReviewPage: React.FC = () => {
     }
   }, [user, navigate]);
 
+  // Refresh data when page becomes visible again
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        loadUserProgress();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [user]);
+
   const loadUserProgress = async () => {
     setLoading(true);
     try {
+      console.log('🔄 Loading user progress for user:', user?.uid);
+      console.log('🔍 Current user object:', user);
+      console.log('🔍 User UID type:', typeof user?.uid);
+      console.log('🔍 User UID length:', user?.uid?.length);
+      
       const progress = await progressService.getUserProgress(user!.uid);
+      console.log('📊 User progress:', progress);
+      console.log('🔍 Progress type:', typeof progress);
+      console.log('🔍 Progress keys:', progress ? Object.keys(progress) : 'null');
+      
       if (progress) {
         // Load completed passages
+        console.log('📚 Completed passages IDs:', progress.completedPassages);
+        
         if (progress.completedPassages && progress.completedPassages.length > 0) {
           const passages: Passage[] = [];
+          
+          // Get all available passages to find matches
+          const allPassages = await passageService.getAll();
+          console.log('📖 All available passages:', allPassages.map(p => ({ id: p.id, title: p.title })));
+          
           for (const passageId of progress.completedPassages) {
-            const passage = await topicService.getPassageById(passageId);
+            console.log('🔍 Looking for passage with ID:', passageId);
+            console.log('🔍 Passage ID type:', typeof passageId);
+            console.log('🔍 Passage ID length:', passageId?.length);
+            
+            // Only use Document ID - this is the standard approach
+            const passage = await passageService.getPassageById(passageId);
+            
             if (passage) {
+              console.log('✅ Found passage by Document ID:', passage.title);
               passages.push(passage);
+            } else {
+              console.log('❌ Passage not found for Document ID:', passageId, 'Skipping...');
+              console.log('⚠️ This passage ID may be invalid or the passage was deleted');
             }
           }
+          
+          console.log('✅ All passages loaded:', passages.length, 'passages');
+          console.log('📝 Setting completedPassages state to:', passages.map(p => p.title));
           setCompletedPassages(passages);
+          console.log('🎯 State update completed');
         } else {
+          console.log('📝 No completed passages found');
           setCompletedPassages([]);
         }
 
@@ -49,9 +94,15 @@ const ReviewPage: React.FC = () => {
         } else {
           setLearnedWords([]);
         }
+      } else {
+        console.log('❌ No progress found for user');
+        setCompletedPassages([]);
+        setLearnedWords([]);
       }
     } catch (error) {
-      console.error('Error loading user progress for review:', error);
+      console.error('❌ Error loading user progress for review:', error);
+      setCompletedPassages([]);
+      setLearnedWords([]);
     } finally {
       setLoading(false);
     }
@@ -71,6 +122,12 @@ const ReviewPage: React.FC = () => {
       </div>
     );
   }
+
+  // Debug render
+  console.log('🎨 RENDERING ReviewPage:');
+  console.log('🎨 - completedPassages.length:', completedPassages.length);
+  console.log('🎨 - completedPassages:', completedPassages.map(p => p.title));
+  console.log('🎨 - loading:', loading);
 
   return (
         <div className="topics-section">
