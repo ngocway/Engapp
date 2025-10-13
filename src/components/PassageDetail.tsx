@@ -70,6 +70,7 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     }
   }, [activeTab, passage.id]);
 
+
   // Load topic name
   useEffect(() => {
     const loadTopicName = async () => {

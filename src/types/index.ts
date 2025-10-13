@@ -9,6 +9,8 @@ export interface Vocabulary {
   image?: string; // for backward compatibility
   example?: string; // for backward compatibility
   examples?: string[]; // new field for multiple examples
+  partOfSpeech?: string; // e.g., "noun", "verb"
+  definitionEn?: string; // English definition
   category?: string;
   level?: number;
   learned?: boolean;

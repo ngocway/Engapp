@@ -19,6 +19,28 @@ export const vocabularyService = {
     }
   },
 
+  // Lấy từ vựng theo từ
+  async getVocabularyByWord(word: string): Promise<Vocabulary | null> {
+    try {
+      const querySnapshot = await getDocs(collection(db, VOCABULARY_COLLECTION));
+      const vocab = querySnapshot.docs.find(doc => {
+        const data = doc.data();
+        return data.word?.toLowerCase() === word.toLowerCase();
+      });
+      
+      if (vocab) {
+        return {
+          id: vocab.id,
+          ...vocab.data()
+        } as Vocabulary;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error getting vocabulary by word:', error);
+      return null;
+    }
+  },
+
   // Thêm từ vựng mới
   async addVocabulary(vocabulary: Omit<Vocabulary, 'id'>): Promise<string | null> {
     try {
@@ -52,6 +74,7 @@ export const vocabularyService = {
     }
   }
 };
+
 
 
 

@@ -27,10 +27,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
 
   const loadVocab = () => {
     setLoading(true);
-    console.log('Looking for term:', term);
-    console.log('Available passage vocab:', passageVocab);
     const found = passageVocab.find(v => v.term.toLowerCase() === term.toLowerCase());
-    console.log('Found vocab:', found);
     setVocab(found || null);
     setLoading(false);
   };
@@ -163,47 +160,98 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
             display: 'block',
             textAlign: 'left'
           }}>
-            {/* Hiển thị pronunciation với ưu tiên US, nếu không có thì hiển thị UK */}
-            {(vocab.phonetics?.us || vocab.phonetics?.uk) && (
-              <div style={{ 
-                display: 'inline-block',
-                textAlign: 'left'
+            {/* Nút play audio - ưu tiên audio đã upload, fallback về Web Speech API */}
+            <div style={{ 
+              display: 'inline-block',
+              textAlign: 'left',
+              marginBottom: '8px'
+            }}>
+              <button 
+                onClick={() => {
+                  // Ưu tiên phát audio đã upload nếu có (URL hoặc Base64)
+                  if (vocab.audio && (vocab.audio.startsWith('data:audio/') || vocab.audio.startsWith('http'))) {
+                    console.log('🔊 Playing uploaded audio for:', vocab.term);
+                    const audio = new Audio(vocab.audio);
+                    audio.play().catch(error => {
+                      console.error('❌ Error playing uploaded audio:', error);
+                      // Fallback về Web Speech API nếu audio không phát được
+                      console.log('🔄 Fallback to Web Speech API');
+                      speak(vocab.term, vocab.phonetics?.us ? 'us' : 'uk');
+                    });
+                  } else {
+                    // Fallback về Web Speech API nếu không có audio upload
+                    console.log('🔊 Using Web Speech API for:', vocab.term);
+                    speak(vocab.term, vocab.phonetics?.us ? 'us' : 'uk');
+                  }
+                }}
+                style={{ 
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '32px',
+                  height: '32px',
+                  border: '2px solid #1976d2',
+                  borderRadius: '50%',
+                  background: 'white',
+                  cursor: 'pointer',
+                  padding: 0,
+                  color: '#1976d2',
+                  marginRight: '8px',
+                  verticalAlign: 'middle',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'scale(1.1)';
+                  e.currentTarget.style.background = '#1976d2';
+                  e.currentTarget.style.color = 'white';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.background = 'white';
+                  e.currentTarget.style.color = '#1976d2';
+                }}
+                title={vocab.audio && (vocab.audio.startsWith('data:audio/') || vocab.audio.startsWith('http')) ? 'Phát audio đã upload' : 'Phát âm với Web Speech API'}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+              </button>
+              <span style={{ 
+                color: '#1976d2', 
+                fontSize: '14px',
+                fontWeight: '500',
+                verticalAlign: 'middle'
               }}>
-                <button 
-                  onClick={() => speak(vocab.term, vocab.phonetics?.us ? 'us' : 'uk')} 
-                  style={{ 
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: '24px',
-                    height: '24px',
-                    border: 'none',
-                    background: 'transparent',
-                    cursor: 'pointer',
-                    padding: 0,
-                    color: '#1976d2',
-                    marginRight: '8px',
-                    verticalAlign: 'middle'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'scale(1.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                  </svg>
-                </button>
+                🔊 Nghe phát âm
+              </span>
+            </div>
+            
+            {/* Hiển thị pronunciation với ưu tiên US, nếu không có thì hiển thị UK */}
+            {(vocab.phonetics?.us || vocab.phonetics?.uk || vocab.pronunciation) && (
+              <div style={{ 
+                display: 'block',
+                textAlign: 'left',
+                marginTop: '4px'
+              }}>
                 <span style={{ 
-                  color: 'black', 
+                  color: '#666', 
                   fontStyle: 'italic',
                   fontFamily: 'monospace',
-                  fontSize: '14px',
-                  verticalAlign: 'middle'
+                  fontSize: '16px',
+                  fontWeight: '500'
                 }}>
-                  {vocab.phonetics?.us || vocab.phonetics?.uk}
+                  {(() => {
+                    // Lấy pronunciation text
+                    const pronunciationText = vocab.phonetics?.us || vocab.phonetics?.uk || vocab.pronunciation;
+                    
+                    if (!pronunciationText) return '';
+                    
+                    // Loại bỏ dấu / ở đầu và cuối nếu có
+                    let cleanText = pronunciationText.replace(/^\/+|\/+$/g, '');
+                    
+                    // Thêm dấu / ở đầu và cuối
+                    return `/${cleanText}/`;
+                  })()}
                 </span>
               </div>
             )}

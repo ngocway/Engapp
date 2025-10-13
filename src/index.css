@@ -186,6 +186,8 @@ body {
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: modalSlideIn 0.3s ease-out;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes modalSlideIn {
@@ -206,6 +208,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0; /* Prevent header from shrinking */
 }
 
 .modal-header h2 {
@@ -237,6 +240,12 @@ body {
   padding: 30px;
   max-height: calc(90vh - 80px);
   overflow-y: auto;
+}
+
+.modal-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
 }
 
 .form-group {
