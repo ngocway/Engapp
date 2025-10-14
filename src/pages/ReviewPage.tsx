@@ -303,6 +303,73 @@ const ReviewPage: React.FC = () => {
               </div>
             ) : (
               <div className="vocabulary-tab">
+                {/* Practice Button */}
+                {learnedWords.length > 0 && (
+                  <div style={{ 
+                    marginBottom: '24px', 
+                    display: 'flex', 
+                    justifyContent: 'center',
+                    gap: '16px'
+                  }}>
+                    <button 
+                      className="practice-vocab-button"
+                      onClick={() => {
+                        // Start practice with all learned words
+                        if (learnedWords.length > 0) {
+                          // Create practice session with all learned words
+                          const practiceVocab: PassageVocab[] = learnedWords.map(vocab => ({
+                            term: vocab.word,
+                            meaning: vocab.meaning || '',
+                            definitionEn: vocab.definitionEn || '',
+                            pronunciation: vocab.pronunciation || '',
+                            partOfSpeech: vocab.partOfSpeech || '',
+                            image: vocab.image || '',
+                            audio: '', // Vocabulary type doesn't have audio property
+                            examples: vocab.examples || [],
+                            phonetics: {
+                              us: vocab.pronunciation || '',
+                              uk: vocab.pronunciation || ''
+                            }
+                          }));
+                          
+                          setPassageVocab(practiceVocab);
+                          setSelectedVocabTerm(practiceVocab[0]?.term || '');
+                          setFlashcardPosition(undefined); // Center the flashcard
+                          setShowVocabFlashcard(true);
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#3b82f6',
+                        color: 'white',
+                        border: 'none',
+                        padding: '12px 24px',
+                        borderRadius: '8px',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#2563eb';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = '#3b82f6';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                      }}
+                    >
+                      <span>🎯</span>
+                      <span>Ôn tập từ vựng ({learnedWords.length} từ)</span>
+                    </button>
+                  </div>
+                )}
+                
                 {learnedWords.length === 0 ? (
                   <div className="empty-state-topics">
                     <div className="empty-icon">🎓</div>
@@ -406,6 +473,7 @@ const ReviewPage: React.FC = () => {
             passageVocab={passageVocab}
             onClose={handleCloseFlashcard}
             position={flashcardPosition}
+            isPracticeMode={passageVocab.length > 1}
           />
         )}
       </div>

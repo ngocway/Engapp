@@ -8,11 +8,14 @@ interface VocabFlashcardProps {
   passageVocab: PassageVocab[];
   onClose: () => void;
   position?: { x: number; y: number };
+  isPracticeMode?: boolean;
 }
 
-const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onClose, position }) => {
+const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onClose, position, isPracticeMode = false }) => {
   const [vocab, setVocab] = useState<PassageVocab | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [completedWords, setCompletedWords] = useState<string[]>([]);
   const { user } = useAuth();
 
   // Helper function to capitalize first letter
@@ -23,12 +26,21 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
 
   useEffect(() => {
     loadVocab();
-  }, [term, passageVocab]);
+  }, [term, passageVocab, currentIndex]);
 
   const loadVocab = () => {
     setLoading(true);
-    const found = passageVocab.find(v => v.term.toLowerCase() === term.toLowerCase());
-    setVocab(found || null);
+    
+    if (isPracticeMode && passageVocab.length > 0) {
+      // In practice mode, use currentIndex to get the current word
+      const currentWord = passageVocab[currentIndex];
+      setVocab(currentWord || null);
+    } else {
+      // Normal mode: find by term
+      const found = passageVocab.find(v => v.term.toLowerCase() === term.toLowerCase());
+      setVocab(found || null);
+    }
+    
     setLoading(false);
   };
 
@@ -51,7 +63,33 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
   const setDifficulty = async (level: VocabDifficulty) => {
     if (vocab && user) {
       await userVocabService.setDifficulty(user.uid, vocab.term, level);
-      onClose();
+      
+      if (isPracticeMode) {
+        // Add to completed words
+        setCompletedWords(prev => [...prev, vocab.term]);
+        
+        // Move to next word or finish practice
+        if (currentIndex < passageVocab.length - 1) {
+          setCurrentIndex(prev => prev + 1);
+        } else {
+          // Practice finished
+          onClose();
+        }
+      } else {
+        onClose();
+      }
+    }
+  };
+
+  const goToNextWord = () => {
+    if (currentIndex < passageVocab.length - 1) {
+      setCurrentIndex(prev => prev + 1);
+    }
+  };
+
+  const goToPreviousWord = () => {
+    if (currentIndex > 0) {
+      setCurrentIndex(prev => prev - 1);
     }
   };
 
@@ -139,8 +177,105 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         padding: 12,
         zIndex: 2000
       }}
-      onMouseLeave={onClose}
+      onMouseLeave={!isPracticeMode ? onClose : undefined}
     >
+      {/* Practice Mode Header */}
+      {isPracticeMode && (
+        <div style={{ 
+          marginBottom: '16px', 
+          padding: '12px', 
+          backgroundColor: '#f8f9fa', 
+          borderRadius: '8px',
+          border: '1px solid #e9ecef'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            marginBottom: '8px'
+          }}>
+            <div style={{ fontSize: '14px', fontWeight: '600', color: '#495057' }}>
+              🎯 Ôn tập từ vựng
+            </div>
+            <div style={{ fontSize: '14px', color: '#6c757d' }}>
+              {currentIndex + 1} / {passageVocab.length}
+            </div>
+          </div>
+          
+          {/* Progress Bar */}
+          <div style={{ 
+            width: '100%', 
+            height: '6px', 
+            backgroundColor: '#e9ecef', 
+            borderRadius: '3px',
+            overflow: 'hidden'
+          }}>
+            <div style={{ 
+              width: `${((currentIndex + 1) / passageVocab.length) * 100}%`, 
+              height: '100%', 
+              backgroundColor: '#3b82f6',
+              transition: 'width 0.3s ease'
+            }} />
+          </div>
+          
+          {/* Navigation Buttons */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            marginTop: '8px',
+            gap: '8px'
+          }}>
+            <button
+              onClick={goToPreviousWord}
+              disabled={currentIndex === 0}
+              style={{
+                padding: '4px 8px',
+                fontSize: '12px',
+                backgroundColor: currentIndex === 0 ? '#e9ecef' : '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: currentIndex === 0 ? 'not-allowed' : 'pointer',
+                opacity: currentIndex === 0 ? 0.5 : 1
+              }}
+            >
+              ← Trước
+            </button>
+            
+            <button
+              onClick={onClose}
+              style={{
+                padding: '4px 8px',
+                fontSize: '12px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer'
+              }}
+            >
+              Kết thúc
+            </button>
+            
+            <button
+              onClick={goToNextWord}
+              disabled={currentIndex === passageVocab.length - 1}
+              style={{
+                padding: '4px 8px',
+                fontSize: '12px',
+                backgroundColor: currentIndex === passageVocab.length - 1 ? '#e9ecef' : '#6c757d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: currentIndex === passageVocab.length - 1 ? 'not-allowed' : 'pointer',
+                opacity: currentIndex === passageVocab.length - 1 ? 0.5 : 1
+              }}
+            >
+              Sau →
+            </button>
+          </div>
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr', gap: 16, alignItems: 'start' }}>
         <div>
           <img 
@@ -308,9 +443,39 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
       <div style={{ display: 'flex', gap: 8, marginTop: 16, justifyContent: 'center' }}>
         {user ? (
           <>
-            <button className="button" onClick={() => setDifficulty('easy')} style={{ background: '#55efc4', padding: '8px 12px' }}>Easy</button>
-            <button className="button" onClick={() => setDifficulty('normal')} style={{ background: '#74b9ff', padding: '8px 12px' }}>Normal</button>
-            <button className="button" onClick={() => setDifficulty('hard')} style={{ background: '#ff7675', padding: '8px 12px' }}>Hard</button>
+            <button 
+              className="button" 
+              onClick={() => setDifficulty('easy')} 
+              style={{ 
+                background: '#55efc4', 
+                padding: '8px 12px',
+                fontSize: isPracticeMode ? '14px' : 'inherit'
+              }}
+            >
+              {isPracticeMode ? '🟢 Easy' : 'Easy'}
+            </button>
+            <button 
+              className="button" 
+              onClick={() => setDifficulty('normal')} 
+              style={{ 
+                background: '#74b9ff', 
+                padding: '8px 12px',
+                fontSize: isPracticeMode ? '14px' : 'inherit'
+              }}
+            >
+              {isPracticeMode ? '🟡 Normal' : 'Normal'}
+            </button>
+            <button 
+              className="button" 
+              onClick={() => setDifficulty('hard')} 
+              style={{ 
+                background: '#ff7675', 
+                padding: '8px 12px',
+                fontSize: isPracticeMode ? '14px' : 'inherit'
+              }}
+            >
+              {isPracticeMode ? '🔴 Hard' : 'Hard'}
+            </button>
           </>
         ) : (
           <div style={{ textAlign: 'left', color: 'black', fontSize: '0.9rem' }}>
