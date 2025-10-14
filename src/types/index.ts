@@ -36,7 +36,9 @@ export interface Passage {
   excerpt?: string; // short description
   thumbnail?: string; // image thumbnail
   audioUrl?: string; // audio file URL
-  level: number;
+  level: number; // for backward compatibility
+  englishLevel?: EnglishLevel; // new field for English proficiency level (backward compatibility)
+  englishLevels?: EnglishLevel[]; // array of English proficiency levels
   topicId: string;
   topicSlug?: string; // for backward compatibility
   createdAt?: number;
@@ -92,3 +94,5 @@ export interface UserProgress {
 }
 
 export type GameMode = 'vocabulary' | 'sentence' | 'main' | 'topicSelect' | 'passageList';
+
+export type EnglishLevel = 'kids-2-4' | 'kids-5-10' | 'basic' | 'independent' | 'proficient';

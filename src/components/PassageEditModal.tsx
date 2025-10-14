@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Passage } from '../types';
+import { Passage, EnglishLevel } from '../types';
 import { passageService } from '../firebase/passageService';
 import { vocabService } from '../firebase/vocabService';
+import { settingsService, EnglishLevelOption } from '../firebase/settingsService';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage } from '../firebase/config';
 
@@ -26,6 +27,9 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     thumbnail: '',
     audioUrl: ''
   });
+  const [selectedEnglishLevels, setSelectedEnglishLevels] = useState<EnglishLevel[]>(['basic']);
+  const [englishLevelOptions, setEnglishLevelOptions] = useState<EnglishLevelOption[]>([]);
+  const [levelsLoading, setLevelsLoading] = useState(true);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [selectedAudioFile, setSelectedAudioFile] = useState<File | null>(null);
@@ -45,6 +49,26 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     wordsToKeep: []
   });
 
+  // Load English Levels
+  useEffect(() => {
+    const loadEnglishLevels = async () => {
+      try {
+        setLevelsLoading(true);
+        await settingsService.initializeDefaultSettings();
+        const levels = await settingsService.getEnglishLevels();
+        setEnglishLevelOptions(levels);
+      } catch (error) {
+        console.error('Error loading English levels:', error);
+      } finally {
+        setLevelsLoading(false);
+      }
+    };
+
+    if (isOpen) {
+      loadEnglishLevels();
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (passage) {
       console.log('🔍 PassageEditModal - Loading passage data:', passage);
@@ -62,6 +86,15 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       setPreviewUrl(passage.thumbnail || '');
       setAudioPreviewUrl(passage.audioUrl || '');
       
+      // Set English Levels
+      if (passage.englishLevels && passage.englishLevels.length > 0) {
+        setSelectedEnglishLevels(passage.englishLevels);
+      } else if (passage.englishLevel) {
+        setSelectedEnglishLevels([passage.englishLevel]);
+      } else {
+        setSelectedEnglishLevels(['basic']);
+      }
+      
     } else {
       setFormData({
         title: '',
@@ -73,6 +106,7 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       });
       setPreviewUrl('');
       setAudioPreviewUrl('');
+      setSelectedEnglishLevels(['basic']);
     }
     setSelectedFile(null);
     setSelectedAudioFile(null);
@@ -209,6 +243,19 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     };
   };
 
+  // English Level handlers
+  const handleFormLevelChange = (level: EnglishLevel, checked: boolean) => {
+    if (checked) {
+      setSelectedEnglishLevels(prev => [...prev, level]);
+    } else {
+      setSelectedEnglishLevels(prev => prev.filter(l => l !== level));
+    }
+  };
+
+  const clearFormLevels = () => {
+    setSelectedEnglishLevels([]);
+  };
+
   // Function to check for new vocabulary words
   const handleCheckVocabulary = async () => {
     if (!formData.text.trim()) {
@@ -305,9 +352,16 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     e.preventDefault();
     if (!passage) return;
 
+    // Validate English Levels
+    if (selectedEnglishLevels.length === 0) {
+      alert('Vui lòng chọn ít nhất một English Level!');
+      return;
+    }
+
     console.log('🔄 Starting passage update...');
     console.log('📝 Passage ID:', passage.id);
     console.log('📝 Form data:', formData);
+    console.log('📝 Selected English Levels:', selectedEnglishLevels);
 
     setLoading(true);
     try {
@@ -352,6 +406,8 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
         thumbnail: thumbnailUrl,
         audioUrl: audioUrl,
         level: passage.level,
+        englishLevel: selectedEnglishLevels[0] || 'basic', // Use first selected level for backward compatibility
+        englishLevels: selectedEnglishLevels, // Save all selected levels
         topicId: passage.topicId || '' // Fallback to empty string if undefined
       };
 
@@ -533,6 +589,57 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
               <option value="daily-activities">🏠 Hoạt động hàng ngày</option>
               <option value="travel">✈️ Du lịch</option>
             </select>
+          </div>
+
+          <div className="form-group">
+            <label>English Level:</label>
+            <div className="form-level-checkboxes">
+              {levelsLoading ? (
+                <p>Đang tải levels...</p>
+              ) : englishLevelOptions.length === 0 ? (
+                <p>Không có level nào được tìm thấy.</p>
+              ) : (
+                <>
+                  <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+                    Đã tải {englishLevelOptions.length} levels. Đã chọn: {selectedEnglishLevels.length}
+                  </p>
+                  <div className="checkbox-list">
+                    {englishLevelOptions.map((level) => (
+                      <label 
+                        key={level.id} 
+                        className={`form-level-checkbox-inline ${selectedEnglishLevels.includes(level.key as EnglishLevel) ? 'selected' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedEnglishLevels.includes(level.key as EnglishLevel)}
+                          onChange={(e) => handleFormLevelChange(level.key as EnglishLevel, e.target.checked)}
+                        />
+                        <span className="checkbox-label">{level.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="form-level-actions">
+                    <button 
+                      type="button" 
+                      className="form-level-btn"
+                      onClick={() => {
+                        const allLevels = englishLevelOptions.map(level => level.key as EnglishLevel);
+                        setSelectedEnglishLevels(allLevels);
+                      }}
+                    >
+                      Chọn tất cả
+                    </button>
+                    <button 
+                      type="button" 
+                      className="form-level-btn"
+                      onClick={clearFormLevels}
+                    >
+                      Bỏ chọn
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="form-group">

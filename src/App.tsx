@@ -12,25 +12,28 @@ import PassageDetail from './pages/PassageDetail';
 import MyVocab from './pages/MyVocab';
 import ReviewPageWrapper from './pages/ReviewPageWrapper';
 import { AuthProvider } from './contexts/AuthContext';
+import { AdminProvider } from './contexts/AdminContext';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/panel" element={<AdminPanel />} />
-          <Route path="/admin/questions" element={<AdminQuestionsPage />} />
-          <Route path="/admin/questions/:passageId" element={<AdminQuestionsPage />} />
-          <Route path="/admin/vocabulary/:passageId" element={<AdminVocabularyPage />} />
-          <Route path="/topics" element={<TopicSelect />} />
-          <Route path="/topics/:topicSlug" element={<PassageList />} />
-          <Route path="/passage/:passageId" element={<PassageDetail />} />
-          <Route path="/my-vocab" element={<MyVocab />} />
-          <Route path="/review" element={<ReviewPageWrapper />} />
-        </Routes>
-      </Router>
+      <AdminProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/panel" element={<AdminPanel />} />
+            <Route path="/admin/questions" element={<AdminQuestionsPage />} />
+            <Route path="/admin/questions/:passageId" element={<AdminQuestionsPage />} />
+            <Route path="/admin/vocabulary/:passageId" element={<AdminVocabularyPage />} />
+            <Route path="/topics" element={<TopicSelect />} />
+            <Route path="/topics/:topicSlug" element={<PassageList />} />
+            <Route path="/passage/:passageId" element={<PassageDetail />} />
+            <Route path="/my-vocab" element={<MyVocab />} />
+            <Route path="/review" element={<ReviewPageWrapper />} />
+          </Routes>
+        </Router>
+      </AdminProvider>
     </AuthProvider>
   );
 }

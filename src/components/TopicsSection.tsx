@@ -2,17 +2,73 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { topicService } from '../firebase/topicService';
 import { passageService } from '../firebase/passageService';
-import { Topic, Passage } from '../types';
+import { userSettingsService } from '../firebase/userSettingsService';
+import { Topic, Passage, EnglishLevel } from '../types';
+import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 
 const TopicsSection: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isAdminLoggedIn } = useAdmin();
   const [topics, setTopics] = useState<Topic[]>([]);
   const [passagesByTopic, setPassagesByTopic] = useState<Record<string, Passage[]>>({});
+  const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     loadTopics();
+    loadUserSettings();
   }, []);
+
+  // Load user settings to get English level
+  const loadUserSettings = async () => {
+    if (user) {
+      try {
+        const settings = await userSettingsService.getUserSettings(user.uid);
+        if (settings) {
+          setUserEnglishLevel(settings.englishLevel);
+          console.log('📚 User English Level:', settings.englishLevel);
+        }
+      } catch (error) {
+        console.error('Error loading user settings:', error);
+      }
+    }
+  };
+
+  // Filter passages based on user's English level
+  const filterPassagesByLevel = (passages: Passage[]): Passage[] => {
+    // Admin sees all passages without filtering
+    if (isAdminLoggedIn) {
+      console.log('🔧 Admin mode: Showing all passages without filtering');
+      return passages;
+    }
+    
+    // Regular users get filtered by their English level
+    if (!user) return passages; // Show all if not logged in
+    
+    return passages.filter(passage => {
+      // Check if passage has multiple English levels
+      if (passage.englishLevels && passage.englishLevels.length > 0) {
+        return passage.englishLevels.includes(userEnglishLevel);
+      }
+      
+      // Fallback to single English level
+      if (passage.englishLevel) {
+        return passage.englishLevel === userEnglishLevel;
+      }
+      
+      // Fallback to old level system (convert to English level)
+      const levelMapping: Record<number, EnglishLevel> = {
+        1: 'basic',
+        2: 'independent', 
+        3: 'independent',
+        4: 'proficient'
+      };
+      const mappedLevel = levelMapping[passage.level] || 'basic';
+      return mappedLevel === userEnglishLevel;
+    });
+  };
 
   const loadTopics = async () => {
     try {
@@ -44,7 +100,8 @@ const TopicsSection: React.FC = () => {
         if (topic.slug) {
           try {
             const passages = await passageService.getByTopicSlug(topic.slug);
-            passagesMap[topic.slug] = passages.slice(0, 4); // Chỉ lấy 4 passages đầu tiên
+            const filteredPassages = filterPassagesByLevel(passages);
+            passagesMap[topic.slug] = filteredPassages.slice(0, 4); // Chỉ lấy 4 passages đầu tiên
             
             // Update loading state for this topic
             setPassagesLoading(prev => ({
@@ -79,7 +136,18 @@ const TopicsSection: React.FC = () => {
     }
   };
 
-  const getDifficultyColor = (level: number) => {
+  const getEnglishLevelColor = (englishLevel?: EnglishLevel, level?: number) => {
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return '#ff6b9d'; // Pink for kids 2-4
+        case 'kids-5-10': return '#4ecdc4'; // Teal for kids 5-10
+        case 'basic': return '#10b981'; // Green for basic
+        case 'independent': return '#3b82f6'; // Blue for independent
+        case 'proficient': return '#ef4444'; // Red for proficient
+        default: return '#6b7280'; // Gray
+      }
+    }
+    // Fallback to old level system
     switch (level) {
       case 1: return '#10b981'; // Green for A1
       case 2: return '#3b82f6'; // Blue for A2
@@ -89,7 +157,36 @@ const TopicsSection: React.FC = () => {
     }
   };
 
-  const getDifficultyText = (level: number) => {
+  const getEnglishLevelText = (englishLevels?: EnglishLevel[], englishLevel?: EnglishLevel, level?: number) => {
+    if (englishLevels && englishLevels.length > 0) {
+      // Show multiple levels
+      if (englishLevels.length === 1) {
+        switch (englishLevels[0]) {
+          case 'kids-2-4': return '👶 Kids 2-4';
+          case 'kids-5-10': return '🧒 Kids 5-10';
+          case 'basic': return '🌱 Basic';
+          case 'independent': return '🌿 Independent';
+          case 'proficient': return '🌳 Proficient';
+          default: return 'Basic';
+        }
+      } else {
+        return `📚 ${englishLevels.length} Levels`;
+      }
+    }
+    
+    // Fallback to single level
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return '👶 Kids 2-4';
+        case 'kids-5-10': return '🧒 Kids 5-10';
+        case 'basic': return '🌱 Basic';
+        case 'independent': return '🌿 Independent';
+        case 'proficient': return '🌳 Proficient';
+        default: return 'Basic';
+      }
+    }
+    
+    // Fallback to old level system
     switch (level) {
       case 1: return 'A1';
       case 2: return 'A2';
@@ -101,6 +198,16 @@ const TopicsSection: React.FC = () => {
 
   return (
     <div className="topics-section">
+      {/* User Level Indicator - Only show for regular users, not admin */}
+      {user && !isAdminLoggedIn && (
+        <div className="user-level-indicator">
+          <span className="level-label">Trình độ hiện tại:</span>
+          <span className="level-badge" style={{ backgroundColor: getEnglishLevelColor(userEnglishLevel) }}>
+            {getEnglishLevelText([userEnglishLevel], userEnglishLevel, 1)}
+          </span>
+        </div>
+      )}
+      
       {topics.length === 0 ? (
         <div className="topics-loading">
           <div className="loading-spinner"></div>
@@ -157,15 +264,14 @@ const TopicsSection: React.FC = () => {
                     
                     <div className="passage-info">
                       <div className="passage-meta">
-                        <span className="view-count">{Math.floor(Math.random() * 10000) + 1000}</span>
-                        <span 
-                          className="difficulty-badge"
-                          style={{ backgroundColor: getDifficultyColor(passage.level || 1) }}
-                        >
-                          {getDifficultyText(passage.level || 1)}
-                        </span>
-                        <span className="source">Youtube</span>
-                        <span className="duration">•{Math.floor(Math.random() * 3) + 1}:{Math.floor(Math.random() * 60).toString().padStart(2, '0')} phút</span>
+                        <span className="view-count">{passage.vocab?.length || 0} từ vựng</span>
+           <span 
+             className="difficulty-badge"
+             style={{ backgroundColor: getEnglishLevelColor(passage.englishLevels?.[0] || passage.englishLevel, passage.level || 1) }}
+           >
+             {getEnglishLevelText(passage.englishLevels || undefined, passage.englishLevel, passage.level || 1)}
+           </span>
+                        <span className="source">Từ vựng</span>
                       </div>
                       
                       <h3 className="passage-title">{passage.title}</h3>

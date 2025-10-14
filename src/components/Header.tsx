@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import UserSettingsModal from './UserSettingsModal';
 
 type TabType = 'topics' | 'review';
 
@@ -12,6 +13,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
   const navigate = useNavigate();
   const { user, login, logout } = useAuth();
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   return (
     <header className="modern-header">
@@ -46,7 +48,11 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
         <div className="header-user">
           {user ? (
             <div className="user-info">
-              <div className="user-avatar">
+              <div 
+                className="user-avatar clickable-avatar"
+                onClick={() => setShowSettingsModal(true)}
+                title="Click để mở cài đặt"
+              >
                 {user.photoURL ? (
                   <img src={user.photoURL} alt="Avatar" />
                 ) : (
@@ -55,7 +61,11 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
                   </div>
                 )}
               </div>
-              <span className="user-name">
+              <span 
+                className="user-name clickable-name"
+                onClick={() => setShowSettingsModal(true)}
+                title="Click để mở cài đặt"
+              >
                 {user.displayName || user.email}
               </span>
               <button 
@@ -75,6 +85,12 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
           )}
         </div>
       </div>
+      
+      {/* User Settings Modal */}
+      <UserSettingsModal 
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+      />
     </header>
   );
 };

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Passage, Topic } from '../types';
+import { Passage, Topic, EnglishLevel } from '../types';
 import { passageService } from '../firebase/passageService';
 import { topicService } from '../firebase/topicService';
+import { settingsService, EnglishLevelOption } from '../firebase/settingsService';
 
 interface AdminPassageManagerProps {
   onClose: () => void;
@@ -12,8 +13,26 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState<string>('');
+  const [selectedLevels, setSelectedLevels] = useState<EnglishLevel[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingPassage, setEditingPassage] = useState<Passage | null>(null);
+  const [englishLevelOptions, setEnglishLevelOptions] = useState<EnglishLevelOption[]>([]);
+  const [levelsLoading, setLevelsLoading] = useState(true);
+
+  // Helper function to display English Level
+  const getEnglishLevelDisplay = (englishLevel?: EnglishLevel, level?: number): string => {
+    if (englishLevel) {
+      const levelMap = {
+        'kids-2-4': '👶 Kids 2-4',
+        'kids-5-10': '🧒 Kids 5-10',
+        'basic': '🌱 Basic',
+        'independent': '🌿 Independent',
+        'proficient': '🌳 Proficient'
+      };
+      return levelMap[englishLevel] || englishLevel;
+    }
+    return 'A' + (level || 1);
+  };
 
   // Form states
   const [formData, setFormData] = useState({
@@ -22,15 +41,36 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
     topicId: '',
     topicSlug: '',
     level: 1,
+    englishLevel: 'basic' as EnglishLevel,
     audioUrl: '',
     thumbnail: '',
     youtubeUrl: '',
     vocab: [] as any[]
   });
+  
+  // Selected English Levels for form
+  const [selectedEnglishLevels, setSelectedEnglishLevels] = useState<EnglishLevel[]>(['basic']);
 
   useEffect(() => {
     loadData();
+    loadEnglishLevels();
   }, []);
+
+  const loadEnglishLevels = async () => {
+    try {
+      setLevelsLoading(true);
+      // Initialize default settings if needed
+      await settingsService.initializeDefaultSettings();
+      
+      // Load English levels
+      const levels = await settingsService.getEnglishLevels();
+      setEnglishLevelOptions(levels);
+    } catch (error) {
+      console.error('Error loading English levels:', error);
+    } finally {
+      setLevelsLoading(false);
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -49,9 +89,17 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
     }
   };
 
-  const filteredPassages = selectedTopic 
-    ? passages.filter(p => p.topicSlug === selectedTopic)
-    : passages;
+  const filteredPassages = passages.filter(passage => {
+    // Filter by topic
+    const matchesTopic = !selectedTopic || passage.topicSlug === selectedTopic;
+    
+    // Filter by English Level
+    const matchesLevel = selectedLevels.length === 0 || 
+      (passage.englishLevel && selectedLevels.includes(passage.englishLevel)) ||
+      (!passage.englishLevel && selectedLevels.includes('basic')); // fallback for old passages
+    
+    return matchesTopic && matchesLevel;
+  });
 
   const handleAddPassage = () => {
     setFormData({
@@ -60,11 +108,13 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       topicId: '',
       topicSlug: selectedTopic || '',
       level: 1,
+      englishLevel: 'basic' as EnglishLevel,
       audioUrl: '',
       thumbnail: '',
       youtubeUrl: '',
       vocab: []
     });
+    setSelectedEnglishLevels(['basic']);
     setEditingPassage(null);
     setShowAddForm(true);
   };
@@ -76,11 +126,13 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       topicId: passage.topicId,
       topicSlug: passage.topicSlug || '',
       level: passage.level,
+      englishLevel: passage.englishLevel || 'basic',
       audioUrl: passage.audioUrl || '',
       thumbnail: passage.thumbnail || '',
       youtubeUrl: '',
       vocab: passage.vocab || []
     });
+    setSelectedEnglishLevels(passage.englishLevel ? [passage.englishLevel] : ['basic']);
     setEditingPassage(passage);
     setShowAddForm(true);
   };
@@ -147,25 +199,39 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate that at least one English level is selected
+    if (selectedEnglishLevels.length === 0) {
+      alert('Vui lòng chọn ít nhất một English Level!');
+      return;
+    }
+    
     try {
+      // Use the first selected level as primary level (for backward compatibility)
+      const primaryLevel = selectedEnglishLevels[0];
+      const passageData = {
+        ...formData,
+        englishLevel: primaryLevel
+      };
+      
       if (editingPassage) {
         // Update existing passage
-        await passageService.update(editingPassage.id, formData);
+        await passageService.update(editingPassage.id, passageData);
         // Auto-process vocabulary from text
         await processVocabularyFromText(editingPassage.id, formData.text);
         
         setPassages(passages.map(p => 
-          p.id === editingPassage.id ? { ...p, ...formData } : p
+          p.id === editingPassage.id ? { ...p, ...passageData } : p
         ));
         alert('Đã cập nhật bài học thành công!');
       } else {
         // Add new passage
-        const newPassage = await passageService.add(formData);
+        const newPassage = await passageService.add(passageData);
         if (newPassage) {
           // Auto-process vocabulary from text
           await processVocabularyFromText(newPassage, formData.text);
           
-          setPassages([...passages, { ...formData, id: newPassage }]);
+          setPassages([...passages, { ...passageData, id: newPassage }]);
           alert('Đã thêm bài học thành công!');
         }
       }
@@ -190,6 +256,45 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   const removeVocabField = (index: number) => {
     const newVocab = formData.vocab.filter((_, i) => i !== index);
     setFormData({ ...formData, vocab: newVocab });
+  };
+
+  // Handle level filter checkbox changes
+  const handleLevelFilterChange = (level: EnglishLevel, checked: boolean) => {
+    if (checked) {
+      setSelectedLevels(prev => [...prev, level]);
+    } else {
+      setSelectedLevels(prev => prev.filter(l => l !== level));
+    }
+  };
+
+  // Clear all level filters
+  const clearLevelFilters = () => {
+    setSelectedLevels([]);
+  };
+
+  // Select all level filters
+  const selectAllLevelFilters = () => {
+    const allLevels = englishLevelOptions.map(level => level.key as EnglishLevel);
+    setSelectedLevels(allLevels);
+  };
+
+  // Handle English Level checkbox changes in form
+  const handleFormLevelChange = (level: EnglishLevel, checked: boolean) => {
+    if (checked) {
+      setSelectedEnglishLevels(prev => [...prev, level]);
+    } else {
+      setSelectedEnglishLevels(prev => prev.filter(l => l !== level));
+    }
+  };
+
+  // Clear all selected English levels in form
+  const clearFormLevels = () => {
+    setSelectedEnglishLevels([]);
+  };
+
+  // Select single level in form (for single selection mode)
+  const selectSingleLevel = (level: EnglishLevel) => {
+    setSelectedEnglishLevels([level]);
   };
 
   if (loading) {
@@ -258,16 +363,57 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
           </div>
 
           <div className="form-group">
-            <label>Trình độ:</label>
-            <select
-              value={formData.level}
-              onChange={(e) => setFormData({ ...formData, level: parseInt(e.target.value) })}
-            >
-              <option value={1}>A1</option>
-              <option value={2}>A2</option>
-              <option value={3}>B1</option>
-              <option value={4}>B2</option>
-            </select>
+            <label>English Level:</label>
+            <div className="form-level-checkboxes">
+              {levelsLoading ? (
+                <p>Đang tải levels... (Loading: {levelsLoading.toString()})</p>
+              ) : englishLevelOptions.length === 0 ? (
+                <p>Không có level nào được tìm thấy. (Count: {englishLevelOptions.length})</p>
+              ) : (
+                <>
+                  <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '8px' }}>
+                    Đã tải {englishLevelOptions.length} levels. Đã chọn: {selectedEnglishLevels.length}
+                  </p>
+                  <div className="checkbox-grid">
+                    {englishLevelOptions.map((level) => (
+                      <label 
+                        key={level.id} 
+                        className={`form-level-checkbox ${selectedEnglishLevels.includes(level.key as EnglishLevel) ? 'selected' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedEnglishLevels.includes(level.key as EnglishLevel)}
+                          onChange={(e) => handleFormLevelChange(level.key as EnglishLevel, e.target.checked)}
+                        />
+                        <div className="checkbox-content">
+                          <span className="checkbox-icon">{level.icon}</span>
+                          <span className="checkbox-label">{level.label}</span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  <div className="form-level-actions">
+                    <button 
+                      type="button" 
+                      className="form-level-btn"
+                      onClick={() => {
+                        const allLevels = englishLevelOptions.map(level => level.key as EnglishLevel);
+                        setSelectedEnglishLevels(allLevels);
+                      }}
+                    >
+                      Chọn tất cả
+                    </button>
+                    <button 
+                      type="button" 
+                      className="form-level-btn"
+                      onClick={clearFormLevels}
+                    >
+                      Bỏ chọn
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
 
           <div className="form-group">
@@ -357,6 +503,56 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
             ))}
           </select>
         </div>
+
+        <div className="filter-section level-filter">
+          <label>Lọc theo English Level:</label>
+          {levelsLoading ? (
+            <p>Đang tải levels...</p>
+          ) : (
+            <div className="level-checkboxes">
+              <div className="checkbox-row">
+                {englishLevelOptions.slice(0, 3).map((level) => (
+                  <label key={level.id} className="level-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedLevels.includes(level.key as EnglishLevel)}
+                      onChange={(e) => handleLevelFilterChange(level.key as EnglishLevel, e.target.checked)}
+                    />
+                    <span className="checkbox-label">{level.icon} {level.label.split(' ')[0]}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="checkbox-row">
+                {englishLevelOptions.slice(3).map((level) => (
+                  <label key={level.id} className="level-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={selectedLevels.includes(level.key as EnglishLevel)}
+                      onChange={(e) => handleLevelFilterChange(level.key as EnglishLevel, e.target.checked)}
+                    />
+                    <span className="checkbox-label">{level.icon} {level.label.split(' ')[0]}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="filter-actions">
+                <button 
+                  type="button" 
+                  className="filter-btn small" 
+                  onClick={selectAllLevelFilters}
+                >
+                  Chọn tất cả
+                </button>
+                <button 
+                  type="button" 
+                  className="filter-btn small" 
+                  onClick={clearLevelFilters}
+                >
+                  Bỏ chọn
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         
         <button className="add-button" onClick={handleAddPassage}>
           + Thêm bài học mới
@@ -375,7 +571,7 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
                 <h3>{passage.title}</h3>
                 <p className="passage-meta">
                   Chủ đề: {topics.find(t => t.slug === passage.topicSlug)?.name || 'Unknown'} | 
-                  Trình độ: {['A1', 'A2', 'B1', 'B2'][passage.level - 1]} |
+                  English Level: {getEnglishLevelDisplay(passage.englishLevel, passage.level)} |
                   Từ vựng: {passage.vocab?.length || 0} từ
                 </p>
                 <p className="passage-content">{passage.text.substring(0, 100)}...</p>

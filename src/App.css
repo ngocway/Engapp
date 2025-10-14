@@ -327,6 +327,23 @@ strong, b {
   letter-spacing: var(--letter-spacing-normal);
 }
 
+.clickable-avatar,
+.clickable-name {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.clickable-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border-color: var(--primary-color);
+}
+
+.clickable-name:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
 .login-button {
   background: var(--primary-color);
   color: var(--white);

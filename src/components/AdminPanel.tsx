@@ -10,19 +10,13 @@ import { vocabSeeds } from '../data/vocab';
 import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
 import AdminPassageManager from './AdminPassageManager';
-import Header from './Header';
+import AdminHeader from './AdminHeader';
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
   const [showPassageManager, setShowPassageManager] = useState(false);
 
-  const handleTabChange = (tab: 'topics' | 'review') => {
-    if (tab === 'topics') {
-      navigate('/');
-    } else if (tab === 'review') {
-      navigate('/review');
-    }
-  };
+  // Remove handleTabChange since admin doesn't need user navigation
 
   const uploadSampleData = async () => {
     console.log('🚀 Bắt đầu upload dữ liệu mẫu lên Firebase...');
@@ -259,7 +253,7 @@ const AdminPanel: React.FC = () => {
   if (showPassageManager) {
     return (
       <div className="app">
-        <Header onTabChange={handleTabChange} activeTab="topics" />
+        <AdminHeader />
         <main className="main">
           <AdminPassageManager onClose={() => setShowPassageManager(false)} />
         </main>
@@ -269,7 +263,7 @@ const AdminPanel: React.FC = () => {
 
   return (
     <div className="app">
-      <Header onTabChange={handleTabChange} activeTab="topics" />
+      <AdminHeader />
       <main className="main">
         <div className="admin-panel-container">
       <div className="admin-header">

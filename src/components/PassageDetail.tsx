@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Passage, Question } from '../types';
+import { Passage, Question, EnglishLevel } from '../types';
 import { topicService } from '../firebase/topicService';
 import { questionService } from '../firebase/questionService';
 import HighlightedText from './HighlightedText';
@@ -26,7 +26,18 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const [selectedVocabTerm, setSelectedVocabTerm] = useState<string>('');
   const [flashcardPosition, setFlashcardPosition] = useState<{ x: number; y: number } | undefined>(undefined);
 
-  const getDifficultyColor = (level: number) => {
+  const getEnglishLevelColor = (englishLevel?: EnglishLevel, level?: number) => {
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return '#ff6b9d'; // Pink for kids 2-4
+        case 'kids-5-10': return '#4ecdc4'; // Teal for kids 5-10
+        case 'basic': return '#10b981'; // Green for basic
+        case 'independent': return '#3b82f6'; // Blue for independent
+        case 'proficient': return '#ef4444'; // Red for proficient
+        default: return '#64748b'; // Gray
+      }
+    }
+    // Fallback to old level system
     switch (level) {
       case 1: return '#10b981'; // Green for A1
       case 2: return '#3b82f6'; // Blue for A2
@@ -36,7 +47,18 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     }
   };
 
-  const getDifficultyText = (level: number) => {
+  const getEnglishLevelText = (englishLevel?: EnglishLevel, level?: number) => {
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return '👶 Kids 2-4';
+        case 'kids-5-10': return '🧒 Kids 5-10';
+        case 'basic': return '🌱 Basic';
+        case 'independent': return '🌿 Independent';
+        case 'proficient': return '🌳 Proficient';
+        default: return 'Basic';
+      }
+    }
+    // Fallback to old level system
     switch (level) {
       case 1: return 'A1';
       case 2: return 'A2';

@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useAdmin } from '../contexts/AdminContext';
 import { Topic, Passage } from '../types';
 import PassageListComponent from '../components/PassageList';
 import PassageEditModal from '../components/PassageEditModal';
 import VocabManagementModal from '../components/VocabManagementModal';
-import Header from '../components/Header';
+import AdminLogin from '../components/AdminLogin';
+import AdminHeader from '../components/AdminHeader';
 import { passageService } from '../firebase/passageService';
 import { topicService } from '../firebase/topicService';
+import { AdminUser } from '../firebase/adminAuthService';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, isAdmin } = useAuth();
+  const { admin, isAdminLoggedIn, login, logout, loading: adminLoading } = useAdmin();
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [editingPassage, setEditingPassage] = useState<Passage | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -20,13 +24,7 @@ const AdminPage: React.FC = () => {
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const handleTabChange = (tab: 'topics' | 'review') => {
-    if (tab === 'topics') {
-      navigate('/');
-    } else if (tab === 'review') {
-      navigate('/review');
-    }
-  };
+  // Remove handleTabChange since admin doesn't need user navigation
 
   useEffect(() => {
     loadTopics();
@@ -146,14 +144,35 @@ const AdminPage: React.FC = () => {
     setIsEditModalOpen(true);
   };
 
+  const handleAdminLoginSuccess = (adminUser: AdminUser) => {
+    console.log('✅ Admin login successful in AdminPage:', adminUser);
+    // The admin state is managed by AdminContext, so we don't need to do anything here
+  };
 
-  // Trong giai đoạn phát triển, cho phép truy cập admin mà không cần đăng nhập
-  // TODO: Bật lại kiểm tra auth khi deploy production
+  // Show admin login if not authenticated
+  if (adminLoading) {
+    return (
+      <div className="app">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Đang kiểm tra quyền admin...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdminLoggedIn) {
+    return (
+      <div className="app">
+        <AdminLogin onLoginSuccess={handleAdminLoginSuccess} />
+      </div>
+    );
+  }
 
   if (loading) {
     return (
       <div className="app">
-        <Header onTabChange={handleTabChange} activeTab="topics" />
+        <AdminHeader />
         <main className="main">
           <div className="loading-container">
             <div className="loading-spinner"></div>
@@ -166,18 +185,20 @@ const AdminPage: React.FC = () => {
 
   return (
     <div className="app">
-      <Header onTabChange={handleTabChange} activeTab="topics" />
+      <AdminHeader />
       
       <main className="main">
         <div className="admin-page-container">
           {/* Admin Controls */}
           <div className="admin-controls">
-            <button className="add-passage-btn" onClick={handleAddPassage}>
-              + Thêm bài học mới
-            </button>
-            <button className="admin-panel-btn" onClick={() => navigate('/admin/panel')}>
-              🔧 Admin Panel
-            </button>
+            <div className="admin-buttons">
+              <button className="add-passage-btn" onClick={handleAddPassage}>
+                + Thêm bài học mới
+              </button>
+              <button className="admin-panel-btn" onClick={() => navigate('/admin/panel')}>
+                🔧 Admin Panel
+              </button>
+            </div>
           </div>
 
           {/* Topic Selection */}
