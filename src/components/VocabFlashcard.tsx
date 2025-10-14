@@ -112,14 +112,20 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
 
   const flashcardStyle = position ? {
     position: 'fixed' as const,
-    left: position.x - 300, // Center the 600px wide card around the position
-    top: position.y,
-    transform: 'none'
+    left: position.x, // Use the calculated x position directly
+    top: position.y, // Use the calculated y position directly
+    transform: 'none',
+    maxWidth: '600px',
+    maxHeight: '80vh',
+    overflow: 'auto'
   } : {
     position: 'fixed' as const,
     top: '50%',
     left: '50%',
-    transform: 'translate(-50%, -50%)'
+    transform: 'translate(-50%, -50%)',
+    maxWidth: '600px',
+    maxHeight: '80vh',
+    overflow: 'auto'
   };
 
   return (

@@ -5,6 +5,7 @@ import { topicService } from '../firebase/topicService';
 import { questionService } from '../firebase/questionService';
 import HighlightedText from './HighlightedText';
 import QuizSection from './QuizSection';
+import { VocabFlashcard } from './VocabFlashcard';
 
 interface PassageDetailProps {
   passage: Passage;
@@ -19,6 +20,11 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const [topicName, setTopicName] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
+  
+  // State for vocabulary flashcard
+  const [showVocabFlashcard, setShowVocabFlashcard] = useState(false);
+  const [selectedVocabTerm, setSelectedVocabTerm] = useState<string>('');
+  const [flashcardPosition, setFlashcardPosition] = useState<{ x: number; y: number } | undefined>(undefined);
 
   const getDifficultyColor = (level: number) => {
     switch (level) {
@@ -52,6 +58,111 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     }
   };
 
+  // Hàm tính toán vị trí thông minh cho flashcard để không che từ vựng
+  const calculateSmartPosition = (rect: DOMRect) => {
+    const flashcardWidth = 600;
+    const flashcardHeight = 400; // Ước tính chiều cao flashcard
+    const padding = 20;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Tính toán vị trí ngang - ưu tiên đặt flashcard ở bên phải hoặc trái từ vựng
+    let x = rect.right + 10; // Mặc định đặt bên phải từ vựng
+    
+    // Kiểm tra xem có đủ không gian bên phải không
+    if (x + flashcardWidth > viewportWidth - padding) {
+      // Không đủ không gian bên phải, thử đặt bên trái
+      x = rect.left - flashcardWidth - 10;
+      
+      // Nếu vẫn không đủ không gian bên trái, đặt ở giữa nhưng tránh che từ vựng
+      if (x < padding) {
+        // Tính toán vị trí để không che từ vựng
+        const wordCenterX = rect.left + rect.width / 2;
+        const wordLeft = rect.left;
+        const wordRight = rect.right;
+        
+        // Thử đặt flashcard ở phía trên hoặc dưới từ vựng
+        if (wordCenterX - flashcardWidth / 2 >= padding && wordCenterX + flashcardWidth / 2 <= viewportWidth - padding) {
+          // Có thể đặt ở giữa mà không che từ vựng
+          x = wordCenterX - flashcardWidth / 2;
+        } else {
+          // Đặt sát bên trái hoặc phải màn hình
+          if (wordLeft < viewportWidth - wordRight) {
+            // Từ vựng gần bên trái, đặt flashcard sát bên phải
+            x = viewportWidth - flashcardWidth - padding;
+          } else {
+            // Từ vựng gần bên phải, đặt flashcard sát bên trái
+            x = padding;
+          }
+        }
+      }
+    }
+    
+    // Tính toán vị trí dọc - ưu tiên không che từ vựng
+    let y = rect.bottom + 10; // Mặc định đặt phía dưới từ vựng
+    
+    const spaceBelow = viewportHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    
+    // Kiểm tra xem có đủ không gian phía dưới không
+    if (spaceBelow >= flashcardHeight + padding) {
+      // Có đủ không gian phía dưới, hiển thị phía dưới từ vựng
+      y = rect.bottom + 10;
+    } else if (spaceAbove >= flashcardHeight + padding) {
+      // Có đủ không gian phía trên, hiển thị phía trên từ vựng
+      y = rect.top - flashcardHeight - 10;
+    } else {
+      // Không đủ không gian ở cả hai phía
+      // Tính toán vị trí để che ít nhất từ vựng
+      const wordCenterY = rect.top + rect.height / 2;
+      
+      if (spaceBelow > spaceAbove) {
+        // Phía dưới có nhiều không gian hơn, đặt flashcard ở phía dưới
+        y = Math.min(viewportHeight - flashcardHeight - padding, rect.bottom + 10);
+      } else {
+        // Phía trên có nhiều không gian hơn, đặt flashcard ở phía trên
+        y = Math.max(padding, rect.top - flashcardHeight - 10);
+      }
+      
+      // Nếu vẫn che từ vựng, thử đặt ở vị trí khác
+      if (y <= rect.bottom && y + flashcardHeight >= rect.top) {
+        // Flashcard vẫn che từ vựng, đặt ở vị trí tối ưu
+        if (wordCenterY < viewportHeight / 2) {
+          // Từ vựng ở nửa trên màn hình, đặt flashcard ở phía dưới
+          y = viewportHeight - flashcardHeight - padding;
+        } else {
+          // Từ vựng ở nửa dưới màn hình, đặt flashcard ở phía trên
+          y = padding;
+        }
+      }
+    }
+    
+    // Đảm bảo flashcard không vượt ra ngoài viewport
+    x = Math.max(padding, Math.min(x, viewportWidth - flashcardWidth - padding));
+    y = Math.max(padding, Math.min(y, viewportHeight - flashcardHeight - padding));
+    
+    return { x, y };
+  };
+
+  // Hàm xử lý khi click vào từ vựng trong phần "Từ mới"
+  const handleNewWordClick = (term: string, event: React.MouseEvent) => {
+    setSelectedVocabTerm(term);
+    
+    // Tính toán vị trí thông minh cho flashcard
+    const rect = event.currentTarget.getBoundingClientRect();
+    const position = calculateSmartPosition(rect);
+    
+    setFlashcardPosition(position);
+    setShowVocabFlashcard(true);
+  };
+
+  // Hàm đóng flashcard
+  const handleCloseFlashcard = () => {
+    setShowVocabFlashcard(false);
+    setSelectedVocabTerm('');
+    setFlashcardPosition(undefined);
+  };
+
   // Load questions when transcript tab is active
   useEffect(() => {
     if (activeTab === 'transcript') {
@@ -70,6 +181,26 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     }
   }, [activeTab, passage.id]);
 
+
+  // Cập nhật vị trí flashcard khi window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (showVocabFlashcard && selectedVocabTerm) {
+        // Tìm lại element từ vựng đang được chọn và tính toán lại vị trí
+        const vocabElements = document.querySelectorAll('.clickable-vocab');
+        vocabElements.forEach((element) => {
+          if (element.textContent?.trim() === selectedVocabTerm) {
+            const rect = element.getBoundingClientRect();
+            const position = calculateSmartPosition(rect);
+            setFlashcardPosition(position);
+          }
+        });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [showVocabFlashcard, selectedVocabTerm]);
 
   // Load topic name
   useEffect(() => {
@@ -166,14 +297,13 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
                 // Use passage.vocab if available, otherwise fallback to extracting from text
                 if (passage.vocab && passage.vocab.length > 0) {
                   return passage.vocab.map((vocab, index) => (
-                    <div key={index} className="vocabulary-item">
+                    <div 
+                      key={index} 
+                      className="vocabulary-item clickable-vocab"
+                      onClick={(e) => handleNewWordClick(vocab.term, e)}
+                      style={{ cursor: 'pointer' }}
+                    >
                       <div className="vocab-word">{vocab.term}</div>
-                      {vocab.meaning && (
-                        <div className="vocab-meaning">{vocab.meaning}</div>
-                      )}
-                      {vocab.phonetics?.us && (
-                        <div className="vocab-pronunciation">{vocab.phonetics.us}</div>
-                      )}
                     </div>
                   ));
                 } else {
@@ -191,7 +321,12 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
                     const uniqueWords = Array.from(new Set(vocabularyWords));
                     
                     return uniqueWords.map((word, index) => (
-                      <div key={index} className="vocabulary-item">
+                      <div 
+                        key={index} 
+                        className="vocabulary-item clickable-vocab"
+                        onClick={(e) => handleNewWordClick(word, e)}
+                        style={{ cursor: 'pointer' }}
+                      >
                         <div className="vocab-word">{word}</div>
                       </div>
                     ));
@@ -265,6 +400,16 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
           )}
         </div>
       </div>
+
+      {/* VocabFlashcard hiển thị khi click vào từ vựng trong phần "Từ mới" */}
+      {showVocabFlashcard && selectedVocabTerm && (
+        <VocabFlashcard
+          term={selectedVocabTerm}
+          passageVocab={passage.vocab || []}
+          onClose={handleCloseFlashcard}
+          position={flashcardPosition}
+        />
+      )}
     </div>
   );
 };

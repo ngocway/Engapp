@@ -129,6 +129,20 @@ body {
   line-height: 1.6;
 }
 
+/* Clickable vocabulary items in new words section */
+.clickable-vocab {
+  transition: all 0.3s ease;
+  border-radius: 8px;
+  padding: 8px;
+  margin: 4px 0;
+}
+
+.clickable-vocab:hover {
+  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
+}
+
 .highlighted-vocab {
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   color: #2d3436;
