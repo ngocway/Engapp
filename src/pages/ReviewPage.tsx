@@ -209,6 +209,13 @@ const ReviewPage: React.FC = () => {
     setPassageVocab([]);
   };
 
+  // Hàm xử lý khi kết thúc practice session
+  const handlePracticeEnd = async () => {
+    console.log('🔄 Practice session ended, reloading vocabulary data...');
+    // Reload learned vocabulary để cập nhật difficulty badges
+    await loadLearnedVocabulary();
+  };
+
   if (loading) {
     return (
       <div className="topics-section">
@@ -474,6 +481,7 @@ const ReviewPage: React.FC = () => {
             onClose={handleCloseFlashcard}
             position={flashcardPosition}
             isPracticeMode={passageVocab.length > 1}
+            onPracticeEnd={handlePracticeEnd}
           />
         )}
       </div>

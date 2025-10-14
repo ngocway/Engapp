@@ -9,9 +9,10 @@ interface VocabFlashcardProps {
   onClose: () => void;
   position?: { x: number; y: number };
   isPracticeMode?: boolean;
+  onPracticeEnd?: () => void;
 }
 
-const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onClose, position, isPracticeMode = false }) => {
+const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onClose, position, isPracticeMode = false, onPracticeEnd }) => {
   const [vocab, setVocab] = useState<PassageVocab | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -73,6 +74,9 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
           setCurrentIndex(prev => prev + 1);
         } else {
           // Practice finished
+          if (onPracticeEnd) {
+            onPracticeEnd();
+          }
           onClose();
         }
       } else {
@@ -243,7 +247,12 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
             </button>
             
             <button
-              onClick={onClose}
+              onClick={() => {
+                if (onPracticeEnd) {
+                  onPracticeEnd();
+                }
+                onClose();
+              }}
               style={{
                 padding: '4px 8px',
                 fontSize: '12px',
