@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Passage, Topic, EnglishLevel } from '../types';
 import { passageService } from '../firebase/passageService';
 import { userSettingsService } from '../firebase/userSettingsService';
@@ -28,37 +28,8 @@ const PassageList: React.FC<PassageListProps> = ({
   const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const load = async () => {
-      // Load user settings first
-      if (user) {
-        try {
-          const settings = await userSettingsService.getUserSettings(user.uid);
-          if (settings) {
-            setUserEnglishLevel(settings.englishLevel);
-          }
-        } catch (error) {
-          console.error('Error loading user settings:', error);
-        }
-      }
-
-      // Load passages
-      if (topic?.slug) {
-        setLoading(true);
-        const data = await passageService.getByTopicSlug(topic.slug);
-        
-        // Filter passages by user's English level
-        const filteredPassages = filterPassagesByLevel(data);
-        setPassages(filteredPassages);
-        
-        setLoading(false);
-      }
-    };
-    load();
-  }, [topic?.slug, user]);
-
   // Filter passages based on user's English level
-  const filterPassagesByLevel = (passages: Passage[]): Passage[] => {
+  const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
     // Admin sees all passages without filtering
     if (isAdminLoggedIn) {
       console.log('🔧 Admin mode: Showing all passages without filtering');
@@ -89,7 +60,39 @@ const PassageList: React.FC<PassageListProps> = ({
       const mappedLevel = levelMapping[passage.level] || 'basic';
       return mappedLevel === userEnglishLevel;
     });
-  };
+  }, [isAdminLoggedIn, user, userEnglishLevel]);
+
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      if (user) {
+        try {
+          const settings = await userSettingsService.getUserSettings(user.uid);
+          if (settings) {
+            setUserEnglishLevel(settings.englishLevel);
+          }
+        } catch (error) {
+          console.error('Error loading user settings:', error);
+        }
+      }
+    };
+    loadUserSettings();
+  }, [user]);
+
+  useEffect(() => {
+    const loadPassages = async () => {
+      if (topic?.slug && user) {
+        setLoading(true);
+        const data = await passageService.getByTopicSlug(topic.slug);
+
+        // Filter passages by user's English level
+        const filteredPassages = filterPassagesByLevel(data);
+        setPassages(filteredPassages);
+
+        setLoading(false);
+      }
+    };
+    loadPassages();
+  }, [topic?.slug, user, userEnglishLevel, filterPassagesByLevel]);
 
 
   if (loading) {

@@ -1,7 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import UserSettingsModal from './UserSettingsModal';
+import LanguageSelector from './LanguageSelector';
+import EnglishLevelSelector from './EnglishLevelSelector';
+import UserDropdown from './UserDropdown';
+import { userSettingsService, NativeLanguage, EnglishLevel } from '../firebase/userSettingsService';
+import './Header.css';
 
 type TabType = 'topics' | 'review';
 
@@ -12,8 +17,67 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
   const navigate = useNavigate();
-  const { user, login, logout } = useAuth();
+  const { user, login } = useAuth();
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [currentLanguage, setCurrentLanguage] = useState<NativeLanguage>('vietnamese');
+  const [currentLevel, setCurrentLevel] = useState<EnglishLevel>('basic');
+
+  // Load user settings when component mounts or user changes
+  useEffect(() => {
+    const loadUserSettings = async () => {
+      if (user) {
+        try {
+          const settings = await userSettingsService.getUserSettings(user.uid);
+          if (settings) {
+            setCurrentLanguage(settings.nativeLanguage);
+            setCurrentLevel(settings.englishLevel);
+          }
+        } catch (error) {
+          console.error('Error loading user settings:', error);
+        }
+      }
+    };
+
+    loadUserSettings();
+  }, [user]);
+
+  const handleLanguageChange = async (language: NativeLanguage) => {
+    setCurrentLanguage(language);
+    // Save to user settings if user is logged in
+    if (user) {
+      try {
+        const currentSettings = await userSettingsService.getUserSettings(user.uid);
+        if (currentSettings) {
+          await userSettingsService.saveUserSettings(user.uid, {
+            ...currentSettings,
+            nativeLanguage: language
+          });
+        }
+      } catch (error) {
+        console.error('Error saving language preference:', error);
+      }
+    }
+  };
+
+  const handleLevelChange = async (level: EnglishLevel) => {
+    setCurrentLevel(level);
+    // Save to user settings if user is logged in
+    if (user) {
+      try {
+        const currentSettings = await userSettingsService.getUserSettings(user.uid);
+        if (currentSettings) {
+          await userSettingsService.saveUserSettings(user.uid, {
+            ...currentSettings,
+            englishLevel: level
+          });
+        }
+      } catch (error) {
+        console.error('Error saving English level:', error);
+      }
+    }
+  };
+
 
   return (
     <header className="modern-header">
@@ -44,45 +108,55 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
           </nav>
         </div>
 
-        {/* User section - bên phải */}
-        <div className="header-user">
-          {user ? (
-            <div className="user-info">
-              <div 
-                className="user-avatar clickable-avatar"
-                onClick={() => setShowSettingsModal(true)}
-                title="Click để mở cài đặt"
-              >
-                {user.photoURL ? (
-                  <img src={user.photoURL} alt="Avatar" />
-                ) : (
-                  <div className="avatar-placeholder">
-                    {user.displayName?.charAt(0) || user.email?.charAt(0) || '👤'}
-                  </div>
-                )}
+        {/* Right section - English Level, Language, User */}
+        <div className="header-right">
+          {/* English Level Selector */}
+          <EnglishLevelSelector
+            selectedLevel={currentLevel}
+            onLevelChange={handleLevelChange}
+            className="header-level-selector"
+          />
+
+          {/* Language Selector */}
+          <LanguageSelector
+            selectedLanguage={currentLanguage}
+            onLanguageChange={handleLanguageChange}
+            className="header-language-selector"
+          />
+
+          {/* User section */}
+          <div className="header-user">
+            {user ? (
+              <div className="user-info">
+                <div 
+                  className="user-avatar clickable-avatar"
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  title="Click để mở menu"
+                >
+                  {user.photoURL ? (
+                    <img src={user.photoURL} alt="Avatar" />
+                  ) : (
+                    <div className="avatar-placeholder">
+                      {user.displayName?.charAt(0) || user.email?.charAt(0) || '👤'}
+                    </div>
+                  )}
+                </div>
+                
+                {/* User Dropdown */}
+                <UserDropdown
+                  isOpen={showUserDropdown}
+                  onClose={() => setShowUserDropdown(false)}
+                />
               </div>
-              <span 
-                className="user-name clickable-name"
-                onClick={() => setShowSettingsModal(true)}
-                title="Click để mở cài đặt"
-              >
-                {user.displayName || user.email}
-              </span>
+            ) : (
               <button 
-                className="logout-button"
-                onClick={logout}
+                className="login-button"
+                onClick={login}
               >
-                Đăng xuất
+                Bắt đầu
               </button>
-            </div>
-          ) : (
-            <button 
-              className="login-button"
-              onClick={login}
-            >
-              Đăng nhập
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
       

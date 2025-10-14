@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { userSettingsService, UserSettings, NativeLanguage, EnglishLevel } from '../firebase/userSettingsService';
-import { settingsService, NativeLanguageOption, EnglishLevelOption } from '../firebase/settingsService';
+import { settingsService, EnglishLevelOption } from '../firebase/settingsService';
 import { useAuth } from '../contexts/AuthContext';
+import LanguageSelector from './LanguageSelector';
 
 interface UserSettingsModalProps {
   isOpen: boolean;
@@ -19,19 +20,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
   const [saving, setSaving] = useState(false);
   
   // Dynamic data from Firebase
-  const [nativeLanguages, setNativeLanguages] = useState<NativeLanguageOption[]>([]);
   const [englishLevels, setEnglishLevels] = useState<EnglishLevelOption[]>([]);
   const [settingsLoading, setSettingsLoading] = useState(true);
-
-  // Load settings data when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      loadSettingsData();
-      if (user) {
-        loadUserSettings();
-      }
-    }
-  }, [isOpen, user]);
 
   // Load settings options from Firebase
   const loadSettingsData = async () => {
@@ -41,13 +31,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
       // Initialize default settings if needed
       await settingsService.initializeDefaultSettings();
       
-      // Load native languages and English levels
-      const [languagesData, levelsData] = await Promise.all([
-        settingsService.getNativeLanguages(),
-        settingsService.getEnglishLevels()
-      ]);
-      
-      setNativeLanguages(languagesData);
+      // Load English levels
+      const levelsData = await settingsService.getEnglishLevels();
       setEnglishLevels(levelsData);
     } catch (error) {
       console.error('Error loading settings data:', error);
@@ -56,7 +41,7 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
     }
   };
 
-  const loadUserSettings = async () => {
+  const loadUserSettings = useCallback(async () => {
     if (!user) return;
     
     setLoading(true);
@@ -70,7 +55,17 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Load settings data when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadSettingsData();
+      if (user) {
+        loadUserSettings();
+      }
+    }
+  }, [isOpen, user, loadUserSettings]);
 
   const handleSave = async () => {
     if (!user) return;
@@ -81,16 +76,8 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
       if (success) {
         console.log('✅ User settings saved successfully');
         
-        // Show success message
-        alert('✅ Cài đặt đã được lưu! Trang sẽ được tải lại để áp dụng thay đổi.');
-        
+        // Close modal without showing notification or reloading page
         onClose();
-        
-        // Reload page to apply new settings
-        setTimeout(() => {
-          console.log('🔄 Reloading page to apply new settings...');
-          window.location.reload();
-        }, 500); // Small delay to ensure modal closes first
       } else {
         console.error('❌ Failed to save user settings');
         alert('Có lỗi xảy ra khi lưu cài đặt. Vui lòng thử lại.');
@@ -132,25 +119,12 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
               {/* Native Language Selection */}
               <div className="settings-section">
                 <h3>🌍 Ngôn ngữ mẹ đẻ</h3>
-                <div className="settings-options">
-                  {nativeLanguages.map((language) => (
-                    <label 
-                      key={language.id}
-                      className={`option-card ${settings.nativeLanguage === language.key ? 'selected' : ''}`}
-                    >
-                      <input
-                        type="radio"
-                        name="nativeLanguage"
-                        value={language.key}
-                        checked={settings.nativeLanguage === language.key}
-                        onChange={() => handleNativeLanguageChange(language.key as NativeLanguage)}
-                      />
-                      <div className="option-content">
-                        <span className="option-icon">{language.icon}</span>
-                        <span className="option-text">{language.label}</span>
-                      </div>
-                    </label>
-                  ))}
+                <div className="language-selector-container">
+                  <LanguageSelector
+                    selectedLanguage={settings.nativeLanguage}
+                    onLanguageChange={handleNativeLanguageChange}
+                    className="language-selector-full-width"
+                  />
                 </div>
               </div>
 

@@ -13,9 +13,9 @@ export interface EnglishLevelOption {
 
 export interface NativeLanguageOption {
   id: string;
-  key: string; // 'vietnamese', 'english'
-  label: string; // 'Tiếng Việt', 'English'
-  icon: string; // '🇻🇳', '🇺🇸'
+  key: string; // 'vietnamese', 'english', 'thai'
+  label: string; // 'Tiếng Việt', 'English', 'ไทย'
+  icon: string; // '🇻🇳', '🇬🇧', '🇹🇭'
   order: number; // for sorting
   isActive: boolean;
 }
@@ -195,9 +195,16 @@ export const settingsService = {
           },
           {
             key: 'english',
-            label: 'Tiếng Anh',
-            icon: '🇺🇸',
+            label: 'English',
+            icon: '🇬🇧',
             order: 2,
+            isActive: true
+          },
+          {
+            key: 'thai',
+            label: 'ไทย',
+            icon: '🇹🇭',
+            order: 3,
             isActive: true
           }
         ];

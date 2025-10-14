@@ -1,7 +1,7 @@
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from './config';
 
-export type NativeLanguage = 'vietnamese' | 'english';
+export type NativeLanguage = 'vietnamese' | 'english' | 'thai';
 export type EnglishLevel = 'kids-2-4' | 'kids-5-10' | 'basic' | 'independent' | 'proficient';
 
 export interface UserSettings {

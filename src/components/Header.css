@@ -1,0 +1,38 @@
+/* Header Right Section Styles */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-level-selector {
+  margin-right: 8px;
+}
+
+.header-language-selector {
+  margin-right: 8px;
+}
+
+
+/* Header User Section Updates */
+.header-user {
+  margin-left: 8px;
+  position: relative;
+}
+
+.login-button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.login-button:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+

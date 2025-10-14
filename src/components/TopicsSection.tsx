@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { topicService } from '../firebase/topicService';
 import { passageService } from '../firebase/passageService';
@@ -16,28 +16,8 @@ const TopicsSection: React.FC = () => {
   const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
 
-  useEffect(() => {
-    loadTopics();
-    loadUserSettings();
-  }, []);
-
-  // Load user settings to get English level
-  const loadUserSettings = async () => {
-    if (user) {
-      try {
-        const settings = await userSettingsService.getUserSettings(user.uid);
-        if (settings) {
-          setUserEnglishLevel(settings.englishLevel);
-          console.log('📚 User English Level:', settings.englishLevel);
-        }
-      } catch (error) {
-        console.error('Error loading user settings:', error);
-      }
-    }
-  };
-
   // Filter passages based on user's English level
-  const filterPassagesByLevel = (passages: Passage[]): Passage[] => {
+  const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
     // Admin sees all passages without filtering
     if (isAdminLoggedIn) {
       console.log('🔧 Admin mode: Showing all passages without filtering');
@@ -52,47 +32,25 @@ const TopicsSection: React.FC = () => {
       if (passage.englishLevels && passage.englishLevels.length > 0) {
         return passage.englishLevels.includes(userEnglishLevel);
       }
-      
+
       // Fallback to single English level
       if (passage.englishLevel) {
         return passage.englishLevel === userEnglishLevel;
       }
-      
+
       // Fallback to old level system (convert to English level)
       const levelMapping: Record<number, EnglishLevel> = {
         1: 'basic',
-        2: 'independent', 
+        2: 'independent',
         3: 'independent',
         4: 'proficient'
       };
       const mappedLevel = levelMapping[passage.level] || 'basic';
       return mappedLevel === userEnglishLevel;
     });
-  };
+  }, [isAdminLoggedIn, user, userEnglishLevel]);
 
-  const loadTopics = async () => {
-    try {
-      // Load topics first
-      const topicsData = await topicService.getAll();
-      setTopics(topicsData);
-      
-      // Initialize loading state for each topic
-      const loadingState: Record<string, boolean> = {};
-      topicsData.forEach(topic => {
-        if (topic.slug) {
-          loadingState[topic.slug] = true;
-        }
-      });
-      setPassagesLoading(loadingState);
-      
-      // Load passages for each topic
-      loadPassagesForTopics(topicsData);
-    } catch (error) {
-      console.error('Error loading topics:', error);
-    }
-  };
-
-  const loadPassagesForTopics = async (topicsData: Topic[]) => {
+  const loadPassagesForTopics = useCallback(async (topicsData: Topic[]) => {
     try {
       const passagesMap: Record<string, Passage[]> = {};
       
@@ -125,7 +83,61 @@ const TopicsSection: React.FC = () => {
     } catch (error) {
       console.error('Error loading passages:', error);
     }
-  };
+  }, [filterPassagesByLevel]);
+
+  const loadTopics = useCallback(async () => {
+    try {
+      // Load topics first
+      const topicsData = await topicService.getAll();
+      setTopics(topicsData);
+      
+      // Initialize loading state for each topic
+      const loadingState: Record<string, boolean> = {};
+      topicsData.forEach(topic => {
+        if (topic.slug) {
+          loadingState[topic.slug] = true;
+        }
+      });
+      setPassagesLoading(loadingState);
+      
+      // Load passages for each topic
+      loadPassagesForTopics(topicsData);
+    } catch (error) {
+      console.error('Error loading topics:', error);
+    }
+  }, [loadPassagesForTopics]);
+
+  // Load user settings to get English level
+  const loadUserSettings = useCallback(async () => {
+    if (user) {
+      try {
+        const settings = await userSettingsService.getUserSettings(user.uid);
+        if (settings) {
+          setUserEnglishLevel(settings.englishLevel);
+          console.log('📚 User English Level:', settings.englishLevel);
+        }
+      } catch (error) {
+        console.error('Error loading user settings:', error);
+      }
+    }
+  }, [user]);
+
+  useEffect(() => {
+    loadUserSettings();
+  }, [user, loadUserSettings]);
+
+  useEffect(() => {
+    if (user) {
+      loadTopics();
+    }
+  }, [user, userEnglishLevel, loadTopics]);
+
+  // Reload passages when user English level changes
+  useEffect(() => {
+    if (topics.length > 0 && user) {
+      loadPassagesForTopics(topics);
+    }
+  }, [userEnglishLevel, filterPassagesByLevel, loadPassagesForTopics, topics]);
 
   const getTopicIcon = (slug: string | undefined) => {
     switch (slug) {
