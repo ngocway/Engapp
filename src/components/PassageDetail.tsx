@@ -78,6 +78,17 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
       utterance.pitch = 1.2;
       speechSynthesis.speak(utterance);
     }
+    
+    // Log để debug
+    console.log('🎯 Vocabulary word clicked:', word);
+    
+    // Tìm từ vựng trong passage vocab để hiển thị thông tin chi tiết
+    const vocabItem = passage.vocab?.find(v => v.term === word);
+    if (vocabItem) {
+      console.log('📚 Found vocab item:', vocabItem);
+    } else {
+      console.log('⚠️ Vocab item not found for word:', word);
+    }
   };
 
   // Hàm tính toán vị trí thông minh cho flashcard để không che từ vựng
@@ -400,9 +411,10 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
             <div className="lesson-content">
               <h3>Nội dung bài học</h3>
               <div className="content-text">
-                <div 
-                  dangerouslySetInnerHTML={{ __html: passage.text }}
-                  style={{ lineHeight: '1.6', fontSize: '1.1rem' }}
+                <HighlightedText 
+                  text={passage.text}
+                  onVocabularyClick={handleVocabularyClick}
+                  passageVocab={passage.vocab || []}
                 />
               </div>
             </div>

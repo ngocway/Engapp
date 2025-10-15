@@ -18,6 +18,7 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   const [editingPassage, setEditingPassage] = useState<Passage | null>(null);
   const [englishLevelOptions, setEnglishLevelOptions] = useState<EnglishLevelOption[]>([]);
   const [levelsLoading, setLevelsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   // Helper function to display English Level
   const getEnglishLevelDisplay = (englishLevel?: EnglishLevel, level?: number): string => {
@@ -173,6 +174,47 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
     return Array.from(new Set(vocabularyWords));
   };
 
+  // Function to get existing vocabulary from passage
+  const getExistingVocabulary = async (passageId: string): Promise<string[]> => {
+    try {
+      console.log('🔍 getExistingVocabulary - passageId:', passageId);
+      
+      // Get current passage data
+      const currentPassage = await passageService.getPassageById(passageId);
+      console.log('🔍 getExistingVocabulary - currentPassage:', currentPassage);
+      
+      if (!currentPassage) {
+        console.log('🔍 getExistingVocabulary - No passage found');
+        return [];
+      }
+      
+      // Get vocabulary from passage.vocab
+      const existingVocab = currentPassage.vocab || [];
+      console.log('🔍 getExistingVocabulary - existingVocab:', existingVocab);
+      
+      const terms = existingVocab.map(vocab => vocab.term);
+      console.log('🔍 getExistingVocabulary - terms:', terms);
+      
+      return terms;
+    } catch (error) {
+      console.error('❌ Error getting existing vocabulary:', error);
+      return [];
+    }
+  };
+
+  // Function to compare and categorize vocabulary
+  const compareVocabulary = (detectedWords: string[], existingWords: string[]) => {
+    const newWords = detectedWords.filter(word => !existingWords.includes(word));
+    const wordsToRemove = existingWords.filter(word => !detectedWords.includes(word));
+    const wordsToKeep = detectedWords.filter(word => existingWords.includes(word));
+
+    return {
+      newWords,
+      wordsToRemove,
+      wordsToKeep
+    };
+  };
+
   // Function to process vocabulary from text and save to passage.vocab
   const processVocabularyFromText = async (passageId: string, text: string) => {
     try {
@@ -181,22 +223,47 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       const detectedWords = extractVocabularyFromText(text);
       console.log('📚 Detected words from text:', detectedWords);
       
-      if (detectedWords.length === 0) {
-        console.log('📚 No vocabulary detected in text');
+      // Get existing vocabulary
+      const existingWords = await getExistingVocabulary(passageId);
+      console.log('📚 Existing vocabulary:', existingWords);
+      
+      // Compare and categorize
+      const comparison = compareVocabulary(detectedWords, existingWords);
+      console.log('📚 Vocabulary comparison:', comparison);
+      
+      // Get current passage to update vocab
+      const currentPassage = await passageService.getPassageById(passageId);
+      if (!currentPassage) {
+        console.error('❌ Could not load current passage');
         return;
       }
       
-      // Prepare vocabulary data
-      const vocabData = detectedWords.map(word => ({
-        term: word,
-        meaning: `Nghĩa của ${word}`,
-        definitionEn: `Definition of ${word}`
-      }));
+      let updatedVocab = [...(currentPassage.vocab || [])];
+      
+      // Add new words
+      comparison.newWords.forEach(word => {
+        const newVocab = {
+          term: word,
+          meaning: `Nghĩa của ${word}`,
+          definitionEn: `Definition of ${word}`
+        };
+        updatedVocab.push(newVocab);
+        console.log('📚 Added new vocabulary:', newVocab);
+      });
+      
+      // Remove words that are no longer in text
+      updatedVocab = updatedVocab.filter(vocab => !comparison.wordsToRemove.includes(vocab.term));
       
       // Update passage with vocabulary
-      await passageService.update(passageId, { vocab: vocabData });
+      await passageService.update(passageId, { vocab: updatedVocab });
       
-      console.log('✅ Vocabulary processed and saved:', vocabData);
+      console.log('✅ Vocabulary processed and saved:', {
+        total: updatedVocab.length,
+        added: comparison.newWords.length,
+        removed: comparison.wordsToRemove.length,
+        kept: comparison.wordsToKeep.length,
+        vocab: updatedVocab
+      });
       
     } catch (error) {
       console.error('❌ Error processing vocabulary:', error);
@@ -212,7 +279,34 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       return;
     }
     
+    // Validate required fields
+    if (!formData.title.trim()) {
+      alert('Vui lòng nhập tiêu đề bài học!');
+      return;
+    }
+    
+    if (!formData.text.trim()) {
+      alert('Vui lòng nhập nội dung bài học!');
+      return;
+    }
+    
+    if (!formData.topicSlug) {
+      alert('Vui lòng chọn chủ đề!');
+      return;
+    }
+    
+    setSaving(true);
+    
     try {
+      console.log('💾 Bắt đầu lưu bài học...');
+      console.log('📝 Dữ liệu form:', {
+        title: formData.title,
+        topicSlug: formData.topicSlug,
+        textLength: formData.text.length,
+        englishLevel: selectedEnglishLevels,
+        vocabCount: formData.vocab.length
+      });
+      
       // Use the first selected level as primary level (for backward compatibility)
       const primaryLevel = selectedEnglishLevels[0];
       const passageData = {
@@ -221,31 +315,54 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       };
       
       if (editingPassage) {
+        console.log('✏️ Cập nhật bài học có sẵn:', editingPassage.id);
         // Update existing passage
         await passageService.update(editingPassage.id, passageData);
+        console.log('✅ Đã cập nhật bài học vào database');
+        
         // Auto-process vocabulary from text
+        console.log('📚 Xử lý từ vựng tự động...');
         await processVocabularyFromText(editingPassage.id, formData.text);
         
         setPassages(passages.map(p => 
           p.id === editingPassage.id ? { ...p, ...passageData } : p
         ));
-        alert('Đã cập nhật bài học thành công!');
+        
+        // Show detailed success message
+        const detectedWords = extractVocabularyFromText(formData.text);
+        let successMessage = `✅ Đã cập nhật bài học thành công!\n\n📚 Từ vựng đã được xử lý tự động: ${detectedWords.length} từ`;
+        alert(successMessage);
       } else {
+        console.log('🆕 Tạo bài học mới...');
         // Add new passage
         const newPassage = await passageService.add(passageData);
         if (newPassage) {
+          console.log('✅ Đã tạo bài học mới với ID:', newPassage);
+          
           // Auto-process vocabulary from text
+          console.log('📚 Xử lý từ vựng tự động...');
           await processVocabularyFromText(newPassage, formData.text);
           
           setPassages([...passages, { ...passageData, id: newPassage }]);
-          alert('Đã thêm bài học thành công!');
+          
+          // Show detailed success message
+          const detectedWords = extractVocabularyFromText(formData.text);
+          let successMessage = `✅ Đã thêm bài học thành công!\n\n📚 Từ vựng đã được xử lý tự động: ${detectedWords.length} từ`;
+          alert(successMessage);
+        } else {
+          throw new Error('Không thể tạo bài học mới');
         }
       }
+      
+      console.log('🎉 Hoàn thành lưu bài học!');
       setShowAddForm(false);
       setEditingPassage(null);
     } catch (error) {
-      console.error('Error saving passage:', error);
-      alert('Lỗi khi lưu bài học');
+      console.error('❌ Lỗi khi lưu bài học:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Vui lòng thử lại';
+      alert(`Lỗi khi lưu bài học: ${errorMessage}`);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -372,15 +489,76 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
             />
             <button 
               type="button" 
-              onClick={() => {
-                // Logic kiểm tra từ mới
-                const bracketRegex = /\[([^\]]+)\]/g;
-                const matches = formData.text.match(bracketRegex);
-                if (matches && matches.length > 0) {
-                  const vocabularyWords = matches.map(match => match.slice(1, -1).trim());
-                  alert(`Đã phát hiện ${vocabularyWords.length} từ mới: ${vocabularyWords.join(', ')}`);
-                } else {
-                  alert('Chưa có từ mới nào được phát hiện');
+              onClick={async () => {
+                if (!formData.text.trim()) {
+                  alert('Vui lòng nhập nội dung trước khi kiểm tra từ mới');
+                  return;
+                }
+
+                try {
+                  // Extract vocabulary from text
+                  const detectedWords = extractVocabularyFromText(formData.text);
+                  
+                  if (detectedWords.length === 0) {
+                    alert('Chưa có từ mới nào được phát hiện trong nội dung. Hãy đảm bảo các từ mới được đặt trong ngoặc vuông [từ mới]');
+                    return;
+                  }
+
+                  // Get existing vocabulary if editing
+                  let existingWords: string[] = [];
+                  console.log('🔍 Debug - editingPassage:', editingPassage);
+                  console.log('🔍 Debug - formData.vocab:', formData.vocab);
+                  
+                  if (editingPassage) {
+                    console.log('🔍 Đang edit bài học có sẵn, lấy từ vựng cũ...');
+                    console.log('🔍 editingPassage.id:', editingPassage.id);
+                    existingWords = await getExistingVocabulary(editingPassage.id);
+                    console.log('🔍 Từ vựng cũ từ database:', existingWords);
+                    console.log('🔍 Số lượng từ vựng cũ:', existingWords.length);
+                  } else {
+                    console.log('🔍 Đang tạo bài học mới hoặc không có editingPassage');
+                    // Nếu có từ vựng trong form, sử dụng để so sánh
+                    if (formData.vocab && formData.vocab.length > 0) {
+                      existingWords = formData.vocab.map(vocab => vocab.term).filter(term => term);
+                      console.log('🔍 Sử dụng từ vựng từ form để so sánh:', existingWords);
+                    }
+                  }
+
+                  // Compare vocabulary
+                  const comparison = compareVocabulary(detectedWords, existingWords);
+                  console.log('🔍 Kết quả so sánh:', comparison);
+
+                  // Create detailed message
+                  let message = `📚 Phân tích từ vựng (${detectedWords.length} từ phát hiện):\n\n`;
+                  
+                  if (editingPassage && existingWords.length > 0) {
+                    message += `📖 Từ vựng hiện tại trong bài học (${existingWords.length}): ${existingWords.join(', ')}\n\n`;
+                  }
+                  
+                  if (comparison.newWords.length > 0) {
+                    message += `➕ Từ vựng sẽ thêm (${comparison.newWords.length}): ${comparison.newWords.join(', ')}\n`;
+                  }
+                  
+                  if (comparison.wordsToKeep.length > 0) {
+                    message += `✅ Từ vựng không đổi (${comparison.wordsToKeep.length}): ${comparison.wordsToKeep.join(', ')}\n`;
+                  }
+                  
+                  if (comparison.wordsToRemove.length > 0) {
+                    message += `❌ Từ vựng sẽ xóa (${comparison.wordsToRemove.length}): ${comparison.wordsToRemove.join(', ')}\n`;
+                  }
+
+                  // Show different messages for new vs editing
+                  if (!editingPassage) {
+                    message += `\n🆕 Đây là bài học mới, tất cả ${detectedWords.length} từ sẽ được thêm vào từ vựng.`;
+                    message += `\n💡 Sau khi lưu bài học, lần tới khi edit sẽ thấy phân loại "từ giữ nguyên" vs "từ mới".`;
+                  } else if (comparison.wordsToRemove.length > 0) {
+                    message += `\n⚠️ Lưu ý: ${comparison.wordsToRemove.length} từ sẽ bị xóa khỏi từ vựng của bài học vì không còn xuất hiện trong nội dung.`;
+                  }
+
+                  alert(message);
+                } catch (error) {
+                  console.error('Error checking vocabulary:', error);
+                  alert('Có lỗi xảy ra khi kiểm tra từ vựng');
                 }
               }}
               style={{ marginTop: '8px', padding: '4px 8px', fontSize: '0.9em' }}
@@ -520,8 +698,8 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
             <button type="button" onClick={() => setShowAddForm(false)}>
               Hủy
             </button>
-            <button type="submit" className="submit-btn">
-              {editingPassage ? 'Cập nhật' : 'Thêm bài học'}
+            <button type="submit" className="submit-btn" disabled={saving}>
+              {saving ? 'Đang lưu...' : (editingPassage ? 'Cập nhật' : 'Thêm bài học')}
             </button>
           </div>
         </form>

@@ -486,8 +486,20 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     }
     
     try {
-      // Get vocabulary from vocabService (linked to passage)
+      console.log('🔍 getExistingVocabulary - passage:', passage);
+      
+      // First try to get vocabulary from passage.vocab (newer approach)
+      if (passage.vocab && passage.vocab.length > 0) {
+        console.log('🔍 Using passage.vocab:', passage.vocab);
+        const terms = passage.vocab.map(vocab => vocab.term);
+        console.log('🔍 Terms from passage.vocab:', terms);
+        return terms;
+      }
+      
+      // Fallback: Get vocabulary from vocabService (legacy approach)
+      console.log('🔍 Fallback to vocabService.getByPassageId');
       const vocabularies = await vocabService.getByPassageId(passage.id);
+      console.log('🔍 vocabService result:', vocabularies);
       return vocabularies.map(vocab => vocab.term);
     } catch (error) {
       console.error('Error getting existing vocabulary:', error);

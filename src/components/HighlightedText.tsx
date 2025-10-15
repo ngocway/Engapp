@@ -103,68 +103,131 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
     return { x, y };
   };
 
+  // Hàm chuyển đổi HTML thành plain text nhưng vẫn giữ từ vựng trong brackets
+  const convertHtmlToTextWithVocab = (htmlText: string): string => {
+    // Tạo một div tạm để parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlText;
+    
+    // Lấy text content
+    let plainText = tempDiv.textContent || tempDiv.innerText || '';
+    
+    return plainText;
+  };
+
   // Hàm để tách và highlight các từ trong dấu ngoặc vuông
   const renderHighlightedText = () => {
-    // Regex để tìm các từ trong dấu ngoặc vuông [word] hoặc [word:meaning]
-    const bracketRegex = /\[([^\]]+)\]/g;
-    const parts = text.split(bracketRegex);
+    // Chuyển đổi HTML thành text với từ vựng trong brackets
+    const processedText = convertHtmlToTextWithVocab(text);
+    
+    // Regex để tìm các từ trong dấu ngoặc vuông [word] - chỉ match từ đơn lẻ
+    const bracketRegex = /\[([^\]]+?)\]/g;
+    const parts = processedText.split(bracketRegex);
     
     return parts.map((part, index) => {
       // Nếu index lẻ, đây là từ trong ngoặc vuông
       if (index % 2 === 1) {
-        const isHovered = hoveredWord === part;
-        return (
-          <span
-            key={index}
-            ref={(el) => { wordRefs.current[part] = el; }}
-            className={`highlighted-vocab ${isHovered ? 'highlighted-vocab-hover' : ''}`}
-            onMouseEnter={(e) => {
-              // Clear any pending hide timeout
-              if (hideTimeoutRef.current) {
-                clearTimeout(hideTimeoutRef.current);
-                hideTimeoutRef.current = null;
-              }
-              
-              setHoveredWord(part);
-              setIsClickedFlashcard(false); // Reset click state khi hover từ vựng mới
-              // Tính toán vị trí thông minh cho flashcard
-              const rect = e.currentTarget.getBoundingClientRect();
-              const position = calculateSmartPosition(rect);
-              setFlashcardPosition(position);
-              setShowFlashcard(true);
-            }}
-            onMouseLeave={() => {
-              // Delay để tránh flashcard biến mất khi di chuột từ text sang flashcard
-              // Nhưng chỉ ẩn nếu không phải click flashcard và không đang hover flashcard
-              hideTimeoutRef.current = setTimeout(() => {
-                if (!isHoveringFlashcard && !isClickedFlashcard) {
-                  setHoveredWord(null);
-                  setShowFlashcard(false);
-                  setFlashcardPosition(undefined);
+        // Chỉ highlight nếu là từ đơn lẻ (không có space)
+        if (part.trim().includes(' ')) {
+          // Nếu có nhiều từ trong brackets, tách ra và chỉ highlight từ đầu tiên
+          const words = part.trim().split(/\s+/);
+          const firstWord = words[0];
+          const remainingText = words.slice(1).join(' ');
+          
+          return (
+            <span key={index}>
+              <span
+                ref={(el) => { wordRefs.current[firstWord] = el; }}
+                className={`highlighted-vocab ${hoveredWord === firstWord ? 'highlighted-vocab-hover' : ''}`}
+                onMouseEnter={(e) => {
+                  if (hideTimeoutRef.current) {
+                    clearTimeout(hideTimeoutRef.current);
+                    hideTimeoutRef.current = null;
+                  }
+                  setHoveredWord(firstWord);
+                  setIsClickedFlashcard(false);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const position = calculateSmartPosition(rect);
+                  setFlashcardPosition(position);
+                  setShowFlashcard(true);
+                }}
+                onMouseLeave={() => {
+                  hideTimeoutRef.current = setTimeout(() => {
+                    if (!isHoveringFlashcard && !isClickedFlashcard) {
+                      setHoveredWord(null);
+                      setShowFlashcard(false);
+                      setFlashcardPosition(undefined);
+                    }
+                  }, 300);
+                }}
+                onClick={(e) => {
+                  onVocabularyClick?.(firstWord);
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  const position = calculateSmartPosition(rect);
+                  setFlashcardPosition(position);
+                  setShowFlashcard(true);
+                  setHoveredWord(firstWord);
+                  setIsClickedFlashcard(true);
+                  if (hideTimeoutRef.current) {
+                    clearTimeout(hideTimeoutRef.current);
+                    hideTimeoutRef.current = null;
+                  }
+                }}
+                title={`Click hoặc hover để xem thông tin từ vựng: ${firstWord}`}
+              >
+                {firstWord}
+              </span>
+              {remainingText && ` ${remainingText}`}
+            </span>
+          );
+        } else {
+          // Từ đơn lẻ - highlight bình thường
+          const isHovered = hoveredWord === part;
+          return (
+            <span
+              key={index}
+              ref={(el) => { wordRefs.current[part] = el; }}
+              className={`highlighted-vocab ${isHovered ? 'highlighted-vocab-hover' : ''}`}
+              onMouseEnter={(e) => {
+                if (hideTimeoutRef.current) {
+                  clearTimeout(hideTimeoutRef.current);
+                  hideTimeoutRef.current = null;
                 }
-              }, 300);
-            }}
-            onClick={(e) => {
-              onVocabularyClick?.(part);
-              // Hiện flashcard khi click với vị trí thông minh
-              const rect = e.currentTarget.getBoundingClientRect();
-              const position = calculateSmartPosition(rect);
-              setFlashcardPosition(position);
-              setShowFlashcard(true);
-              setHoveredWord(part);
-              setIsClickedFlashcard(true); // Đánh dấu đã click
-              
-              // Clear any pending hide timeout when clicking
-              if (hideTimeoutRef.current) {
-                clearTimeout(hideTimeoutRef.current);
-                hideTimeoutRef.current = null;
-              }
-            }}
-            title={`Click hoặc hover để xem thông tin từ vựng: ${part}`}
-          >
-            {part}
-          </span>
-        );
+                setHoveredWord(part);
+                setIsClickedFlashcard(false);
+                const rect = e.currentTarget.getBoundingClientRect();
+                const position = calculateSmartPosition(rect);
+                setFlashcardPosition(position);
+                setShowFlashcard(true);
+              }}
+              onMouseLeave={() => {
+                hideTimeoutRef.current = setTimeout(() => {
+                  if (!isHoveringFlashcard && !isClickedFlashcard) {
+                    setHoveredWord(null);
+                    setShowFlashcard(false);
+                    setFlashcardPosition(undefined);
+                  }
+                }, 300);
+              }}
+              onClick={(e) => {
+                onVocabularyClick?.(part);
+                const rect = e.currentTarget.getBoundingClientRect();
+                const position = calculateSmartPosition(rect);
+                setFlashcardPosition(position);
+                setShowFlashcard(true);
+                setHoveredWord(part);
+                setIsClickedFlashcard(true);
+                if (hideTimeoutRef.current) {
+                  clearTimeout(hideTimeoutRef.current);
+                  hideTimeoutRef.current = null;
+                }
+              }}
+              title={`Click hoặc hover để xem thông tin từ vựng: ${part}`}
+            >
+              {part}
+            </span>
+          );
+        }
       }
       // Nếu index chẵn, đây là text thường
       return <span key={index}>{part}</span>;
