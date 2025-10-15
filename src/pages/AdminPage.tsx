@@ -70,7 +70,13 @@ const AdminPage: React.FC = () => {
 
   const handleSavePassage = async (updatedPassage: Passage) => {
     console.log('💾 AdminPage handleSavePassage called with:', updatedPassage);
+    console.log('💾 Updated passage images count:', updatedPassage.images?.length || 0);
+    console.log('💾 Updated passage images:', updatedPassage.images);
     try {
+      // 🔄 CRITICAL: Update editingPassage state with the updated data
+      setEditingPassage(updatedPassage);
+      console.log('🔄 Updated editingPassage state with new data');
+      
       // Note: The actual update is already done in PassageEditModal
       // This is just for additional handling if needed
       console.log('✅ Passage saved successfully in AdminPage');

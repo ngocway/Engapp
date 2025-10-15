@@ -58,6 +58,11 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
         console.error('Error saving language preference:', error);
       }
     }
+    
+    // Auto reload page to update content with new language
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
   const handleLevelChange = async (level: EnglishLevel) => {
@@ -76,6 +81,11 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
         console.error('Error saving English level:', error);
       }
     }
+    
+    // Auto reload page to update content with new level
+    setTimeout(() => {
+      window.location.reload();
+    }, 100);
   };
 
 

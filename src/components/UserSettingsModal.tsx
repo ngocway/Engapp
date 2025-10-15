@@ -76,8 +76,11 @@ const UserSettingsModal: React.FC<UserSettingsModalProps> = ({ isOpen, onClose }
       if (success) {
         console.log('✅ User settings saved successfully');
         
-        // Close modal without showing notification or reloading page
+        // Close modal and reload page to apply new settings
         onClose();
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } else {
         console.error('❌ Failed to save user settings');
         alert('Có lỗi xảy ra khi lưu cài đặt. Vui lòng thử lại.');

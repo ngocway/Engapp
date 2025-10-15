@@ -44,6 +44,8 @@ export interface Passage {
   createdAt?: number;
   vocab?: PassageVocab[]; // highlighted vocabulary within the text
   questions?: Question[]; // quiz questions for this passage
+  layoutRatio?: '4:6' | '5:5'; // layout ratio for the passage detail page
+  images?: string[]; // array of image URLs used in the passage content
 }
 
 export interface Question {

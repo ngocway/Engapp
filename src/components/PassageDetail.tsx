@@ -291,7 +291,7 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
         <span>{passage.title}</span>
       </div>
 
-      <div className="passage-detail-layout">
+      <div className={`passage-detail-layout ratio-${passage.layoutRatio?.replace(':', '-') || '4-6'}`}>
         {/* Left Panel - Video */}
         <div className="left-panel">
           <h3 className="panel-title">{passage.title}</h3>
@@ -400,10 +400,9 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
             <div className="lesson-content">
               <h3>Nội dung bài học</h3>
               <div className="content-text">
-                <HighlightedText 
-                  text={passage.text} 
-                  onVocabularyClick={handleVocabularyClick}
-                  passageVocab={passage.vocab || []}
+                <div 
+                  dangerouslySetInnerHTML={{ __html: passage.text }}
+                  style={{ lineHeight: '1.6', fontSize: '1.1rem' }}
                 />
               </div>
             </div>

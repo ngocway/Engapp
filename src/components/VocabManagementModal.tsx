@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Passage, PassageVocab } from '../types';
 import { CambridgeDictionaryService } from '../services/cambridgeDictionaryService';
-import { StorageService } from '../firebase/storageService';
+import { uploadImageToStorage, deleteImageFromStorage, validateImageFile, validateAudioFile, uploadVocabImage, uploadVocabAudio } from '../firebase/storageService';
 
 interface VocabManagementModalProps {
   passage: Passage | null;
@@ -257,7 +257,7 @@ const VocabManagementModal: React.FC<VocabManagementModalProps> = ({
     if (!file || !editingVocab?.term) return;
 
     // Validate file
-    const validation = StorageService.validateImageFile(file);
+    const validation = validateImageFile(file);
     if (!validation.valid) {
       alert(validation.error);
       return;
@@ -266,7 +266,7 @@ const VocabManagementModal: React.FC<VocabManagementModalProps> = ({
     setUploadingImage(true);
     try {
       // Upload to Firebase Storage
-      const result = await StorageService.uploadVocabImage(file, editingVocab.term);
+      const result = await uploadVocabImage(file, editingVocab.term);
       
       if (result.success && result.url) {
         setUploadedImage(result.url);
@@ -289,7 +289,7 @@ const VocabManagementModal: React.FC<VocabManagementModalProps> = ({
     if (!file || !editingVocab?.term) return;
 
     // Validate file
-    const validation = StorageService.validateAudioFile(file);
+    const validation = validateAudioFile(file);
     if (!validation.valid) {
       alert(validation.error);
       return;
@@ -298,7 +298,7 @@ const VocabManagementModal: React.FC<VocabManagementModalProps> = ({
     setUploadingAudio(true);
     try {
       // Upload to Firebase Storage
-      const result = await StorageService.uploadVocabAudio(file, editingVocab.term);
+      const result = await uploadVocabAudio(file, editingVocab.term);
       
       if (result.success && result.url) {
         setUploadedAudio(result.url);

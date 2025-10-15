@@ -37,6 +37,7 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   // Form states
   const [formData, setFormData] = useState({
     title: '',
+    excerpt: '',
     text: '',
     topicId: '',
     topicSlug: '',
@@ -45,7 +46,8 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
     audioUrl: '',
     thumbnail: '',
     youtubeUrl: '',
-    vocab: [] as any[]
+    vocab: [] as any[],
+    layoutRatio: '4:6' as '4:6' | '5:5'
   });
   
   // Selected English Levels for form
@@ -104,6 +106,7 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   const handleAddPassage = () => {
     setFormData({
       title: '',
+      excerpt: '',
       text: '',
       topicId: '',
       topicSlug: selectedTopic || '',
@@ -112,7 +115,8 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       audioUrl: '',
       thumbnail: '',
       youtubeUrl: '',
-      vocab: []
+      vocab: [],
+      layoutRatio: '4:6' as '4:6' | '5:5'
     });
     setSelectedEnglishLevels(['basic']);
     setEditingPassage(null);
@@ -122,6 +126,7 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
   const handleEditPassage = (passage: Passage) => {
     setFormData({
       title: passage.title,
+      excerpt: passage.excerpt || '',
       text: passage.text,
       topicId: passage.topicId,
       topicSlug: passage.topicSlug || '',
@@ -130,7 +135,8 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
       audioUrl: passage.audioUrl || '',
       thumbnail: passage.thumbnail || '',
       youtubeUrl: '',
-      vocab: passage.vocab || []
+      vocab: passage.vocab || [],
+      layoutRatio: passage.layoutRatio || '4:6'
     });
     setSelectedEnglishLevels(passage.englishLevel ? [passage.englishLevel] : ['basic']);
     setEditingPassage(passage);
@@ -325,8 +331,34 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
               type="text"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              placeholder="Nhập tiêu đề đoạn văn"
               required
             />
+          </div>
+
+          <div className="form-group">
+            <label>Tóm tắt:</label>
+            <textarea
+              value={formData.excerpt}
+              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
+              rows={3}
+              placeholder="Nhập tóm tắt ngắn gọn"
+            />
+          </div>
+
+          {/* Dropdown chọn tỷ lệ layout - vị trí màu vàng */}
+          <div className="form-group">
+            <label>Tỷ lệ layout:</label>
+            <select
+              value={formData.layoutRatio}
+              onChange={(e) => setFormData({ ...formData, layoutRatio: e.target.value as '4:6' | '5:5' })}
+            >
+              <option value="4:6">4:6 (Cột trái nhỏ hơn - Video 40%, Nội dung 60%)</option>
+              <option value="5:5">5:5 (Cột bằng nhau - Video 50%, Nội dung 50%)</option>
+            </select>
+            <small style={{ color: '#666', fontSize: '0.9em', marginTop: '4px', display: 'block' }}>
+              💡 Chọn tỷ lệ hiển thị giữa video/từ vựng và nội dung bài học
+            </small>
           </div>
 
           <div className="form-group">
@@ -335,8 +367,26 @@ const AdminPassageManager: React.FC<AdminPassageManagerProps> = ({ onClose }) =>
               value={formData.text}
               onChange={(e) => setFormData({ ...formData, text: e.target.value })}
               rows={6}
+              placeholder="Nhập nội dung đoạn văn đầy đủ. Các từ mới nên đặt trong ngoặc vuông [từ mới]"
               required
             />
+            <button 
+              type="button" 
+              onClick={() => {
+                // Logic kiểm tra từ mới
+                const bracketRegex = /\[([^\]]+)\]/g;
+                const matches = formData.text.match(bracketRegex);
+                if (matches && matches.length > 0) {
+                  const vocabularyWords = matches.map(match => match.slice(1, -1).trim());
+                  alert(`Đã phát hiện ${vocabularyWords.length} từ mới: ${vocabularyWords.join(', ')}`);
+                } else {
+                  alert('Chưa có từ mới nào được phát hiện');
+                }
+              }}
+              style={{ marginTop: '8px', padding: '4px 8px', fontSize: '0.9em' }}
+            >
+              🔍 Kiểm tra từ mới
+            </button>
           </div>
 
           <div className="form-group">

@@ -78,6 +78,8 @@ export const passageService = {
       // Remove id field before updating (Firestore doesn't allow updating document ID)
       const { id, ...passageDataWithoutId } = passage as any;
       console.log('🔍 passageService.update - passage data without id:', passageDataWithoutId);
+      console.log('🔍 passageService.update - text field:', passageDataWithoutId.text);
+      console.log('🔍 passageService.update - layoutRatio field:', passageDataWithoutId.layoutRatio);
       
       await updateDoc(docRef, passageDataWithoutId);
       console.log('✅ passageService.update - Successfully updated in Firestore');

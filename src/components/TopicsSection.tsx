@@ -210,15 +210,6 @@ const TopicsSection: React.FC = () => {
 
   return (
     <div className="topics-section">
-      {/* User Level Indicator - Only show for regular users, not admin */}
-      {user && !isAdminLoggedIn && (
-        <div className="user-level-indicator">
-          <span className="level-label">Trình độ hiện tại:</span>
-          <span className="level-badge" style={{ backgroundColor: getEnglishLevelColor(userEnglishLevel) }}>
-            {getEnglishLevelText([userEnglishLevel], userEnglishLevel, 1)}
-          </span>
-        </div>
-      )}
       
       {topics.length === 0 ? (
         <div className="topics-loading">
