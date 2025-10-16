@@ -8,6 +8,8 @@ import { userVocabService, VocabDifficulty } from '../firebase/userVocabService'
 import { useAuth } from '../contexts/AuthContext';
 import { VocabFlashcard } from '../components/VocabFlashcard';
 import { PassageVocab } from '../types';
+import LessonCard from '../components/LessonCard';
+import VocabCard from '../components/VocabCard';
 
 const ReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +23,10 @@ const ReviewPage: React.FC = () => {
     hard: []
   });
   const [loading, setLoading] = useState(true);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<'all' | 'easy' | 'normal' | 'hard'>('all');
   
   // State for vocabulary flashcard
   const [showVocabFlashcard, setShowVocabFlashcard] = useState(false);
@@ -216,6 +222,47 @@ const ReviewPage: React.FC = () => {
     await loadLearnedVocabulary();
   };
 
+  // Filter functions
+  const getFilteredPassages = () => {
+    let filtered = completedPassages;
+    
+    // Filter by search term
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(passage => 
+        passage.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        passage.text.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by difficulty (for now, all passages are considered completed)
+    // In the future, we could add difficulty tracking for passages
+    
+    return filtered;
+  };
+
+  const getFilteredVocabulary = () => {
+    let filtered = learnedWords;
+    
+    // Filter by search term
+    if (searchTerm.trim()) {
+      filtered = filtered.filter(vocab => 
+        vocab.word?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vocab.meaning?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vocab.definitionEn?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by difficulty
+    if (selectedDifficulty !== 'all') {
+      filtered = filtered.filter(vocab => {
+        const wordLower = vocab.word?.toLowerCase() || '';
+        return userVocabDifficulty[selectedDifficulty].includes(wordLower);
+      });
+    }
+    
+    return filtered;
+  };
+
   if (loading) {
     return (
       <div className="topics-section">
@@ -236,241 +283,177 @@ const ReviewPage: React.FC = () => {
   return (
     <>
       <div className="topics-section">
-          {/* Page Header */}
-          <div className="topic-group">
-            {/* Simple Tabs */}
-            <div className="review-tabs-container">
+          {/* Search and Filter Section */}
+          <div className="search-filter-wrapper">
+            <div className="search-box">
+              <i className="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Tìm kiếm bài học hoặc từ vựng..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <div className="filter-group">
               <button 
-                className={`review-tab-button ${activeTab === 'passages' ? 'active' : ''}`}
-                onClick={() => setActiveTab('passages')}
+                className={`filter-btn ${selectedDifficulty === 'all' ? 'active' : ''}`}
+                onClick={() => setSelectedDifficulty('all')}
               >
-                <span className="tab-icon">📖</span>
-                <span className="tab-text">Đoạn văn đã học</span>
-                <span className="tab-count">{completedPassages.length}</span>
+                Tất cả
               </button>
               <button 
-                className={`review-tab-button ${activeTab === 'vocabulary' ? 'active' : ''}`}
-                onClick={() => setActiveTab('vocabulary')}
+                className={`filter-btn ${selectedDifficulty === 'easy' ? 'active' : ''}`}
+                onClick={() => setSelectedDifficulty('easy')}
               >
-                <span className="tab-icon">🎓</span>
-                <span className="tab-text">Từ vựng đã học</span>
-                <span className="tab-count">{learnedWords.length}</span>
+                Easy
+              </button>
+              <button 
+                className={`filter-btn ${selectedDifficulty === 'normal' ? 'active' : ''}`}
+                onClick={() => setSelectedDifficulty('normal')}
+              >
+                Normal
+              </button>
+              <button 
+                className={`filter-btn ${selectedDifficulty === 'hard' ? 'active' : ''}`}
+                onClick={() => setSelectedDifficulty('hard')}
+              >
+                Hard
+              </button>
+            </div>
+          </div>
+
+          {/* Page Header */}
+          <div className="topic-group">
+            {/* Tabs */}
+            <div className="tabs-container">
+              <div className="tab-header">
+                <button 
+                  className={`tab-btn ${activeTab === 'passages' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('passages')}
+                >
+                  <i className="fa-solid fa-book-open"></i>
+                  Đoạn văn đã học
+                  <span className="badge">{getFilteredPassages().length}</span>
+                </button>
+                <button 
+                  className={`tab-btn ${activeTab === 'vocabulary' ? 'active' : ''}`}
+                  onClick={() => setActiveTab('vocabulary')}
+                >
+                  <i className="fa-solid fa-graduation-cap"></i>
+                  Từ vựng đã học
+                  <span className="badge">{getFilteredVocabulary().length}</span>
+                </button>
+              </div>
+
+              <button 
+                className="review-all-btn"
+                onClick={() => {
+                  // Start practice with filtered learned words
+                  const filteredVocab = getFilteredVocabulary();
+                  if (filteredVocab.length > 0) {
+                    // Create practice session with filtered learned words
+                    const practiceVocab: PassageVocab[] = filteredVocab.map(vocab => ({
+                      term: vocab.word,
+                      meaning: vocab.meaning || '',
+                      definitionEn: vocab.definitionEn || '',
+                      pronunciation: vocab.pronunciation || '',
+                      partOfSpeech: vocab.partOfSpeech || '',
+                      image: vocab.image || '',
+                      audio: '', // Vocabulary type doesn't have audio property
+                      examples: vocab.examples || [],
+                      phonetics: {
+                        us: vocab.pronunciation || '',
+                        uk: vocab.pronunciation || ''
+                      }
+                    }));
+                    
+                    setPassageVocab(practiceVocab);
+                    setSelectedVocabTerm(practiceVocab[0]?.term || '');
+                    setFlashcardPosition(undefined); // Center the flashcard
+                    setShowVocabFlashcard(true);
+                  }
+                }}
+              >
+                <i className="fa-solid fa-bullseye"></i>
+                Ôn tập từ vựng ({getFilteredVocabulary().length} từ)
               </button>
             </div>
 
             {/* Tab Content */}
-            {activeTab === 'passages' ? (
-              <div className="passages-tab">
-                {completedPassages.length === 0 ? (
-                  <div className="empty-state-topics">
-                    <div className="empty-icon">📝</div>
-                    <h3>Chưa có đoạn văn nào</h3>
-                    <p>Bạn chưa hoàn thành đoạn văn nào</p>
-                    <p className="empty-subtitle">Hãy đọc và trả lời câu hỏi để ôn tập nhé!</p>
-                    <button 
-                      className="view-all-button"
-                      onClick={() => navigate('/topics')}
-                    >
-                      Bắt đầu học ngay →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="passages-grid">
-                    {completedPassages.map((passage) => (
-                      <div 
-                        key={passage.id}
-                        className="passage-card-parroto"
-                        onClick={() => handlePassageClick(passage.id)}
-                      >
-                        <div className="passage-thumbnail">
-                          {passage.thumbnail ? (
-                            <img src={passage.thumbnail} alt={passage.title} />
-                          ) : (
-                            <div className="thumbnail-placeholder">
-                              📖
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="passage-info">
-                          <div className="passage-meta">
-                            <span className="view-count">Đã hoàn thành</span>
-                            <span className="difficulty-badge" style={{ backgroundColor: '#10b981' }}>
-                              ✅
-                            </span>
-                            <span className="source">Review</span>
-                          </div>
-                          
-                          <h3 className="passage-title">{passage.title}</h3>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="vocabulary-tab">
-                {/* Practice Button */}
-                {learnedWords.length > 0 && (
-                  <div style={{ 
-                    marginBottom: '24px', 
-                    display: 'flex', 
-                    justifyContent: 'center',
-                    gap: '16px'
-                  }}>
-                    <button 
-                      className="practice-vocab-button"
-                      onClick={() => {
-                        // Start practice with all learned words
-                        if (learnedWords.length > 0) {
-                          // Create practice session with all learned words
-                          const practiceVocab: PassageVocab[] = learnedWords.map(vocab => ({
-                            term: vocab.word,
-                            meaning: vocab.meaning || '',
-                            definitionEn: vocab.definitionEn || '',
-                            pronunciation: vocab.pronunciation || '',
-                            partOfSpeech: vocab.partOfSpeech || '',
-                            image: vocab.image || '',
-                            audio: '', // Vocabulary type doesn't have audio property
-                            examples: vocab.examples || [],
-                            phonetics: {
-                              us: vocab.pronunciation || '',
-                              uk: vocab.pronunciation || ''
-                            }
-                          }));
-                          
-                          setPassageVocab(practiceVocab);
-                          setSelectedVocabTerm(practiceVocab[0]?.term || '');
-                          setFlashcardPosition(undefined); // Center the flashcard
-                          setShowVocabFlashcard(true);
-                        }
-                      }}
-                      style={{
-                        backgroundColor: '#3b82f6',
-                        color: 'white',
-                        border: 'none',
-                        padding: '12px 24px',
-                        borderRadius: '8px',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#2563eb';
-                        e.currentTarget.style.transform = 'translateY(-2px)';
-                        e.currentTarget.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#3b82f6';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
-                      }}
-                    >
-                      <span>🎯</span>
-                      <span>Ôn tập từ vựng ({learnedWords.length} từ)</span>
-                    </button>
-                  </div>
-                )}
-                
-                {learnedWords.length === 0 ? (
-                  <div className="empty-state-topics">
-                    <div className="empty-icon">🎓</div>
-                    <h3>Chưa có từ vựng nào</h3>
-                    <p>Bạn chưa học từ vựng nào</p>
-                    <p className="empty-subtitle">Hãy học từ vựng trong các đoạn văn nhé!</p>
-                    <button 
-                      className="view-all-button"
-                      onClick={() => navigate('/topics')}
-                    >
-                      Bắt đầu học ngay →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="passages-grid">
-                    {learnedWords.map((vocab) => {
-                      // Determine difficulty level for this word
-                      const getDifficultyInfo = () => {
-                        if (userVocabDifficulty.hard.includes(vocab.word?.toLowerCase() || '')) {
-                          return { level: 'Hard', color: '#ff7675', icon: '🔴' };
-                        } else if (userVocabDifficulty.normal.includes(vocab.word?.toLowerCase() || '')) {
-                          return { level: 'Normal', color: '#fdcb6e', icon: '🟡' };
-                        } else if (userVocabDifficulty.easy.includes(vocab.word?.toLowerCase() || '')) {
-                          return { level: 'Easy', color: '#55efc4', icon: '🟢' };
-                        } else {
-                          return null; // No difficulty set
-                        }
-                      };
-                      
-                      const difficulty = getDifficultyInfo();
-                      
-                      return (
-                        <div 
-                          key={vocab.id} 
-                          className="passage-card-parroto"
-                          onClick={(e) => handleVocabClick(vocab, e)}
-                          style={{ 
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
-                          }}
-                          title="Click để ôn tập từ vựng"
-                        >
-                          <div className="passage-thumbnail">
-                            {vocab.image ? (
-                              <img src={vocab.image} alt={vocab.word} />
-                            ) : (
-                              <div className="thumbnail-placeholder">
-                                🎓
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="passage-info">
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-                              <h3 className="passage-title" style={{ margin: 0 }}>{vocab.word}</h3>
-                              {difficulty && (
-                                <span 
-                                  style={{ 
-                                    backgroundColor: difficulty.color,
-                                    color: 'white',
-                                    padding: '2px 6px',
-                                    borderRadius: '4px',
-                                    fontSize: '12px',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '4px'
-                                  }}
-                                  title={`Độ khó: ${difficulty.level}`}
-                                >
-                                  {difficulty.icon} {difficulty.level}
-                                </span>
-                              )}
-                            </div>
-                            <p className="vocab-meaning">{vocab.meaning}</p>
-                            {vocab.pronunciation && (
-                              <p className="vocab-pronunciation">{vocab.pronunciation}</p>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+            <div className={`tab-body ${activeTab === 'passages' ? 'active' : ''}`} id="passages">
+              {getFilteredPassages().length === 0 ? (
+                <div className="empty-state-topics">
+                  <div className="empty-icon">📝</div>
+                  <h3>Chưa có đoạn văn nào</h3>
+                  <p>Bạn chưa hoàn thành đoạn văn nào</p>
+                  <p className="empty-subtitle">Hãy đọc và trả lời câu hỏi để ôn tập nhé!</p>
+                  <button 
+                    className="view-all-button"
+                    onClick={() => navigate('/topics')}
+                  >
+                    Bắt đầu học ngay →
+                  </button>
+                </div>
+              ) : (
+                <div className="cards-grid">
+                  {getFilteredPassages().map((passage) => (
+                    <LessonCard
+                      key={passage.id}
+                      passage={passage}
+                      isLearned={true}
+                      onClick={() => handlePassageClick(passage.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className={`tab-body ${activeTab === 'vocabulary' ? 'active' : ''}`} id="vocabulary">
+              {getFilteredVocabulary().length === 0 ? (
+                <div className="empty-state-topics">
+                  <div className="empty-icon">🎓</div>
+                  <h3>Chưa có từ vựng nào</h3>
+                  <p>Bạn chưa học từ vựng nào</p>
+                  <p className="empty-subtitle">Hãy học từ vựng trong các đoạn văn nhé!</p>
+                  <button 
+                    className="view-all-button"
+                    onClick={() => navigate('/topics')}
+                  >
+                    Bắt đầu học ngay →
+                  </button>
+                </div>
+              ) : (
+                <div className="cards-grid">
+                  {getFilteredVocabulary().map((vocab) => {
+                    // Determine difficulty level for this word
+                    const getDifficultyLevel = (): 'easy' | 'normal' | 'hard' | null => {
+                      if (userVocabDifficulty.hard.includes(vocab.word?.toLowerCase() || '')) {
+                        return 'hard';
+                      } else if (userVocabDifficulty.normal.includes(vocab.word?.toLowerCase() || '')) {
+                        return 'normal';
+                      } else if (userVocabDifficulty.easy.includes(vocab.word?.toLowerCase() || '')) {
+                        return 'easy';
+                      } else {
+                        return null; // No difficulty set
+                      }
+                    };
+                    
+                    const difficulty = getDifficultyLevel();
+                    
+                    return (
+                      <VocabCard
+                        key={vocab.id}
+                        vocab={vocab}
+                        difficulty={difficulty}
+                        onClick={(e) => handleVocabClick(vocab, e)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         
         {/* Vocabulary Flashcard for Review */}
