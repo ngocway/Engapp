@@ -2,15 +2,15 @@
 .header-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 16px;
 }
 
 .header-level-selector {
-  margin-right: 8px;
+  margin-right: 0;
 }
 
 .header-language-selector {
-  margin-right: 8px;
+  margin-right: 0;
 }
 
 
@@ -21,18 +21,18 @@
 }
 
 .login-button {
-  background: #3b82f6;
+  background: #1e293b;
   color: white;
+  font-size: 14px;
+  font-weight: 600;
   border: none;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 500;
+  border-radius: 6px;
+  padding: 6px 14px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.3s;
 }
 
 .login-button:hover {
-  background: #2563eb;
-  transform: translateY(-1px);
+  background: #0f172a;
 }
 

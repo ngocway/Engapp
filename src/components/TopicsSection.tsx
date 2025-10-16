@@ -6,6 +6,8 @@ import { userSettingsService } from '../firebase/userSettingsService';
 import { Topic, Passage, EnglishLevel } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAdmin } from '../contexts/AdminContext';
+import LessonCard from './LessonCard';
+import TopicTypeSelector, { TopicType } from './TopicTypeSelector';
 
 const TopicsSection: React.FC = () => {
   const navigate = useNavigate();
@@ -15,6 +17,7 @@ const TopicsSection: React.FC = () => {
   const [passagesByTopic, setPassagesByTopic] = useState<Record<string, Passage[]>>({});
   const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
+  const [selectedTopicType, setSelectedTopicType] = useState<TopicType>('paragraph');
 
   // Filter passages based on user's English level
   const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
@@ -208,8 +211,19 @@ const TopicsSection: React.FC = () => {
     }
   };
 
+  const handleTopicTypeChange = (type: TopicType) => {
+    setSelectedTopicType(type);
+    // TODO: Filter topics based on type if needed
+  };
+
   return (
-    <div className="topics-section">
+    <div className="topics-section-wrapper">
+      <TopicTypeSelector 
+        selectedType={selectedTopicType}
+        onTypeChange={handleTopicTypeChange}
+      />
+      
+      <div className="topics-section container">
       
       {topics.length === 0 ? (
         <div className="topics-loading">
@@ -222,25 +236,26 @@ const TopicsSection: React.FC = () => {
         const isPassagesLoading = topic.slug ? passagesLoading[topic.slug] : false;
         
         return (
-          <div key={topic.id} className="topic-group">
-            <div className="topic-header">
-              <div className="topic-title">
-                <span className="topic-icon">{getTopicIcon(topic.slug)}</span>
-                <h2>{topic.name}</h2>
-                <span className="lesson-count">
+          <section key={topic.id} className="topic-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                {getTopicIcon(topic.slug)} {topic.name} <span className="count">
                   {isPassagesLoading ? '...' : `(${topicPassages.length} bài học)`}
                 </span>
-              </div>
-              <button 
-                className="view-all-button"
-                onClick={() => topic.slug && navigate(`/topics/${topic.slug}`)}
-                disabled={isPassagesLoading}
+              </h2>
+              <a 
+                href="#" 
+                className="view-all"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (topic.slug) navigate(`/topics/${topic.slug}`);
+                }}
               >
                 Xem tất cả →
-              </button>
+              </a>
             </div>
 
-            <div className="passages-grid">
+            <div className="lessons-grid">
               {isPassagesLoading ? (
                 // Hiển thị loading cho passages của topic này
                 <div className="topic-loading">
@@ -248,38 +263,14 @@ const TopicsSection: React.FC = () => {
                   <span>Đang tải bài học...</span>
                 </div>
               ) : topicPassages.length > 0 ? (
-                // Hiển thị passages
+                // Hiển thị passages với LessonCard mới
                 topicPassages.map((passage: Passage) => (
-                  <div 
-                    key={passage.id} 
-                    className="passage-card-parroto"
+                  <LessonCard
+                    key={passage.id}
+                    passage={passage}
+                    isLearned={false} // TODO: Implement learned status tracking
                     onClick={() => navigate(`/passage/${passage.id}`)}
-                  >
-                    <div className="passage-thumbnail">
-                      {passage.thumbnail ? (
-                        <img src={passage.thumbnail} alt={passage.title} />
-                      ) : (
-                        <div className="thumbnail-placeholder">
-                          {getTopicIcon(topic.slug)}
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="passage-info">
-                      <div className="passage-meta">
-                        <span className="view-count">{passage.vocab?.length || 0} từ vựng</span>
-           <span 
-             className="difficulty-badge"
-             style={{ backgroundColor: getEnglishLevelColor(passage.englishLevels?.[0] || passage.englishLevel, passage.level || 1) }}
-           >
-             {getEnglishLevelText(passage.englishLevels || undefined, passage.englishLevel, passage.level || 1)}
-           </span>
-                        <span className="source">Từ vựng</span>
-                      </div>
-                      
-                      <h3 className="passage-title">{passage.title}</h3>
-                    </div>
-                  </div>
+                  />
                 ))
               ) : (
                 // Hiển thị thông báo không có passage
@@ -288,10 +279,11 @@ const TopicsSection: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
+          </section>
         );
         })
       )}
+      </div>
     </div>
   );
 };

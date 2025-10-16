@@ -22,6 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [currentLanguage, setCurrentLanguage] = useState<NativeLanguage>('vietnamese');
   const [currentLevel, setCurrentLevel] = useState<EnglishLevel>('basic');
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Load user settings when component mounts or user changes
   useEffect(() => {
@@ -41,6 +42,20 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
 
     loadUserSettings();
   }, [user]);
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLanguageChange = async (language: NativeLanguage) => {
     setCurrentLanguage(language);
@@ -90,7 +105,7 @@ const Header: React.FC<HeaderProps> = ({ onTabChange, activeTab }) => {
 
 
   return (
-    <header className="modern-header">
+    <header className={`modern-header ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         {/* Logo, tên app và navigation */}
         <div className="header-left">

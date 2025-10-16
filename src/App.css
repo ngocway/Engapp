@@ -219,6 +219,7 @@ body {
   letter-spacing: var(--letter-spacing-normal);
   margin: 0;
   padding: 0;
+  padding-top: 84px; /* Bù cho header fixed */
 }
 
 /* Typography styles - Parroto-inspired */
@@ -284,18 +285,27 @@ strong, b {
 
 /* Modern Header - Parroto style */
 .modern-header {
-  background: var(--white);
-  border-bottom: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 50;
+  width: 100%;
+  z-index: 1000;
+  padding: 10px 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: background 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.modern-header.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
 .header-container {
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--spacing-6);
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -306,35 +316,35 @@ strong, b {
 .header-logo {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: 8px;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: transform 0.2s ease;
 }
 
 .header-logo:hover {
-  opacity: 0.8;
+  transform: scale(1.05);
 }
 
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  background: var(--primary-color);
-  border-radius: var(--radius-lg);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--primary-color), #8b5cf6);
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
 }
 
 .logo-bird {
-  font-size: 20px;
-  filter: grayscale(0.2);
+  font-size: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .logo-text {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-bold);
-  color: var(--primary-color);
+  font-size: 18px;
+  font-weight: 700;
+  color: #1e293b;
   letter-spacing: -0.025em;
 }
 
@@ -342,42 +352,41 @@ strong, b {
 .header-left {
   display: flex;
   align-items: center;
-  gap: var(--spacing-8);
+  gap: 20px;
 }
 
 /* Navigation */
 .header-nav {
   display: flex;
   align-items: center;
-  gap: var(--spacing-4);
+  gap: 20px;
 }
 
 .nav-button {
-  background: rgba(255, 255, 255, 0.1);
-  color: #9ca3af; /* Màu xám cho chữ khi inactive */
-  border: 2px solid #9ca3af; /* Viền xám khi inactive */
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-family);
-  letter-spacing: var(--letter-spacing-normal);
+  position: relative;
+  font-size: 15px;
+  color: #1e293b;
+  text-decoration: none;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 6px;
   transition: all 0.2s ease;
 }
 
 .nav-button:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: #d1d5db; /* Viền xám nhạt hơn khi hover */
-  color: #d1d5db; /* Chữ xám nhạt hơn khi hover */
-  transform: translateY(-1px);
+  color: #2563eb;
 }
 
 .nav-button.active {
-  background: #1e40af; /* Xanh đậm như trong ảnh */
-  border-color: #1e40af;
+  background: #2563eb;
   color: white;
-  box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+  font-weight: 600;
 }
 
 .nav-text {
@@ -569,10 +578,8 @@ strong, b {
 /* Topics Section - Parroto style */
 .topics-section {
   background: white;
-  border-radius: var(--radius-2xl);
   padding: var(--spacing-4);
   margin: var(--spacing-6) 0;
-  border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
   width: 100%;
 }
@@ -1204,6 +1211,315 @@ strong, b {
 
 .passage-card-content {
   cursor: pointer;
+}
+
+/* =================== TOPIC TYPE SELECTOR =================== */
+.topic-type-section.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 20px;
+  margin-bottom: 24px;
+}
+
+.topic-switch {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.topic-option {
+  flex: 1;
+  background: #fff;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  position: relative;
+}
+
+.topic-option:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
+  border-color: #cbd5e1;
+}
+
+.topic-option.active {
+  background: #f8fafc;
+  border: 1px solid #94a3b8;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+  transform: translateY(-2px);
+}
+
+.topic-option.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(139, 92, 246, 0.05));
+  border-radius: 10px;
+  z-index: -1;
+}
+
+.topic-option h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 6px;
+  transition: color 0.3s ease;
+}
+
+.topic-option p {
+  font-size: 14px;
+  color: #475569;
+  transition: color 0.3s ease;
+}
+
+.topic-option.active h3 {
+  color: #1e40af;
+  font-weight: 800;
+}
+
+.topic-option.active p {
+  color: #374151;
+  font-weight: 500;
+}
+
+/* =================== TOPICS SECTION LAYOUT =================== */
+.topics-section-wrapper {
+  width: 100%;
+}
+
+.topics-section.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.topic-section {
+  margin-bottom: 40px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  color: #1e293b;
+}
+
+.section-title .count {
+  font-size: 15px;
+  font-weight: 400;
+  color: #64748b;
+}
+
+.view-all {
+  font-size: 14px;
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: text-decoration 0.2s ease;
+}
+
+.view-all:hover {
+  text-decoration: underline;
+}
+
+/* =================== LESSONS GRID =================== */
+.lessons-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+/* =================== LESSON CARD STYLES =================== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+.lesson-card {
+  width: 100%;
+  max-width: 320px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: all 0.25s ease;
+  position: relative;
+  cursor: pointer;
+}
+
+.lesson-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* =================== THUMBNAIL =================== */
+.lesson-thumb {
+  position: relative;
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+}
+
+.lesson-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.lesson-thumb .thumbnail-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-size: 3rem;
+  color: white;
+}
+
+.lesson-card:hover .lesson-thumb img {
+  transform: scale(1.05);
+}
+
+/* =================== LEVEL BADGE =================== */
+.level {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #d7f4da;
+  color: #198754;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  text-transform: uppercase;
+}
+
+/* =================== STATUS LABEL =================== */
+.status {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #444;
+}
+
+.status.done {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.status.new {
+  background: #fde2e1;
+  color: #b02a37;
+}
+
+/* =================== CONTENT =================== */
+.lesson-content {
+  padding: 16px 18px;
+}
+
+.lesson-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.lesson-desc {
+  font-size: 14px;
+  color: #555;
+  line-height: 1.5;
+  height: 42px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 10px;
+}
+
+.lesson-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.word-count {
+  font-size: 14px;
+  color: #666;
+}
+
+.btn-learn {
+  background: #007bff;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.25s;
+}
+
+.btn-learn:hover {
+  background: #0056b3;
+}
+
+/* =================== STATE: LEARNED =================== */
+.lesson-card.learned .lesson-thumb img {
+  filter: grayscale(40%) brightness(0.9);
+}
+
+/* =================== RESPONSIVE =================== */
+@media (max-width: 768px) {
+  .topics-section.container {
+    padding: 0 15px;
+  }
+  
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  
+  .section-title {
+    font-size: 20px;
+  }
+  
+  .lessons-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .lesson-card {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .topic-switch {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .topic-option {
+    flex: none;
+  }
 }
 
 /* Manual Vocabulary Management Styles */
@@ -2750,10 +3066,6 @@ strong, b {
   font-size: var(--font-size-sm);
 }
 
-.lesson-title {
-  margin: var(--spacing-6) 0;
-  text-align: center;
-}
 
 .lesson-title h2 {
   font-size: var(--font-size-2xl);
