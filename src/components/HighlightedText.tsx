@@ -4,7 +4,7 @@ import { PassageVocab } from '../types';
 
 interface HighlightedTextProps {
   text: string;
-  onVocabularyClick?: (word: string) => void;
+  onVocabularyClick?: (word: string, event?: React.MouseEvent) => void;
   passageVocab?: PassageVocab[];
 }
 
@@ -139,34 +139,38 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
               <span
                 ref={(el) => { wordRefs.current[firstWord] = el; }}
                 className={`highlighted-vocab ${hoveredWord === firstWord ? 'highlighted-vocab-hover' : ''}`}
-                onMouseEnter={(e) => {
-                  if (hideTimeoutRef.current) {
-                    clearTimeout(hideTimeoutRef.current);
-                    hideTimeoutRef.current = null;
-                  }
-                  setHoveredWord(firstWord);
-                  setIsClickedFlashcard(false);
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const position = calculateSmartPosition(rect);
-                  setFlashcardPosition(position);
-                  setShowFlashcard(true);
-                }}
+              onMouseEnter={(e) => {
+                console.log('🎯 HighlightedText onMouseEnter:', { firstWord, hasOnVocabularyClick: !!onVocabularyClick });
+                if (hideTimeoutRef.current) {
+                  clearTimeout(hideTimeoutRef.current);
+                  hideTimeoutRef.current = null;
+                }
+                setHoveredWord(firstWord);
+                setIsClickedFlashcard(false);
+                // Hiển thị flashcard khi hover
+                onVocabularyClick?.(firstWord, e);
+              }}
                 onMouseLeave={() => {
-                  hideTimeoutRef.current = setTimeout(() => {
-                    if (!isHoveringFlashcard && !isClickedFlashcard) {
+                  console.log('🎯 HighlightedText onMouseLeave:', { firstWord, isHoveringFlashcard, isClickedFlashcard });
+                  // Chỉ quản lý state nội bộ nếu không có onVocabularyClick prop
+                  if (!onVocabularyClick) {
+                    hideTimeoutRef.current = setTimeout(() => {
+                      if (!isHoveringFlashcard && !isClickedFlashcard) {
+                        console.log('🎯 Hiding internal flashcard after timeout');
+                        setHoveredWord(null);
+                        setShowFlashcard(false);
+                        setFlashcardPosition(undefined);
+                      }
+                    }, 300);
+                  } else {
+                    // Nếu có onVocabularyClick, chỉ clear hoveredWord
+                    hideTimeoutRef.current = setTimeout(() => {
                       setHoveredWord(null);
-                      setShowFlashcard(false);
-                      setFlashcardPosition(undefined);
-                    }
-                  }, 300);
+                    }, 300);
+                  }
                 }}
                 onClick={(e) => {
-                  onVocabularyClick?.(firstWord);
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const position = calculateSmartPosition(rect);
-                  setFlashcardPosition(position);
-                  setShowFlashcard(true);
-                  setHoveredWord(firstWord);
+                  // Click để giữ flashcard hiển thị (không tự động ẩn)
                   setIsClickedFlashcard(true);
                   if (hideTimeoutRef.current) {
                     clearTimeout(hideTimeoutRef.current);
@@ -189,33 +193,35 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
               ref={(el) => { wordRefs.current[part] = el; }}
               className={`highlighted-vocab ${isHovered ? 'highlighted-vocab-hover' : ''}`}
               onMouseEnter={(e) => {
+                console.log('🎯 HighlightedText onMouseEnter (single word):', { part, hasOnVocabularyClick: !!onVocabularyClick });
                 if (hideTimeoutRef.current) {
                   clearTimeout(hideTimeoutRef.current);
                   hideTimeoutRef.current = null;
                 }
                 setHoveredWord(part);
                 setIsClickedFlashcard(false);
-                const rect = e.currentTarget.getBoundingClientRect();
-                const position = calculateSmartPosition(rect);
-                setFlashcardPosition(position);
-                setShowFlashcard(true);
+                // Hiển thị flashcard khi hover
+                onVocabularyClick?.(part, e);
               }}
               onMouseLeave={() => {
-                hideTimeoutRef.current = setTimeout(() => {
-                  if (!isHoveringFlashcard && !isClickedFlashcard) {
+                // Chỉ quản lý state nội bộ nếu không có onVocabularyClick prop
+                if (!onVocabularyClick) {
+                  hideTimeoutRef.current = setTimeout(() => {
+                    if (!isHoveringFlashcard && !isClickedFlashcard) {
+                      setHoveredWord(null);
+                      setShowFlashcard(false);
+                      setFlashcardPosition(undefined);
+                    }
+                  }, 300);
+                } else {
+                  // Nếu có onVocabularyClick, chỉ clear hoveredWord
+                  hideTimeoutRef.current = setTimeout(() => {
                     setHoveredWord(null);
-                    setShowFlashcard(false);
-                    setFlashcardPosition(undefined);
-                  }
-                }, 300);
+                  }, 300);
+                }
               }}
               onClick={(e) => {
-                onVocabularyClick?.(part);
-                const rect = e.currentTarget.getBoundingClientRect();
-                const position = calculateSmartPosition(rect);
-                setFlashcardPosition(position);
-                setShowFlashcard(true);
-                setHoveredWord(part);
+                // Click để giữ flashcard hiển thị (không tự động ẩn)
                 setIsClickedFlashcard(true);
                 if (hideTimeoutRef.current) {
                   clearTimeout(hideTimeoutRef.current);
@@ -240,8 +246,8 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
         {renderHighlightedText()}
       </div>
       
-      {/* Flashcard hiển thị khi hover */}
-      {showFlashcard && hoveredWord && (
+      {/* Flashcard hiển thị khi hover - chỉ hiển thị nếu không có onVocabularyClick */}
+      {showFlashcard && hoveredWord && !onVocabularyClick && (
         <div
           onMouseEnter={() => {
             setIsHoveringFlashcard(true);

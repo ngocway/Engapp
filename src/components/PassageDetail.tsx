@@ -69,7 +69,9 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   };
 
   // Hàm xử lý khi click vào từ vựng được highlight
-  const handleVocabularyClick = (word: string) => {
+  const handleVocabularyClick = (word: string, event?: React.MouseEvent) => {
+    console.log('🎯 handleVocabularyClick called with:', { word, hasEvent: !!event });
+    
     // Phát âm từ vựng
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(word);
@@ -79,60 +81,55 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
       speechSynthesis.speak(utterance);
     }
     
-    // Log để debug
-    console.log('🎯 Vocabulary word clicked:', word);
-    
     // Tìm từ vựng trong passage vocab để hiển thị thông tin chi tiết
     const vocabItem = passage.vocab?.find(v => v.term === word);
-    if (vocabItem) {
-      console.log('📚 Found vocab item:', vocabItem);
-    } else {
-      console.log('⚠️ Vocab item not found for word:', word);
+
+    // Hiển thị flashcard gần từ vựng được click
+    if (event) {
+      console.log('🎯 Setting flashcard state...');
+      setSelectedVocabTerm(word);
+      
+      // Tính toán vị trí thông minh cho flashcard
+      const rect = event.currentTarget.getBoundingClientRect();
+      const position = calculateSmartPosition(rect);
+      
+      setFlashcardPosition(position);
+      setShowVocabFlashcard(true);
+      console.log('🎯 Flashcard state set:', { word, position, showFlashcard: true });
     }
   };
 
   // Hàm tính toán vị trí thông minh cho flashcard để không che từ vựng
   const calculateSmartPosition = (rect: DOMRect) => {
-    const flashcardWidth = 600;
-    const flashcardHeight = 400; // Ước tính chiều cao flashcard
+    const flashcardWidth = 850;
+    const flashcardHeight = 600; // Tăng chiều cao để chứa full nội dung
     const padding = 20;
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     
-    // Tính toán vị trí ngang - ưu tiên đặt flashcard ở bên phải hoặc trái từ vựng
-    let x = rect.right + 10; // Mặc định đặt bên phải từ vựng
+    // Tính toán vị trí ngang - ưu tiên đặt flashcard gần từ vựng
+    let x = rect.right + 10; // Đặt bên phải từ vựng với khoảng cách 10px
     
     // Kiểm tra xem có đủ không gian bên phải không
     if (x + flashcardWidth > viewportWidth - padding) {
       // Không đủ không gian bên phải, thử đặt bên trái
       x = rect.left - flashcardWidth - 10;
       
-      // Nếu vẫn không đủ không gian bên trái, đặt ở giữa nhưng tránh che từ vựng
+      // Nếu vẫn không đủ không gian bên trái, đặt ở vị trí gần nhất có thể
       if (x < padding) {
-        // Tính toán vị trí để không che từ vựng
-        const wordCenterX = rect.left + rect.width / 2;
-        const wordLeft = rect.left;
-        const wordRight = rect.right;
-        
-        // Thử đặt flashcard ở phía trên hoặc dưới từ vựng
-        if (wordCenterX - flashcardWidth / 2 >= padding && wordCenterX + flashcardWidth / 2 <= viewportWidth - padding) {
-          // Có thể đặt ở giữa mà không che từ vựng
-          x = wordCenterX - flashcardWidth / 2;
+        // Đặt flashcard ở vị trí gần từ vựng nhất có thể
+        if (rect.left < viewportWidth / 2) {
+          // Từ vựng ở bên trái, đặt flashcard sát bên phải màn hình
+          x = viewportWidth - flashcardWidth - padding;
         } else {
-          // Đặt sát bên trái hoặc phải màn hình
-          if (wordLeft < viewportWidth - wordRight) {
-            // Từ vựng gần bên trái, đặt flashcard sát bên phải
-            x = viewportWidth - flashcardWidth - padding;
-          } else {
-            // Từ vựng gần bên phải, đặt flashcard sát bên trái
-            x = padding;
-          }
+          // Từ vựng ở bên phải, đặt flashcard sát bên trái màn hình
+          x = padding;
         }
       }
     }
     
-    // Tính toán vị trí dọc - ưu tiên không che từ vựng
-    let y = rect.bottom + 10; // Mặc định đặt phía dưới từ vựng
+    // Tính toán vị trí dọc - ưu tiên đặt flashcard gần từ vựng
+    let y = rect.bottom + 10; // Mặc định đặt phía dưới từ vựng với khoảng cách 10px
     
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
@@ -145,28 +142,13 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
       // Có đủ không gian phía trên, hiển thị phía trên từ vựng
       y = rect.top - flashcardHeight - 10;
     } else {
-      // Không đủ không gian ở cả hai phía
-      // Tính toán vị trí để che ít nhất từ vựng
-      const wordCenterY = rect.top + rect.height / 2;
-      
+      // Không đủ không gian ở cả hai phía, đặt ở vị trí gần nhất có thể
       if (spaceBelow > spaceAbove) {
         // Phía dưới có nhiều không gian hơn, đặt flashcard ở phía dưới
         y = Math.min(viewportHeight - flashcardHeight - padding, rect.bottom + 10);
       } else {
         // Phía trên có nhiều không gian hơn, đặt flashcard ở phía trên
         y = Math.max(padding, rect.top - flashcardHeight - 10);
-      }
-      
-      // Nếu vẫn che từ vựng, thử đặt ở vị trí khác
-      if (y <= rect.bottom && y + flashcardHeight >= rect.top) {
-        // Flashcard vẫn che từ vựng, đặt ở vị trí tối ưu
-        if (wordCenterY < viewportHeight / 2) {
-          // Từ vựng ở nửa trên màn hình, đặt flashcard ở phía dưới
-          y = viewportHeight - flashcardHeight - padding;
-        } else {
-          // Từ vựng ở nửa dưới màn hình, đặt flashcard ở phía trên
-          y = padding;
-        }
       }
     }
     
@@ -214,6 +196,11 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     }
   }, [activeTab, passage.id]);
 
+
+  // Debug log để theo dõi state
+  useEffect(() => {
+    console.log('🎯 Render check:', { showVocabFlashcard, selectedVocabTerm, flashcardPosition });
+  }, [showVocabFlashcard, selectedVocabTerm, flashcardPosition]);
 
   // Cập nhật vị trí flashcard khi window resize
   useEffect(() => {
@@ -289,55 +276,101 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     loadTopicName();
   }, [passage.topicId]);
 
+  // Audio player functionality - chỉ khởi tạo khi có audio
+  useEffect(() => {
+    // Chỉ khởi tạo audio player nếu có audio
+    if (!passage.audioUrl) return;
+
+    const audio = document.getElementById('lesson-audio') as HTMLAudioElement;
+    const playBtn = document.getElementById('play-pause') as HTMLButtonElement;
+    const progress = document.getElementById('progress') as HTMLDivElement;
+    const current = document.getElementById('current-time') as HTMLSpanElement;
+    const duration = document.getElementById('duration') as HTMLSpanElement;
+    const speedBtn = document.getElementById('speed-btn') as HTMLButtonElement;
+
+    if (!audio || !playBtn || !progress || !current || !duration || !speedBtn) return;
+
+    let isPlaying = false;
+    let speed = 1;
+
+    const formatTime = (seconds: number) => {
+      if (!seconds || isNaN(seconds)) return '0:00';
+      const minutes = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${minutes}:${secs}`;
+    };
+
+    const updateProgress = () => {
+      const { currentTime, duration: dur } = audio;
+      progress.style.width = `${(currentTime / dur) * 100}%`;
+      current.textContent = formatTime(currentTime);
+      duration.textContent = formatTime(dur);
+    };
+
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        audio.pause();
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
+      } else {
+        audio.play();
+        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    audio.addEventListener('timeupdate', updateProgress);
+
+    speedBtn.addEventListener('click', () => {
+      speed += 0.25;
+      if (speed > 1.5) speed = 0.75;
+      audio.playbackRate = speed;
+      speedBtn.textContent = `${speed.toFixed(2)}x`.replace('.00', '');
+    });
+
+    // Cleanup function
+    return () => {
+      audio.removeEventListener('timeupdate', updateProgress);
+    };
+  }, [passage.audioUrl]);
+
   // Mock words for dictation exercise
   const words = passage.text.split(' ').slice(0, 10);
   const maskedWords = words.map(word => '*'.repeat(word.length));
 
   return (
-    <div className="passage-detail-container">
-      {/* Breadcrumbs */}
-      <div className="breadcrumbs">
-        <span onClick={() => navigate('/topics')}>{topicName || 'Chủ đề'}</span>
-        <span>›</span>
-        <span>{passage.title}</span>
-      </div>
+    <main className="lesson-container">
+      {/* Breadcrumb */}
+      <nav className="breadcrumb">
+        <a href="#" onClick={() => navigate('/topics')}>{topicName || 'Chủ đề'}</a> › <span>{passage.title}</span>
+      </nav>
 
-      <div className={`passage-detail-layout ratio-${passage.layoutRatio?.replace(':', '-') || '4-6'}`}>
-        {/* Left Panel - Video */}
-        <div className="left-panel">
-          <h3 className="panel-title">{passage.title}</h3>
-          
-          <div className="video-container">
-            <div className="video-player">
-              {passage.thumbnail ? (
-                <img src={passage.thumbnail} alt={passage.title} className="video-thumbnail" />
-              ) : (
-                <div className="video-placeholder">
-                  <div className="play-button">▶</div>
-                </div>
-              )}
-              <div className="video-overlay">
-                <div className="video-title">{passage.title}</div>
-                <div className="video-source">Xem trên YouTube</div>
-              </div>
-            </div>
+      <div className="lesson-layout">
+        {/* LEFT PANEL */}
+        <aside className="lesson-info">
+          <h2 className="lesson-title">{passage.title}</h2>
+
+          <div className="lesson-thumb">
+            {passage.thumbnail ? (
+              <img src={passage.thumbnail} alt="Lesson Thumbnail" />
+            ) : (
+              <img src="https://i.ibb.co/nrRJLwH/dogs.jpg" alt="Lesson Thumbnail" />
+            )}
           </div>
 
-          <div className="vocabulary-section">
-            <h4>Từ mới</h4>
-            <div className="vocabulary-list">
+          <div className="vocab-section">
+            <h3>Từ mới</h3>
+            <div className="vocab-list">
               {(() => {
                 // Use passage.vocab if available, otherwise fallback to extracting from text
                 if (passage.vocab && passage.vocab.length > 0) {
                   return passage.vocab.map((vocab, index) => (
-                    <div 
+                    <button 
                       key={index} 
-                      className="vocabulary-item clickable-vocab"
+                      className="vocab-btn clickable-vocab"
                       onClick={(e) => handleNewWordClick(vocab.term, e)}
-                      style={{ cursor: 'pointer' }}
                     >
-                      <div className="vocab-word">{vocab.term}</div>
-                    </div>
+                      {vocab.term}
+                    </button>
                   ));
                 } else {
                   // Fallback: Extract vocabulary from text (same logic as HighlightedText)
@@ -354,14 +387,13 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
                     const uniqueWords = Array.from(new Set(vocabularyWords));
                     
                     return uniqueWords.map((word, index) => (
-                      <div 
+                      <button 
                         key={index} 
-                        className="vocabulary-item clickable-vocab"
+                        className="vocab-btn clickable-vocab"
                         onClick={(e) => handleNewWordClick(word, e)}
-                        style={{ cursor: 'pointer' }}
                       >
-                        <div className="vocab-word">{word}</div>
-                      </div>
+                        {word}
+                      </button>
                     ));
                   } else {
                     return (
@@ -375,63 +407,75 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
               })()}
             </div>
           </div>
-        </div>
+        </aside>
 
-        {/* Right Panel - Exercise */}
-        <div className="right-panel">
-          <div className="exercise-tabs">
-            <div className="package-tab-wrapper">
-              <input 
-                type="radio" 
-                id="tab-1" 
-                name="tab" 
-                className="input"
-                checked={activeTab === 'dictation'}
-                onChange={() => setActiveTab('dictation')}
+        {/* RIGHT PANEL */}
+        <section className="lesson-content">
+          <div className="tab-header">
+            <button 
+              className={`tab-btn ${activeTab === 'dictation' ? 'active' : ''}`} 
+              data-tab="reading"
+              onClick={() => setActiveTab('dictation')}
+            >
+              Đọc bài
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'transcript' ? 'active' : ''}`} 
+              data-tab="questions"
+              onClick={() => setActiveTab('transcript')}
+            >
+              Câu hỏi
+            </button>
+          </div>
+
+          {/* Tab: Reading */}
+          <div className={`tab-body ${activeTab === 'dictation' ? 'active' : ''}`} id="reading">
+            <h3>Nội dung bài học</h3>
+
+            {/* Chỉ hiển thị audio player nếu có audio */}
+            {passage.audioUrl && (
+              <>
+                <div className="audio-player">
+                  <button id="play-pause" className="play-btn">
+                    <i className="fa-solid fa-play"></i>
+                  </button>
+                  <div className="progress-wrapper">
+                    <div className="progress-bar"><div id="progress"></div></div>
+                    <div className="time">
+                      <span id="current-time">0:00</span>
+                      <span id="duration">0:00</span>
+                    </div>
+                  </div>
+                  <button id="speed-btn" className="speed-btn">1x</button>
+                </div>
+
+                <audio id="lesson-audio" src={passage.audioUrl}></audio>
+              </>
+            )}
+
+            <div className="lesson-text">
+              <HighlightedText 
+                text={passage.text}
+                onVocabularyClick={handleVocabularyClick}
+                passageVocab={passage.vocab || []}
               />
-              <label htmlFor="tab-1" className="package-tab">
-                Đọc bài
-              </label>
-              
-              <input 
-                type="radio" 
-                id="tab-2" 
-                name="tab" 
-                className="input"
-                checked={activeTab === 'transcript'}
-                onChange={() => setActiveTab('transcript')}
-              />
-              <label htmlFor="tab-2" className="package-tab">
-                Câu hỏi
-              </label>
             </div>
           </div>
 
-          {activeTab === 'dictation' ? (
-            <div className="lesson-content">
-              <h3>Nội dung bài học</h3>
-              <div className="content-text">
-                <HighlightedText 
-                  text={passage.text}
-                  onVocabularyClick={handleVocabularyClick}
-                  passageVocab={passage.vocab || []}
-                />
+          {/* Tab: Questions */}
+          <div className={`tab-body ${activeTab === 'transcript' ? 'active' : ''}`} id="questions">
+            <h3>Câu hỏi ôn tập</h3>
+            {loadingQuestions ? (
+              <div style={{ textAlign: 'center', padding: '40px' }}>
+                <p style={{ color: '#666', fontSize: '1.2rem' }}>
+                  🔄 Đang tải câu hỏi...
+                </p>
               </div>
-            </div>
-          ) : (
-            <>
-              {loadingQuestions ? (
-                <div style={{ textAlign: 'center', padding: '40px' }}>
-                  <p style={{ color: '#666', fontSize: '1.2rem' }}>
-                    🔄 Đang tải câu hỏi...
-                  </p>
-                </div>
-              ) : (
-                <QuizSection questions={questions} passageId={passage.id} />
-              )}
-            </>
-          )}
-        </div>
+            ) : (
+              <QuizSection questions={questions} passageId={passage.id} />
+            )}
+          </div>
+        </section>
       </div>
 
       {/* VocabFlashcard hiển thị khi click vào từ vựng trong phần "Từ mới" */}
@@ -443,7 +487,7 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
           position={flashcardPosition}
         />
       )}
-    </div>
+    </main>
   );
 };
 

@@ -2813,360 +2813,361 @@ strong, b {
   color: var(--gray-900);
 }
 
-/* Passage Detail Layout - Parroto style */
-.passage-detail-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: var(--spacing-6);
+/* Modern Lesson Detail Layout - Inter Font Style */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+.lesson-container {
+  font-family: "Inter", sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+  margin: 0;
+  padding: 40px;
+  min-height: 100vh;
 }
 
-.breadcrumbs {
+/* Breadcrumb */
+.breadcrumb {
+  font-size: 14px;
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.breadcrumb a {
+  color: #2563eb;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Layout */
+.lesson-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+}
+
+/* Card style */
+.lesson-info,
+.lesson-content {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.lesson-info:hover,
+.lesson-content:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* Left Panel */
+.lesson-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #1e293b;
+}
+
+.lesson-thumb {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.lesson-thumb img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.lesson-thumb:hover img {
+  transform: scale(1.05);
+}
+
+
+/* Vocab */
+.vocab-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+
+.vocab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vocab-btn {
+  background: #1e293b;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  font-size: 14px;
+}
+
+.vocab-btn:hover {
+  background: #2563eb;
+  transform: scale(1.05);
+}
+
+/* Tabs */
+.tab-header {
+  display: flex;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  background: #e2e8f0;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 10px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  color: #475569;
+  background: transparent;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.tab-btn.active {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  color: white;
+  border-radius: 10px;
+}
+
+/* Audio Player */
+.audio-player {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
-  margin-bottom: var(--spacing-6);
-  font-size: var(--font-size-sm);
-  color: var(--gray-600);
+  gap: 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+  padding: 12px 16px;
+  margin-bottom: 18px;
 }
 
-.breadcrumbs span {
+.play-btn {
+  background: linear-gradient(145deg, #2563eb, #1e40af);
+  border: none;
+  color: white;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
   cursor: pointer;
-  transition: color 0.2s ease;
-}
-
-.breadcrumbs span:hover {
-  color: var(--primary-color);
-}
-
-.passage-detail-layout {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: var(--spacing-8);
-  min-height: 80vh;
-}
-
-/* Layout ratio variations */
-.passage-detail-layout.ratio-4-6 {
-  grid-template-columns: 2fr 3fr; /* 40% : 60% */
-}
-
-.passage-detail-layout.ratio-5-5 {
-  grid-template-columns: 1fr 1fr; /* 50% : 50% */
-}
-
-/* Left Panel - Video */
-.left-panel {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--gray-200);
-}
-
-.panel-title {
-  font-size: var(--font-size-xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--gray-900);
-  margin: 0 0 var(--spacing-4) 0;
-  padding: var(--spacing-6) var(--spacing-6) 0 var(--spacing-6);
-}
-
-.video-container {
-  margin-bottom: var(--spacing-6);
-  padding: 0 var(--spacing-6);
-}
-
-.video-player {
-  position: relative;
-  width: 100%;
-  height: 300px;
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  background: var(--gray-100);
-}
-
-.video-thumbnail {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-
-.video-placeholder {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--gray-100), var(--gray-200));
+  box-shadow: 0 4px 10px rgba(37,99,235,0.3);
+  transition: transform 0.2s;
 }
 
-.play-button {
-  font-size: 3rem;
-  color: var(--primary-color);
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.play-button:hover {
+.play-btn:hover {
   transform: scale(1.1);
 }
 
-.video-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  color: white;
-  padding: var(--spacing-4);
+.progress-wrapper {
+  flex: 1;
 }
 
-.video-title {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  margin-bottom: var(--spacing-1);
-}
-
-.video-source {
-  font-size: var(--font-size-sm);
-  opacity: 0.8;
-}
-
-.video-controls h4 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--gray-900);
-  margin: 0 0 var(--spacing-3) 0;
-}
-
-.control-buttons {
-  display: flex;
-  gap: var(--spacing-3);
-}
-
-.control-btn {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-4);
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: var(--font-size-base);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-family);
-  letter-spacing: var(--letter-spacing-normal);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.control-btn.primary {
-  background: var(--primary-color);
-  color: white;
-}
-
-.control-btn.primary:hover {
-  background: var(--primary-dark);
-  transform: translateY(-1px);
-}
-
-.control-btn.secondary {
-  background: var(--gray-100);
-  color: var(--gray-700);
-  border: 1px solid var(--gray-300);
-}
-
-.control-btn.secondary:hover {
-  background: var(--gray-200);
-  transform: translateY(-1px);
-}
-
-/* Vocabulary Section */
-.vocabulary-section {
-  margin-top: var(--spacing-6);
-  padding: 0 var(--spacing-6) var(--spacing-6) var(--spacing-6);
-}
-
-.vocabulary-section h4 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--gray-900);
-  margin: 0 0 var(--spacing-4) 0;
-}
-
-.vocabulary-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-2);
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.vocabulary-item {
-  display: inline-block;
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #e5e7eb;
   border-radius: 4px;
-  background-color: #3d405b;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+#progress {
+  width: 0%;
+  height: 6px;
+  background: linear-gradient(90deg, #3b82f6, #06b6d4);
+  border-radius: 4px;
+}
+
+.time {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #475569;
+}
+
+.speed-btn {
   border: none;
-  color: #FFFFFF;
-  text-align: center;
-  font-size: 17px;
+  background: #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.speed-btn:hover {
+  background: #cbd5e1;
+}
+
+/* Text */
+.lesson-text {
+  background: #f8fafc;
+  border-radius: 10px;
   padding: 16px;
-  width: 130px;
-  transition: all 0.5s;
-  cursor: pointer;
-  margin: 5px;
+  line-height: 1.7;
+  font-size: 15px;
+  color: #1e293b;
 }
 
-.vocab-word {
-  cursor: pointer;
-  display: inline-block;
-  position: relative;
-  transition: 0.5s;
-  font-weight: var(--font-weight-semibold);
-  white-space: nowrap;
+.lesson-text mark {
+  background: #fde047;
+  padding: 2px 4px;
+  border-radius: 4px;
 }
 
-.vocab-word:after {
-  content: '»';
-  position: absolute;
+/* Questions */
+.tab-body h3 {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #1e293b;
+}
+
+/* Animation */
+.tab-body {
+  display: none;
   opacity: 0;
-  top: 0;
-  right: -15px;
-  transition: 0.5s;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
 }
 
-.vocabulary-item:hover .vocab-word {
-  padding-right: 15px;
-}
-
-.vocabulary-item:hover .vocab-word:after {
+.tab-body.active {
+  display: block;
   opacity: 1;
-  right: 0;
+  transform: translateY(0);
 }
 
-.vocab-meaning {
-  font-size: var(--font-size-sm);
-  color: var(--gray-700);
-  margin-bottom: var(--spacing-1);
-}
-
-.vocab-pronunciation {
-  font-size: var(--font-size-xs);
-  color: var(--gray-500);
-  font-style: italic;
-}
-
+/* No vocabulary fallback */
 .no-vocabulary {
   text-align: center;
-  padding: var(--spacing-6);
-  color: var(--gray-500);
+  padding: 20px;
+  color: #64748b;
+  font-size: 14px;
 }
 
 .no-vocabulary p {
-  margin: 0;
-  font-size: var(--font-size-sm);
+  margin: 0 0 8px 0;
 }
 
-
-.lesson-title h2 {
-  font-size: var(--font-size-2xl);
-  font-weight: var(--font-weight-semibold);
-  color: var(--gray-900);
-  margin: 0;
-}
-
-.mascot {
-  display: flex;
-  justify-content: center;
-  margin-top: var(--spacing-6);
-}
-
-.mascot-character {
-  font-size: 4rem;
-  animation: bounce 2s infinite;
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-/* Right Panel - Exercise */
-.right-panel {
-  background: var(--white);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  border: 1px solid var(--gray-200);
-}
-
-/* Modern Tab Style */
-.exercise-tabs {
-  margin-bottom: var(--spacing-4);
-}
-
-.package-tab-wrapper {
-  display: flex;
-  align-items: center;
-  column-gap: 10px;
-  border-radius: 8px;
-  border: 1px solid var(--primary-color);
-  padding: 8px;
-}
-
-.package-tab-wrapper .input {
-  display: none;
-}
-
-.package-tab {
-  flex-grow: 1;
-  text-align: center;
-  padding: 8px 16px;
-  border-radius: 8px;
+.no-vocabulary small {
   font-size: 12px;
-  background: #ffffff;
-  color: var(--primary-color);
-  font-weight: var(--font-weight-semibold);
-  cursor: pointer;
-  transition: 0.5s ease-in-out;
+  color: #94a3b8;
 }
 
-.package-tab:active {
-  transform: scale(0.9);
+/* Loading Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.input:checked + label.package-tab {
-  background: var(--primary-color);
-  color: #ffffff;
-  box-shadow: 0px 0px 10px 0px var(--primary-color);
+/* Responsive Design */
+@media (max-width: 900px) {
+  .lesson-layout {
+    grid-template-columns: 1fr;
+  }
+  
+  .lesson-container {
+    padding: 20px;
+  }
+  
+  .lesson-info,
+  .lesson-content {
+    padding: 20px;
+  }
+  
+  .lesson-thumb img {
+    height: 180px;
+  }
+  
+  .audio-player {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+  
+  .progress-wrapper {
+    order: 2;
+  }
+  
+  .play-btn {
+    order: 1;
+    align-self: center;
+  }
+  
+  .speed-btn {
+    order: 3;
+    align-self: center;
+  }
 }
 
-/* Lesson Content */
-.lesson-content {
-  margin-top: var(--spacing-4);
-}
-
-.lesson-content h3 {
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--gray-900);
-  margin: 0 0 var(--spacing-4) 0;
-}
-
-.content-text {
-  background: var(--gray-50);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-4);
-  border: 1px solid var(--gray-200);
-  font-size: var(--font-size-base);
-  line-height: 1.6;
-  color: var(--gray-800);
+@media (max-width: 600px) {
+  .lesson-container {
+    padding: 15px;
+  }
+  
+  .lesson-info,
+  .lesson-content {
+    padding: 16px;
+    border-radius: 16px;
+  }
+  
+  .lesson-title {
+    font-size: 20px;
+  }
+  
+  .lesson-thumb img {
+    height: 160px;
+  }
+  
+  .vocab-list {
+    gap: 8px;
+  }
+  
+  .vocab-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  
+  .tab-btn {
+    padding: 8px;
+    font-size: 13px;
+  }
+  
+  .audio-player {
+    padding: 10px 12px;
+  }
+  
+  .play-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
 }
 
 /* Admin Panel Styles - Parroto Style */
