@@ -592,51 +592,9 @@ strong, b {
   margin-right: auto;
 }
 
-.topic-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-3);
-  width: 100%;
-}
-
-.topic-title {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  flex: 1;
-}
-
-.topic-icon {
-  font-size: var(--font-size-2xl);
-}
 
 
-.lesson-count {
-  color: var(--gray-500);
-  font-size: var(--font-size-base);
-  font-weight: 400;
-}
-
-.view-all-button {
-  background: none;
-  border: none;
-  color: var(--primary-color);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  font-family: var(--font-family);
-  letter-spacing: var(--letter-spacing-normal);
-  cursor: pointer;
-  transition: color 0.2s ease;
-  padding: var(--spacing-2) 0;
-}
-
-.view-all-button:hover {
-  color: var(--primary-hover);
-}
-
-/* .passages-grid {
+.passages-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-auto-rows: auto;
@@ -644,16 +602,16 @@ strong, b {
   padding: var(--spacing-2) 0;
   overflow: hidden;
   justify-content: space-evenly;
-} */
+}
 
 /* Đảm bảo desktop luôn có 4 cột */
-/* @media (min-width: 1024px) {
+@media (min-width: 769px) {
   .passages-grid {
     grid-template-columns: repeat(4, 1fr) !important;
     gap: var(--spacing-3) !important;
     justify-content: space-evenly !important;
   }
-} */
+}
 
 
 .passage-card-parroto {
@@ -4694,8 +4652,8 @@ strong, b {
   }
   
   .passages-grid {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: var(--spacing-1);
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-3);
   }
 }
 
@@ -4783,12 +4741,6 @@ strong, b {
     width: 95%;
   }
   
-  .topic-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--spacing-2);
-    margin-bottom: var(--spacing-2);
-  }
   
   .passages-grid {
     grid-template-columns: repeat(4, 1fr);
@@ -4989,27 +4941,6 @@ strong, b {
   font-style: italic;
 }
 
-.empty-state-topics .view-all-button {
-  background: var(--primary-color);
-  color: white;
-  border: none;
-  padding: var(--spacing-3) var(--spacing-6);
-  border-radius: var(--radius-lg);
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  font-family: var(--font-family);
-  letter-spacing: var(--letter-spacing-normal);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(30, 64, 175, 0.3);
-  min-width: 200px;
-}
-
-.empty-state-topics .view-all-button:hover {
-  background: var(--primary-hover);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 40px rgba(30, 64, 175, 0.4);
-}
 
 /* Vocabulary specific styles */
 .vocab-meaning {

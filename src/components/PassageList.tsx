@@ -94,6 +94,50 @@ const PassageList: React.FC<PassageListProps> = ({
     loadPassages();
   }, [topic?.slug, user, userEnglishLevel, filterPassagesByLevel]);
 
+  // Tooltip positioning effect
+  useEffect(() => {
+    const tooltips = document.querySelectorAll(".tooltip");
+
+    const handleMouseEnter = (tooltip: Element) => {
+      const tooltipText = tooltip.querySelector(".tooltip-text") as HTMLElement;
+      if (!tooltipText) return;
+
+      const rect = tooltipText.getBoundingClientRect();
+
+      // Nếu tooltip bị cắt bên phải
+      if (rect.right > window.innerWidth) {
+        tooltipText.style.left = "auto";
+        tooltipText.style.right = "0";
+        tooltipText.style.transform = "translateX(0)";
+      }
+
+      // Nếu tooltip bị cắt bên trái
+      if (rect.left < 0) {
+        tooltipText.style.left = "0";
+        tooltipText.style.transform = "translateX(0)";
+      }
+    };
+
+    const handleMouseLeave = (tooltip: Element) => {
+      const tooltipText = tooltip.querySelector(".tooltip-text") as HTMLElement;
+      if (tooltipText) {
+        tooltipText.removeAttribute("style");
+      }
+    };
+
+    tooltips.forEach((tooltip) => {
+      tooltip.addEventListener("mouseenter", () => handleMouseEnter(tooltip));
+      tooltip.addEventListener("mouseleave", () => handleMouseLeave(tooltip));
+    });
+
+    return () => {
+      tooltips.forEach((tooltip) => {
+        tooltip.removeEventListener("mouseenter", () => handleMouseEnter(tooltip));
+        tooltip.removeEventListener("mouseleave", () => handleMouseLeave(tooltip));
+      });
+    };
+  }, [passages]);
+
 
   if (loading) {
     return (
@@ -138,29 +182,25 @@ const PassageList: React.FC<PassageListProps> = ({
 
   const getEnglishLevelText = (englishLevels?: EnglishLevel[], englishLevel?: EnglishLevel, level?: number) => {
     if (englishLevels && englishLevels.length > 0) {
-      // Show multiple levels
-      if (englishLevels.length === 1) {
-        switch (englishLevels[0]) {
-          case 'kids-2-4': return '👶 Kids 2-4';
-          case 'kids-5-10': return '🧒 Kids 5-10';
-          case 'basic': return '🌱 Basic';
-          case 'independent': return '🌿 Independent';
-          case 'proficient': return '🌳 Proficient';
-          default: return 'Basic';
-        }
-      } else {
-        return `📚 ${englishLevels.length} Levels`;
+      // Return text for the first level (since we're now handling multiple levels separately)
+      switch (englishLevels[0]) {
+        case 'kids-2-4': return 'Kids 2-4';
+        case 'kids-5-10': return 'Kids 5-10';
+        case 'basic': return 'Basic';
+        case 'independent': return 'Independent';
+        case 'proficient': return 'Proficient';
+        default: return 'Basic';
       }
     }
     
     // Fallback to single level
     if (englishLevel) {
       switch (englishLevel) {
-        case 'kids-2-4': return '👶 Kids 2-4';
-        case 'kids-5-10': return '🧒 Kids 5-10';
-        case 'basic': return '🌱 Basic';
-        case 'independent': return '🌿 Independent';
-        case 'proficient': return '🌳 Proficient';
+        case 'kids-2-4': return 'Kids 2-4';
+        case 'kids-5-10': return 'Kids 5-10';
+        case 'basic': return 'Basic';
+        case 'independent': return 'Independent';
+        case 'proficient': return 'Proficient';
         default: return 'Basic';
       }
     }
@@ -175,96 +215,141 @@ const PassageList: React.FC<PassageListProps> = ({
     }
   };
 
+  const getLevelClass = (englishLevels?: EnglishLevel[], englishLevel?: EnglishLevel, level?: number) => {
+    // Handle single level from array
+    if (englishLevels && englishLevels.length > 0) {
+      switch (englishLevels[0]) {
+        case 'kids-2-4': return 'beginner';
+        case 'kids-5-10': return 'beginner';
+        case 'basic': return 'beginner';
+        case 'independent': return 'intermediate';
+        case 'proficient': return 'proficient';
+        default: return 'beginner';
+      }
+    }
+    
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return 'beginner';
+        case 'kids-5-10': return 'beginner';
+        case 'basic': return 'beginner';
+        case 'independent': return 'intermediate';
+        case 'proficient': return 'proficient';
+        default: return 'beginner';
+      }
+    }
+    
+    // Fallback to level number
+    if (level) {
+      switch (level) {
+        case 1: return 'beginner';
+        case 2: return 'beginner';
+        case 3: return 'intermediate';
+        case 4: return 'proficient';
+        default: return 'beginner';
+      }
+    }
+    
+    return 'beginner';
+  };
+
   return (
     <div className="topics-section">
       <div className="topic-group">
-        <div className="topic-header">
-          <div className="topic-title">
-            <span className="topic-icon">{getTopicIcon(topic.slug)}</span>
-            <h2>{topic.name}</h2>
-            <span className="lesson-count">({passages.length} bài học)</span>
-          </div>
-          <button 
-            className="view-all-button"
-            onClick={onBack}
-          >
-            ← Quay lại
-          </button>
-        </div>
 
         <div className="passages-grid">
           {passages.map((passage) => (
             <div 
               key={passage.id} 
-              className="passage-card-parroto"
+              className="lesson-card"
             >
-              <div className="passage-card-content" onClick={() => onOpen(passage)}>
-                <div className="passage-thumbnail">
-                  {passage.thumbnail ? (
-                    <img src={passage.thumbnail} alt={passage.title} />
-                  ) : (
-                    <div className="thumbnail-placeholder">
-                      {getTopicIcon(topic.slug)}
+              <div className="lesson-thumbnail">
+                {passage.thumbnail ? (
+                  <img src={passage.thumbnail} alt={passage.title} />
+                ) : (
+                  <div className="thumbnail-placeholder">
+                    {getTopicIcon(topic.slug)}
+                  </div>
+                )}
+
+                <div className="card-actions">
+                  {onManageVocab && (
+                    <div className="tooltip">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onManageVocab(passage);
+                        }}
+                      >
+                        <i className="fa-solid fa-language"></i>
+                      </button>
+                      <span className="tooltip-text">Quản lý từ vựng</span>
+                    </div>
+                  )}
+                  <div className="tooltip">
+                    <button>
+                      <i className="fa-solid fa-circle-question"></i>
+                    </button>
+                    <span className="tooltip-text">Quản lý câu hỏi</span>
+                  </div>
+                  {onEdit && (
+                    <div className="tooltip">
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(passage);
+                        }}
+                      >
+                        <i className="fa-solid fa-pen-to-square"></i>
+                      </button>
+                      <span className="tooltip-text">Chỉnh sửa bài học</span>
+                    </div>
+                  )}
+                  {onDelete && (
+                    <div className="tooltip">
+                      <button 
+                        className="delete-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDelete(passage);
+                        }}
+                      >
+                        <i className="fa-solid fa-trash"></i>
+                      </button>
+                      <span className="tooltip-text">Xóa bài học</span>
                     </div>
                   )}
                 </div>
-                
-                <div className="passage-content">
-                  <div className="passage-meta">
-                    <span className="passage-views">{passage.vocab?.length || 0} từ vựng</span>
-         <span 
-           className="passage-level"
-           style={{ backgroundColor: getEnglishLevelColor(passage.englishLevels?.[0] || passage.englishLevel, passage.level || 1) }}
-         >
-           {getEnglishLevelText(passage.englishLevels || undefined, passage.englishLevel, passage.level || 1)}
-         </span>
-                    <span className="passage-source">Từ vựng</span>
-                  </div>
-                  
-                  <h3 className="passage-title">{passage.title}</h3>
-                </div>
               </div>
-              
-              {(onEdit || onDelete || onManageVocab) && (
-                <div className="passage-admin-actions">
-                  {onEdit && (
-                    <button 
-                      className="edit-passage-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onEdit(passage);
-                      }}
-                      title="Chỉnh sửa bài học"
+
+              <div className="lesson-info" onClick={() => onOpen(passage)}>
+                <div className="lesson-tags">
+                  <span className="tag-count">
+                    <i className="fa-solid fa-book"></i> {passage.vocab?.length || 0} từ vựng
+                  </span>
+                  <span className="tag-questions">
+                    <i className="fa-solid fa-circle-question"></i> {passage.questions?.length || 0} câu hỏi
+                  </span>
+                  {passage.englishLevels && passage.englishLevels.length > 0 ? (
+                    passage.englishLevels.map((level, index) => (
+                      <span 
+                        key={index}
+                        className={`tag-level ${getLevelClass([level], undefined, undefined)}`}
+                      >
+                        <i className="fa-solid fa-seedling"></i> {getEnglishLevelText([level], undefined, undefined)}
+                      </span>
+                    ))
+                  ) : (
+                    <span 
+                      className={`tag-level ${getLevelClass(undefined, passage.englishLevel, passage.level || 1)}`}
                     >
-                      ✏️
-                    </button>
-                  )}
-                  {onManageVocab && (
-                    <button 
-                      className="manage-vocab-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onManageVocab(passage);
-                      }}
-                      title="Quản lý từ vựng"
-                    >
-                      📚
-                    </button>
-                  )}
-                  {onDelete && (
-                    <button 
-                      className="delete-passage-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDelete(passage);
-                      }}
-                      title="Xóa bài học"
-                    >
-                      🗑️
-                    </button>
+                      <i className="fa-solid fa-seedling"></i> {getEnglishLevelText(undefined, passage.englishLevel, passage.level || 1)}
+                    </span>
                   )}
                 </div>
-              )}
+
+                <h3 className="lesson-title">{passage.title}</h3>
+              </div>
             </div>
           ))}
         </div>

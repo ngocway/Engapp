@@ -10,10 +10,12 @@ import { vocabSeeds } from '../data/vocab';
 import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
 import AdminPassageManager from './AdminPassageManager';
-import AdminHeader from './AdminHeader';
+import { useAdmin } from '../contexts/AdminContext';
+import '../pages/AdminPage.css';
 
 const AdminPanel: React.FC = () => {
   const navigate = useNavigate();
+  const { logout } = useAdmin();
   const [showPassageManager, setShowPassageManager] = useState(false);
 
   // Remove handleTabChange since admin doesn't need user navigation
@@ -252,9 +254,37 @@ const AdminPanel: React.FC = () => {
 
   if (showPassageManager) {
     return (
-      <div className="app">
-        <AdminHeader />
-        <main className="main">
+      <div className="admin-dashboard">
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <img src="https://i.ibb.co/6bPZYBn/logo.png" alt="EngApp Logo" />
+            <h2>EngApp</h2>
+          </div>
+        <nav className="sidebar-menu">
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-gauge-high"></i> Dashboard
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-book"></i> Bài học
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-language"></i> Từ vựng
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-user-gear"></i> Người dùng
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-chart-line"></i> Thống kê
+          </a>
+          <button className="menu-item active">
+            <i className="fa-solid fa-screwdriver-wrench"></i> Admin Panel
+          </button>
+        </nav>
+          <button className="logout-sidebar" onClick={logout}>
+            <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
+          </button>
+        </aside>
+        <main className="main-content">
           <AdminPassageManager onClose={() => setShowPassageManager(false)} />
         </main>
       </div>
@@ -262,115 +292,141 @@ const AdminPanel: React.FC = () => {
   }
 
   return (
-    <div className="app">
-      <AdminHeader />
-      <main className="main">
+    <div className="admin-dashboard">
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <img src="https://i.ibb.co/6bPZYBn/logo.png" alt="EngApp Logo" />
+          <h2>EngApp</h2>
+        </div>
+        <nav className="sidebar-menu">
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-gauge-high"></i> Dashboard
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-book"></i> Bài học
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-language"></i> Từ vựng
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-user-gear"></i> Người dùng
+          </a>
+          <a href="#" className="menu-item active">
+            <i className="fa-solid fa-chart-line"></i> Thống kê
+          </a>
+        </nav>
+        <button className="logout-sidebar" onClick={logout}>
+          <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
+        </button>
+      </aside>
+      <main className="main-content">
         <div className="admin-panel-container">
-      <div className="admin-header">
-        <div className="admin-title">
-          <span className="admin-icon">🔧</span>
-          <h1>Admin Panel</h1>
-        </div>
-        <p className="admin-subtitle">Quản lý nội dung học tiếng Anh</p>
-        <div className="admin-status">
-          <span className="status-icon">⚠️</span>
-          <span className="status-text">Development Mode - Auth disabled</span>
-        </div>
-      </div>
 
-      <div className="admin-content">
-        {/* Passage Management Section */}
-        <div className="admin-section">
-          <h2 className="section-title">📚 Quản lý bài học</h2>
-          <div className="admin-grid">
-            <button className="admin-button primary" onClick={() => setShowPassageManager(true)}>
-              <span className="button-icon">📝</span>
-              <span className="button-text">Quản lý bài học</span>
-            </button>
+          <div className="admin-panel-content">
+            <div className="admin-title">
+              <span className="admin-icon">🔧</span>
+              <h2>Admin Panel</h2>
+            </div>
+            <p className="admin-subtitle">Quản lý nội dung học tiếng Anh</p>
+            <div className="admin-status">
+              <span className="status-icon">⚠️</span>
+              <span className="status-text">Development Mode - Auth disabled</span>
+            </div>
+          </div>
+
+          <div className="admin-content">
+            {/* Passage Management Section */}
+            <div className="admin-section">
+              <h2 className="section-title">📚 Quản lý bài học</h2>
+              <div className="admin-grid">
+                <button className="admin-button primary" onClick={() => setShowPassageManager(true)}>
+                  <span className="button-icon">📝</span>
+                  <span className="button-text">Quản lý bài học</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Data Management Section */}
+            <div className="admin-section">
+              <h2 className="section-title">📊 Quản lý dữ liệu</h2>
+              <div className="admin-grid">
+                <button className="admin-button primary" onClick={uploadSampleData}>
+                  <span className="button-icon">📤</span>
+                  <span className="button-text">Upload dữ liệu mẫu</span>
+                </button>
+                
+                <button className="admin-button primary" onClick={uploadTopicsAndPassages}>
+                  <span className="button-icon">📚</span>
+                  <span className="button-text">Upload Topics & Passages</span>
+                </button>
+                
+                <button className="admin-button primary" onClick={uploadLongPassages}>
+                  <span className="button-icon">📄</span>
+                  <span className="button-text">Upload đoạn văn dài</span>
+                </button>
+                
+                <button className="admin-button primary" onClick={reuploadLongPassagesWithVocabDetails}>
+                  <span className="button-icon">🎴</span>
+                  <span className="button-text">Upload Flashcard details</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Vocabulary Management Section */}
+            <div className="admin-section">
+              <h2 className="section-title">📝 Quản lý từ vựng</h2>
+              <div className="admin-grid">
+                <button className="admin-button secondary" onClick={seedVocabCollection}>
+                  <span className="button-icon">➕</span>
+                  <span className="button-text">Tạo collection vocab</span>
+                </button>
+                
+                <button className="admin-button secondary" onClick={quickSetVocabImage}>
+                  <span className="button-icon">🖼️</span>
+                  <span className="button-text">Gán ảnh từ vựng</span>
+                </button>
+                
+                <button className="admin-button secondary" onClick={checkVocabData}>
+                  <span className="button-icon">🔍</span>
+                  <span className="button-text">Kiểm tra dữ liệu vocab</span>
+                </button>
+                
+                <button className="admin-button danger" onClick={forceRefreshVocab}>
+                  <span className="button-icon">🔄</span>
+                  <span className="button-text">Làm mới vocab hoàn toàn</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Questions Management Section */}
+            <div className="admin-section">
+              <h2 className="section-title">❓ Quản lý câu hỏi</h2>
+              <div className="admin-grid">
+                <button className="admin-button secondary" onClick={uploadQuestions}>
+                  <span className="button-icon">📝</span>
+                  <span className="button-text">Upload câu hỏi</span>
+                </button>
+                
+                <button className="admin-button info" onClick={checkQuestionsData}>
+                  <span className="button-icon">📊</span>
+                  <span className="button-text">Kiểm tra câu hỏi database</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Maintenance Section */}
+            <div className="admin-section">
+              <h2 className="section-title">🔧 Bảo trì hệ thống</h2>
+              <div className="admin-grid">
+                <button className="admin-button warning" onClick={fixDuplicatesAndUpdateTravel}>
+                  <span className="button-icon">🧹</span>
+                  <span className="button-text">Dọn trùng & cập nhật ảnh</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-
-        {/* Data Management Section */}
-        <div className="admin-section">
-          <h2 className="section-title">📊 Quản lý dữ liệu</h2>
-          <div className="admin-grid">
-            <button className="admin-button primary" onClick={uploadSampleData}>
-              <span className="button-icon">📤</span>
-              <span className="button-text">Upload dữ liệu mẫu</span>
-            </button>
-            
-            <button className="admin-button primary" onClick={uploadTopicsAndPassages}>
-              <span className="button-icon">📚</span>
-              <span className="button-text">Upload Topics & Passages</span>
-            </button>
-            
-            <button className="admin-button primary" onClick={uploadLongPassages}>
-              <span className="button-icon">📄</span>
-              <span className="button-text">Upload đoạn văn dài</span>
-            </button>
-            
-            <button className="admin-button primary" onClick={reuploadLongPassagesWithVocabDetails}>
-              <span className="button-icon">🎴</span>
-              <span className="button-text">Upload Flashcard details</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Vocabulary Management Section */}
-        <div className="admin-section">
-          <h2 className="section-title">📝 Quản lý từ vựng</h2>
-          <div className="admin-grid">
-            <button className="admin-button secondary" onClick={seedVocabCollection}>
-              <span className="button-icon">➕</span>
-              <span className="button-text">Tạo collection vocab</span>
-            </button>
-            
-            <button className="admin-button secondary" onClick={quickSetVocabImage}>
-              <span className="button-icon">🖼️</span>
-              <span className="button-text">Gán ảnh từ vựng</span>
-            </button>
-            
-            <button className="admin-button secondary" onClick={checkVocabData}>
-              <span className="button-icon">🔍</span>
-              <span className="button-text">Kiểm tra dữ liệu vocab</span>
-            </button>
-            
-            <button className="admin-button danger" onClick={forceRefreshVocab}>
-              <span className="button-icon">🔄</span>
-              <span className="button-text">Làm mới vocab hoàn toàn</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Questions Management Section */}
-        <div className="admin-section">
-          <h2 className="section-title">❓ Quản lý câu hỏi</h2>
-          <div className="admin-grid">
-            <button className="admin-button secondary" onClick={uploadQuestions}>
-              <span className="button-icon">📝</span>
-              <span className="button-text">Upload câu hỏi</span>
-            </button>
-            
-            <button className="admin-button info" onClick={checkQuestionsData}>
-              <span className="button-icon">📊</span>
-              <span className="button-text">Kiểm tra câu hỏi database</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Maintenance Section */}
-        <div className="admin-section">
-          <h2 className="section-title">🔧 Bảo trì hệ thống</h2>
-          <div className="admin-grid">
-            <button className="admin-button warning" onClick={fixDuplicatesAndUpdateTravel}>
-              <span className="button-icon">🧹</span>
-              <span className="button-text">Dọn trùng & cập nhật ảnh</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      </div>
-    </main>
+      </main>
     </div>
   );
 };

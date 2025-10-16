@@ -7,10 +7,10 @@ import PassageListComponent from '../components/PassageList';
 import PassageEditModal from '../components/PassageEditModal';
 import VocabManagementModal from '../components/VocabManagementModal';
 import AdminLogin from '../components/AdminLogin';
-import AdminHeader from '../components/AdminHeader';
 import { passageService } from '../firebase/passageService';
 import { topicService } from '../firebase/topicService';
 import { AdminUser } from '../firebase/adminAuthService';
+import './AdminPage.css';
 
 const AdminPage: React.FC = () => {
   const navigate = useNavigate();
@@ -177,9 +177,37 @@ const AdminPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="app">
-        <AdminHeader />
-        <main className="main">
+      <div className="admin-dashboard">
+        <aside className="sidebar">
+          <div className="sidebar-logo">
+            <img src="https://i.ibb.co/6bPZYBn/logo.png" alt="EngApp Logo" />
+            <h2>EngApp</h2>
+          </div>
+          <nav className="sidebar-menu">
+            <a href="#" className="menu-item active">
+              <i className="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+            <a href="#" className="menu-item">
+              <i className="fa-solid fa-book"></i> Bài học
+            </a>
+            <a href="#" className="menu-item">
+              <i className="fa-solid fa-language"></i> Từ vựng
+            </a>
+            <a href="#" className="menu-item">
+              <i className="fa-solid fa-user-gear"></i> Người dùng
+            </a>
+            <a href="#" className="menu-item">
+              <i className="fa-solid fa-chart-line"></i> Thống kê
+            </a>
+            <button className="menu-item" onClick={() => navigate('/admin/panel')}>
+              <i className="fa-solid fa-screwdriver-wrench"></i> Admin Panel
+            </button>
+          </nav>
+          <button className="logout-sidebar" onClick={logout}>
+            <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
+          </button>
+        </aside>
+        <main className="main-content">
           <div className="loading-container">
             <div className="loading-spinner"></div>
             <p>Đang tải dữ liệu...</p>
@@ -190,36 +218,74 @@ const AdminPage: React.FC = () => {
   }
 
   return (
-    <div className="app">
-      <AdminHeader />
-      
-      <main className="main">
-        <div className="admin-page-container">
-          {/* Admin Controls */}
-          <div className="admin-controls">
-            <div className="admin-buttons">
-              <button className="add-passage-btn" onClick={handleAddPassage}>
-                + Thêm bài học mới
-              </button>
-              <button className="admin-panel-btn" onClick={() => navigate('/admin/panel')}>
-                🔧 Admin Panel
-              </button>
-            </div>
-          </div>
+    <div className="admin-dashboard">
+      {/* Sidebar */}
+      <aside className="sidebar">
+        <div className="sidebar-logo">
+          <img src="https://i.ibb.co/6bPZYBn/logo.png" alt="EngApp Logo" />
+          <h2>EngApp</h2>
+        </div>
 
-          {/* Topic Selection */}
-          <div className="admin-topic-selector">
-            <div className="topic-tabs">
-              {topics.map(topic => (
-                <button
-                  key={topic.id}
-                  className={`topic-tab ${selectedTopic?.id === topic.id ? 'active' : ''}`}
-                  onClick={() => setSelectedTopic(topic)}
-                >
-                  {topic.slug === 'nature' ? '🌿' : topic.slug === 'travel' ? '✈️' : '🏠'} {topic.name || topic.title}
-                </button>
-              ))}
-            </div>
+        <nav className="sidebar-menu">
+          <a href="#" className="menu-item active">
+            <i className="fa-solid fa-gauge-high"></i> Dashboard
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-book"></i> Bài học
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-language"></i> Từ vựng
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-user-gear"></i> Người dùng
+          </a>
+          <a href="#" className="menu-item">
+            <i className="fa-solid fa-chart-line"></i> Thống kê
+          </a>
+          <button className="menu-item" onClick={() => navigate('/admin/panel')}>
+            <i className="fa-solid fa-screwdriver-wrench"></i> Admin Panel
+          </button>
+        </nav>
+
+        <button className="logout-sidebar" onClick={logout}>
+          <i className="fa-solid fa-right-from-bracket"></i> Đăng xuất
+        </button>
+      </aside>
+
+      {/* Main Content */}
+      <main className="main-content">
+
+        {/* Category Filter */}
+        <section className="category-filter">
+          {topics.map(topic => (
+            <button
+              key={topic.id}
+              className={`filter-btn ${selectedTopic?.id === topic.id ? 'active' : ''}`}
+              onClick={() => setSelectedTopic(topic)}
+            >
+              {topic.slug === 'nature' ? <i className="fa-solid fa-leaf"></i> : 
+               topic.slug === 'travel' ? <i className="fa-solid fa-plane"></i> : 
+               topic.slug === 'daily-activities' ? <i className="fa-solid fa-person-walking"></i> :
+               <i className="fa-solid fa-flask"></i>} 
+              {topic.name || topic.title}
+            </button>
+          ))}
+        </section>
+
+        {/* Lessons Section */}
+        <section className="lesson-section">
+          <div className="section-header">
+            <h2>
+              {selectedTopic?.slug === 'nature' ? <i className="fa-solid fa-leaf"></i> : 
+               selectedTopic?.slug === 'travel' ? <i className="fa-solid fa-plane"></i> : 
+               selectedTopic?.slug === 'daily-activities' ? <i className="fa-solid fa-person-walking"></i> :
+               <i className="fa-solid fa-flask"></i>} 
+              {selectedTopic?.name || selectedTopic?.title} 
+              <span>({selectedTopic ? '3 bài học' : '0 bài học'})</span>
+            </h2>
+            <button className="primary-btn" onClick={handleAddPassage}>
+              <i className="fa-solid fa-plus"></i> Thêm bài học mới
+            </button>
           </div>
 
           {/* Passage List */}
@@ -233,22 +299,22 @@ const AdminPage: React.FC = () => {
               onManageVocab={handleManageVocab}
             />
           )}
+        </section>
 
-          {/* Edit Passage Modal */}
-          <PassageEditModal
-            passage={editingPassage}
-            isOpen={isEditModalOpen}
-            onClose={handleCloseEditModal}
-            onSave={handleSavePassage}
-          />
+        {/* Edit Passage Modal */}
+        <PassageEditModal
+          passage={editingPassage}
+          isOpen={isEditModalOpen}
+          onClose={handleCloseEditModal}
+          onSave={handleSavePassage}
+        />
 
-          {/* Vocabulary Management Modal */}
-          <VocabManagementModal
-            passage={managingVocabPassage}
-            isOpen={isVocabModalOpen}
-            onClose={handleCloseVocabModal}
-          />
-        </div>
+        {/* Vocabulary Management Modal */}
+        <VocabManagementModal
+          passage={managingVocabPassage}
+          isOpen={isVocabModalOpen}
+          onClose={handleCloseVocabModal}
+        />
       </main>
     </div>
   );
