@@ -11,6 +11,7 @@ import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
 import AdminPassageManager from './AdminPassageManager';
 import { useAdmin } from '../contexts/AdminContext';
+import { ContentGeneratorService } from '../services/contentGeneratorService';
 import '../pages/AdminPage.css';
 
 const AdminPanel: React.FC = () => {
@@ -252,6 +253,219 @@ const AdminPanel: React.FC = () => {
     }
   };
 
+  const generateAutoContent = async () => {
+    const confirmed = window.confirm(
+      '🚀 Bạn có chắc chắn muốn tạo 20 bài văn cho mỗi chủ đề?\n\n' +
+      'Mỗi bài văn sẽ có:\n' +
+      '• 8 từ vựng mới (trong dấu [])\n' +
+      '• 8 câu hỏi (3 multiple choice, 3 fill blank, 2 true/false)\n' +
+      '• English level, layout ratio, thumbnail tự động\n\n' +
+      'Quá trình này có thể mất vài phút. Tiếp tục?'
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      console.log('🚀 Bắt đầu tạo nội dung tự động...');
+      await ContentGeneratorService.generatePassagesForAllTopics();
+      alert('🎉 Hoàn thành! Đã tạo 20 bài văn cho mỗi chủ đề với từ vựng và câu hỏi!');
+    } catch (error) {
+      console.error('❌ Lỗi khi tạo nội dung tự động:', error);
+      alert('❌ Có lỗi xảy ra khi tạo nội dung tự động. Xem console để chi tiết.');
+    }
+  };
+
+  const generateContentForTopic = async () => {
+    const topicSlug = prompt('Nhập slug của chủ đề (travel, daily-activities, nature):');
+    if (!topicSlug) return;
+
+    const countStr = prompt('Nhập số lượng bài văn muốn tạo (mặc định 20):');
+    const count = countStr ? parseInt(countStr) : 20;
+
+    if (isNaN(count) || count <= 0) {
+      alert('❌ Số lượng không hợp lệ!');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `🚀 Bạn có chắc chắn muốn tạo ${count} bài văn cho chủ đề "${topicSlug}"?\n\n` +
+      'Mỗi bài văn sẽ có:\n' +
+      '• 8 từ vựng mới (trong dấu [])\n' +
+      '• 8 câu hỏi (3 multiple choice, 3 fill blank, 2 true/false)\n' +
+      '• English level, layout ratio, thumbnail tự động\n\n' +
+      'Tiếp tục?'
+    );
+    
+    if (!confirmed) return;
+
+    try {
+      console.log(`🚀 Bắt đầu tạo ${count} bài văn cho chủ đề: ${topicSlug}`);
+      await ContentGeneratorService.generatePassagesForTopic(topicSlug, count);
+      alert(`🎉 Hoàn thành! Đã tạo ${count} bài văn cho chủ đề "${topicSlug}"!`);
+    } catch (error) {
+      console.error(`❌ Lỗi khi tạo nội dung cho chủ đề ${topicSlug}:`, error);
+      alert(`❌ Có lỗi xảy ra khi tạo nội dung cho chủ đề "${topicSlug}". Xem console để chi tiết.`);
+    }
+  };
+
+  const testGenerateOnePassage = async () => {
+    try {
+      console.log('🧪 Test tạo 1 bài văn...');
+      await ContentGeneratorService.generatePassagesForTopic('travel', 1);
+      alert('✅ Test thành công! Đã tạo 1 bài văn cho chủ đề travel.');
+    } catch (error) {
+      console.error('❌ Test thất bại:', error);
+      alert('❌ Test thất bại. Xem console để chi tiết.');
+    }
+  };
+
+  const testFirebaseConnection = async () => {
+    try {
+      console.log('🔍 Test kết nối Firebase...');
+      
+      // Test topics
+      const topics = await topicService.getAll();
+      console.log('📚 Topics:', topics);
+      
+      // Test passages
+      const passages = await passageService.getAll();
+      console.log('📖 Passages:', passages);
+      
+      // Test questions
+      const questions = await questionService.getAll();
+      console.log('❓ Questions:', questions);
+      
+      let message = `✅ Firebase kết nối OK!\n📚 Topics: ${topics.length}\n📖 Passages: ${passages.length}\n❓ Questions: ${questions.length}`;
+      
+      if (topics.length === 0) {
+        message += '\n\n⚠️ CẢNH BÁO: Không có topics nào trong database!';
+        message += '\nHãy chạy "Upload Topics & Passages" trước khi tạo bài văn tự động.';
+      } else {
+        // Check if topics have level field
+        const topicsWithoutLevel = topics.filter(t => typeof t.level !== 'number');
+        if (topicsWithoutLevel.length > 0) {
+          message += `\n\n⚠️ CẢNH BÁO: ${topicsWithoutLevel.length} topics không có trường level!`;
+          message += '\nHãy chạy "Sửa lỗi topics" để khắc phục.';
+        }
+      }
+      
+      alert(message);
+    } catch (error) {
+      console.error('❌ Firebase connection failed:', error);
+      alert('❌ Lỗi kết nối Firebase. Xem console để chi tiết.');
+    }
+  };
+
+  const fixTopicsLevel = async () => {
+    try {
+      console.log('🔧 Đang sửa lỗi level cho topics...');
+      
+      const topics = await topicService.getAll();
+      let fixedCount = 0;
+      
+      for (const topic of topics) {
+        if (typeof topic.level !== 'number') {
+          console.log(`🔧 Sửa topic: ${topic.title} - level từ ${topic.level} thành 1`);
+          await topicService.updateById(topic.id, { level: 1 });
+          fixedCount++;
+        }
+      }
+      
+      alert(`✅ Đã sửa ${fixedCount} topics. Tất cả topics giờ đã có trường level hợp lệ.`);
+    } catch (error) {
+      console.error('❌ Lỗi khi sửa topics:', error);
+      alert('❌ Lỗi khi sửa topics. Xem console để chi tiết.');
+    }
+  };
+
+  const checkPassageThumbnails = async () => {
+    try {
+      console.log('🔍 Kiểm tra thumbnail của passages...');
+      
+      const passages = await passageService.getAll();
+      let noThumbnailCount = 0;
+      let invalidThumbnailCount = 0;
+      
+      for (const passage of passages) {
+        if (!passage.thumbnail || passage.thumbnail.trim() === '') {
+          console.log(`❌ Passage "${passage.title}" không có thumbnail`);
+          noThumbnailCount++;
+        } else {
+          // Test if thumbnail URL is valid
+          try {
+            const response = await fetch(passage.thumbnail, { method: 'HEAD' });
+            if (!response.ok) {
+              console.log(`❌ Passage "${passage.title}" có thumbnail không hợp lệ: ${passage.thumbnail}`);
+              invalidThumbnailCount++;
+            }
+          } catch (error) {
+            console.log(`❌ Passage "${passage.title}" có thumbnail không load được: ${passage.thumbnail}`);
+            invalidThumbnailCount++;
+          }
+        }
+      }
+      
+      let message = `📊 Kết quả kiểm tra thumbnail:\n`;
+      message += `📖 Tổng passages: ${passages.length}\n`;
+      message += `❌ Không có thumbnail: ${noThumbnailCount}\n`;
+      message += `⚠️ Thumbnail không hợp lệ: ${invalidThumbnailCount}\n`;
+      message += `✅ Thumbnail OK: ${passages.length - noThumbnailCount - invalidThumbnailCount}`;
+      
+      alert(message);
+    } catch (error) {
+      console.error('❌ Lỗi khi kiểm tra thumbnails:', error);
+      alert('❌ Lỗi khi kiểm tra thumbnails. Xem console để chi tiết.');
+    }
+  };
+
+  const fixPassageThumbnails = async () => {
+    try {
+      console.log('🔧 Đang sửa thumbnail cho passages...');
+      
+      const passages = await passageService.getAll();
+      let fixedCount = 0;
+      
+      for (const passage of passages) {
+        if (!passage.thumbnail || passage.thumbnail.trim() === '') {
+          // Generate a new thumbnail URL
+          const newThumbnail = `https://picsum.photos/400/300?random=${Math.floor(Math.random() * 1000)}`;
+          
+          console.log(`🔧 Sửa passage: ${passage.title} - thêm thumbnail mới`);
+          await passageService.update(passage.id, { thumbnail: newThumbnail });
+          fixedCount++;
+        }
+      }
+      
+      alert(`✅ Đã sửa ${fixedCount} passages. Tất cả passages giờ đã có thumbnail.`);
+    } catch (error) {
+      console.error('❌ Lỗi khi sửa thumbnails:', error);
+      alert('❌ Lỗi khi sửa thumbnails. Xem console để chi tiết.');
+    }
+  };
+
+  const fixAllThumbnails = async () => {
+    try {
+      console.log('🔧 Đang sửa TẤT CẢ thumbnail cho passages...');
+      
+      const passages = await passageService.getAll();
+      let fixedCount = 0;
+      
+      for (const passage of passages) {
+        // Generate a new thumbnail URL for ALL passages
+        const newThumbnail = `https://picsum.photos/400/300?random=${Math.floor(Math.random() * 1000)}`;
+        
+        console.log(`🔧 Sửa passage: ${passage.title} - cập nhật thumbnail mới`);
+        await passageService.update(passage.id, { thumbnail: newThumbnail });
+        fixedCount++;
+      }
+      
+      alert(`✅ Đã sửa ${fixedCount} passages. Tất cả passages giờ đã có thumbnail mới từ Picsum.`);
+    } catch (error) {
+      console.error('❌ Lỗi khi sửa tất cả thumbnails:', error);
+      alert('❌ Lỗi khi sửa tất cả thumbnails. Xem console để chi tiết.');
+    }
+  };
+
   if (showPassageManager) {
     return (
       <div className="admin-dashboard">
@@ -342,6 +556,46 @@ const AdminPanel: React.FC = () => {
                 <button className="admin-button primary" onClick={() => setShowPassageManager(true)}>
                   <span className="button-icon">📝</span>
                   <span className="button-text">Quản lý bài học</span>
+                </button>
+                
+                <button className="admin-button success" onClick={generateAutoContent}>
+                  <span className="button-icon">🤖</span>
+                  <span className="button-text">Tạo 20 bài văn cho tất cả chủ đề</span>
+                </button>
+                
+                <button className="admin-button success" onClick={generateContentForTopic}>
+                  <span className="button-icon">🎯</span>
+                  <span className="button-text">Tạo bài văn cho chủ đề cụ thể</span>
+                </button>
+                
+                <button className="admin-button warning" onClick={testGenerateOnePassage}>
+                  <span className="button-icon">🧪</span>
+                  <span className="button-text">Test tạo 1 bài văn</span>
+                </button>
+                
+                <button className="admin-button info" onClick={testFirebaseConnection}>
+                  <span className="button-icon">🔍</span>
+                  <span className="button-text">Test kết nối Firebase</span>
+                </button>
+                
+                <button className="admin-button warning" onClick={fixTopicsLevel}>
+                  <span className="button-icon">🔧</span>
+                  <span className="button-text">Sửa lỗi topics</span>
+                </button>
+                
+                <button className="admin-button info" onClick={checkPassageThumbnails}>
+                  <span className="button-icon">🔍</span>
+                  <span className="button-text">Kiểm tra thumbnail</span>
+                </button>
+                
+                <button className="admin-button warning" onClick={fixPassageThumbnails}>
+                  <span className="button-icon">🖼️</span>
+                  <span className="button-text">Sửa thumbnail</span>
+                </button>
+                
+                <button className="admin-button danger" onClick={fixAllThumbnails}>
+                  <span className="button-icon">🔄</span>
+                  <span className="button-text">Sửa TẤT CẢ thumbnail</span>
                 </button>
               </div>
             </div>

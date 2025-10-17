@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Question } from '../types';
 import { progressService } from '../firebase/progressService';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,25 +17,36 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
 
   const currentQuestion = questions[currentQuestionIndex];
 
+  // Debug effect để theo dõi khi currentQuestionIndex thay đổi
+  useEffect(() => {
+    console.log(`🔄 Question index changed to: ${currentQuestionIndex}`);
+    console.log(`📋 Current question:`, currentQuestion);
+    console.log(`💾 Current userAnswers:`, userAnswers);
+  }, [currentQuestionIndex, currentQuestion, userAnswers]);
+
   const handleAnswer = (answer: any) => {
+    // Sử dụng currentQuestionIndex làm key nếu ID rỗng
+    const questionKey = currentQuestion.id || `question_${currentQuestionIndex}`;
     setUserAnswers(prev => ({
       ...prev,
-      [currentQuestion.id]: answer
+      [questionKey]: answer
     }));
   };
 
   const handleNextQuestion = async () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
+      console.log(`➡️ Moving to question ${currentQuestionIndex + 2}`);
     } else {
       // Luôn hiển thị kết quả khi đến câu cuối
       calculateScore();
       setShowResults(true);
       
       // Kiểm tra xem user đã trả lời hết tất cả câu hỏi chưa
-      const allQuestionsAnswered = questions.every(question => 
-        userAnswers[question.id] !== undefined && userAnswers[question.id] !== ''
-      );
+      const allQuestionsAnswered = questions.every((question, index) => {
+        const questionKey = question.id || `question_${index}`;
+        return userAnswers[questionKey] !== undefined && userAnswers[questionKey] !== '';
+      });
       
       if (allQuestionsAnswered && user) {
         // Đánh dấu passage đã hoàn thành
@@ -54,13 +65,15 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
   const handlePrevQuestion = () => {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(prev => prev - 1);
+      console.log(`⬅️ Moving to question ${currentQuestionIndex}`);
     }
   };
 
   const calculateScore = () => {
     let correctAnswers = 0;
-    questions.forEach(question => {
-      const userAnswer = userAnswers[question.id];
+    questions.forEach((question, index) => {
+      const questionKey = question.id || `question_${index}`;
+      const userAnswer = userAnswers[questionKey];
       if (userAnswer === question.correctAnswer) {
         correctAnswers++;
       }
@@ -102,9 +115,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
   };
 
   if (showResults) {
-    const allQuestionsAnswered = questions.every(question => 
-      userAnswers[question.id] !== undefined && userAnswers[question.id] !== ''
-    );
+    const allQuestionsAnswered = questions.every((question, index) => {
+      const questionKey = question.id || `question_${index}`;
+      return userAnswers[questionKey] !== undefined && userAnswers[questionKey] !== '';
+    });
     
     return (
       <div style={{ textAlign: 'center', padding: '40px' }}>
@@ -175,7 +189,16 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
   const renderQuestion = () => {
     if (!currentQuestion) return null;
 
-    const userAnswer = userAnswers[currentQuestion.id];
+    // Chỉ lấy đáp án nếu câu hỏi hiện tại đã có đáp án
+    // Nếu chưa có đáp án, trả về undefined để không hiển thị đáp án nào được chọn
+    const questionKey = currentQuestion.id || `question_${currentQuestionIndex}`;
+    const userAnswer = userAnswers[questionKey];
+    
+    // Debug log để kiểm tra
+    console.log(`🔍 Question ${currentQuestionIndex + 1} (ID: ${currentQuestion.id}, Key: ${questionKey}):`, {
+      userAnswer,
+      allAnswers: userAnswers
+    });
 
     return (
       <div style={{ marginBottom: '15px' }}>
@@ -217,10 +240,13 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
                 }}>
                   <input
                     type="radio"
-                    name={`question_${currentQuestion.id}`}
+                    name={`question_${questionKey}`}
                     value={index}
                     checked={userAnswer === index}
-                    onChange={() => handleAnswer(index)}
+                    onChange={() => {
+                      console.log(`📝 Answering question ${questionKey} with option ${index}`);
+                      handleAnswer(index);
+                    }}
                     style={{ marginRight: '12px', transform: 'scale(1.2)' }}
                   />
                   <span style={{ fontSize: '1rem' }}>
@@ -246,9 +272,12 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
               }}>
                 <input
                   type="radio"
-                  name={`question_${currentQuestion.id}`}
+                  name={`question_${questionKey}`}
                   checked={userAnswer === true}
-                  onChange={() => handleAnswer(true)}
+                  onChange={() => {
+                    console.log(`📝 Answering question ${questionKey} with TRUE`);
+                    handleAnswer(true);
+                  }}
                   style={{ marginRight: '8px', transform: 'scale(1.2)' }}
                 />
                 <span style={{ fontSize: '1rem', fontWeight: '500' }}>✅ Đúng</span>
@@ -266,9 +295,12 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
               }}>
                 <input
                   type="radio"
-                  name={`question_${currentQuestion.id}`}
+                  name={`question_${questionKey}`}
                   checked={userAnswer === false}
-                  onChange={() => handleAnswer(false)}
+                  onChange={() => {
+                    console.log(`📝 Answering question ${questionKey} with FALSE`);
+                    handleAnswer(false);
+                  }}
                   style={{ marginRight: '8px', transform: 'scale(1.2)' }}
                 />
                 <span style={{ fontSize: '1rem', fontWeight: '500' }}>❌ Sai</span>
@@ -281,7 +313,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
               <input
                 type="text"
                 value={userAnswer || ''}
-                onChange={(e) => handleAnswer(e.target.value)}
+                onChange={(e) => {
+                  console.log(`📝 Answering question ${questionKey} with text:`, e.target.value);
+                  handleAnswer(e.target.value);
+                }}
                 placeholder="Nhập câu trả lời của bạn..."
                 style={{
                   width: '100%',
@@ -356,7 +391,10 @@ const QuizSection: React.FC<QuizSectionProps> = ({ questions, passageId }) => {
         </p>
       </div>
 
-      {renderQuestion()}
+      {/* Thêm key để đảm bảo component re-render khi chuyển câu hỏi */}
+      <div key={`question-${currentQuestionIndex}-${currentQuestion?.id}`}>
+        {renderQuestion()}
+      </div>
     </div>
   );
 };

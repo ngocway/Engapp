@@ -7,6 +7,7 @@ import AdminPanel from './components/AdminPanel';
 import AdminQuestionsPage from './pages/AdminQuestionsPage';
 import AdminVocabularyPage from './pages/AdminVocabularyPage';
 import TopicSelect from './pages/TopicSelect';
+import TopicDetailPage from './pages/TopicDetailPage';
 import PassageList from './pages/PassageList';
 import PassageDetail from './pages/PassageDetail';
 import MyVocab from './pages/MyVocab';
@@ -27,7 +28,8 @@ function App() {
             <Route path="/admin/questions/:passageId" element={<AdminQuestionsPage />} />
             <Route path="/admin/vocabulary/:passageId" element={<AdminVocabularyPage />} />
             <Route path="/topics" element={<TopicSelect />} />
-            <Route path="/topics/:topicSlug" element={<PassageList />} />
+            <Route path="/topics/:topicSlug" element={<TopicDetailPage />} />
+            <Route path="/topics/:topicSlug/passages" element={<PassageList />} />
             <Route path="/passage/:passageId" element={<PassageDetail />} />
             <Route path="/my-vocab" element={<MyVocab />} />
             <Route path="/review" element={<ReviewPageWrapper />} />

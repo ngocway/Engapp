@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { topicService } from '../firebase/topicService';
 import { passageService } from '../firebase/passageService';
 import { userSettingsService } from '../firebase/userSettingsService';
+import { progressService } from '../firebase/progressService';
 import { Topic, Passage, EnglishLevel } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAdmin } from '../contexts/AdminContext';
@@ -18,6 +19,7 @@ const TopicsSection: React.FC = () => {
   const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
   const [selectedTopicType, setSelectedTopicType] = useState<TopicType>('paragraph');
+  const [completedPassages, setCompletedPassages] = useState<Set<string>>(new Set());
 
   // Filter passages based on user's English level
   const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
@@ -125,9 +127,25 @@ const TopicsSection: React.FC = () => {
     }
   }, [user]);
 
+  // Load user progress to get completed passages
+  const loadUserProgress = useCallback(async () => {
+    if (user) {
+      try {
+        const progress = await progressService.getUserProgress(user.uid);
+        if (progress && progress.completedPassages) {
+          setCompletedPassages(new Set(progress.completedPassages));
+          console.log('📊 Completed passages:', progress.completedPassages);
+        }
+      } catch (error) {
+        console.error('Error loading user progress:', error);
+      }
+    }
+  }, [user]);
+
   useEffect(() => {
     loadUserSettings();
-  }, [user, loadUserSettings]);
+    loadUserProgress();
+  }, [user, loadUserSettings, loadUserProgress]);
 
   useEffect(() => {
     if (user) {
@@ -141,6 +159,18 @@ const TopicsSection: React.FC = () => {
       loadPassagesForTopics(topics);
     }
   }, [userEnglishLevel, filterPassagesByLevel, loadPassagesForTopics, topics]);
+
+  // Refresh progress when returning to this page
+  useEffect(() => {
+    const handleFocus = () => {
+      if (user) {
+        loadUserProgress();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [user, loadUserProgress]);
 
   const getTopicIcon = (slug: string | undefined) => {
     switch (slug) {
@@ -268,7 +298,7 @@ const TopicsSection: React.FC = () => {
                   <LessonCard
                     key={passage.id}
                     passage={passage}
-                    isLearned={false} // TODO: Implement learned status tracking
+                    isLearned={completedPassages.has(passage.id)}
                     onClick={() => navigate(`/passage/${passage.id}`)}
                   />
                 ))

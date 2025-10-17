@@ -65,13 +65,20 @@ const LessonCard: React.FC<LessonCardProps> = ({ passage, isLearned = false, onC
       onClick={onClick}
     >
       <div className="lesson-thumb">
-        {passage.thumbnail ? (
-          <img src={passage.thumbnail} alt={passage.title} />
-        ) : (
-          <div className="thumbnail-placeholder">
-            📚
-          </div>
-        )}
+        {passage.thumbnail && passage.thumbnail.trim() !== '' ? (
+          <img 
+            src={passage.thumbnail} 
+            alt={passage.title}
+            onError={(e) => {
+              console.log('❌ Thumbnail load error for passage:', passage.title, 'URL:', passage.thumbnail);
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        <div className={`thumbnail-placeholder ${passage.thumbnail && passage.thumbnail.trim() !== '' ? 'hidden' : ''}`}>
+          📚
+        </div>
         <span className="level">
           {getEnglishLevelText(passage.englishLevels, passage.englishLevel, passage.level)}
         </span>

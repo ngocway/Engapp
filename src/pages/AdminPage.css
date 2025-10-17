@@ -573,6 +573,16 @@
   transform: translateY(-2px);
 }
 
+.admin-button.success {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: white;
+}
+
+.admin-button.success:hover {
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3);
+  transform: translateY(-2px);
+}
+
 .button-icon {
   font-size: 24px;
 }
