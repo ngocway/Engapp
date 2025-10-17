@@ -53,6 +53,17 @@ const VocabCard: React.FC<VocabCardProps> = ({ vocab, difficulty, onClick }) => 
 
       <div className="lesson-content">
         <h3 className="lesson-title">{vocab.word}</h3>
+        
+        {/* Pronunciation */}
+        {vocab.pronunciation && (
+          <div className="vocab-pronunciation">/ {vocab.pronunciation} /</div>
+        )}
+        
+        {/* Part of Speech */}
+        {vocab.partOfSpeech && (
+          <div className="vocab-part-of-speech">{vocab.partOfSpeech}</div>
+        )}
+        
         <p className="lesson-desc">
           {vocab.meaning || vocab.definitionEn || 'Khám phá nghĩa và cách sử dụng từ vựng này.'}
         </p>

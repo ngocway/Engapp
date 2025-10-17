@@ -42,23 +42,41 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ onBack }) => {
     loadVocabulary();
   }, []);
 
-  const playAudio = async (word: string, wordId: string) => {
-    // Sử dụng Web Speech API để phát âm
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.8;
-      utterance.pitch = 1.2;
-      speechSynthesis.speak(utterance);
+  const playAudio = async (vocabulary: Vocabulary) => {
+    // Ưu tiên phát audio thực tế từ Firebase Storage
+    if (vocabulary.audioUrl && (vocabulary.audioUrl.startsWith('data:audio/') || vocabulary.audioUrl.startsWith('http'))) {
+      try {
+        const audio = new Audio(vocabulary.audioUrl);
+        await audio.play();
+      } catch (error) {
+        console.error('Lỗi khi phát audio:', error);
+        // Fallback về text-to-speech nếu audio không phát được
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(vocabulary.word);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.8;
+          utterance.pitch = 1.2;
+          speechSynthesis.speak(utterance);
+        }
+      }
+    } else {
+      // Fallback về text-to-speech nếu không có audio
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(vocabulary.word);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.8;
+        utterance.pitch = 1.2;
+        speechSynthesis.speak(utterance);
+      }
     }
 
     // Đánh dấu từ đã học và lưu vào Firebase
-    if (!learnedWords.includes(wordId)) {
-      setLearnedWords(prev => [...prev, wordId]);
+    if (!learnedWords.includes(vocabulary.id)) {
+      setLearnedWords(prev => [...prev, vocabulary.id]);
       
       // Lưu tiến độ vào Firebase
       if (user) {
-        await progressService.addLearnedWord(user.uid, wordId);
+        await progressService.addLearnedWord(user.uid, vocabulary.id);
       }
     }
   };
@@ -96,7 +114,7 @@ const VocabularySection: React.FC<VocabularySectionProps> = ({ onBack }) => {
             <VocabularyCard
               key={word.id}
               vocabulary={word}
-              onPlayAudio={(wordText) => playAudio(wordText, word.id)}
+              onPlayAudio={() => playAudio(word)}
             />
           ))}
         </div>

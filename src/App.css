@@ -577,7 +577,7 @@ strong, b {
 
 /* Topics Section - Parroto style */
 .topics-section {
-  background: white;
+  background: #fff;
   padding: var(--spacing-4);
   margin: var(--spacing-6) 0;
   box-shadow: var(--shadow-sm);
@@ -782,7 +782,7 @@ strong, b {
 
 /* Admin Passage Manager Styles */
 .admin-passage-manager {
-  background: white;
+  background: #fff;
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   padding: var(--spacing-6);
@@ -847,7 +847,7 @@ strong, b {
   padding: var(--spacing-2) var(--spacing-3);
   border: 1px solid var(--gray-300);
   border-radius: var(--border-radius);
-  background: white;
+  background: #fff;
   font-size: 0.9rem;
 }
 
@@ -880,7 +880,7 @@ strong, b {
   padding: var(--spacing-4);
   border: 1px solid var(--gray-200);
   border-radius: var(--border-radius);
-  background: white;
+  background: #fff;
   transition: all 0.2s;
 }
 
@@ -1044,7 +1044,7 @@ strong, b {
 }
 
 .form-actions button[type="button"] {
-  background: white;
+  background: #fff;
   color: var(--gray-700);
 }
 
@@ -1125,7 +1125,7 @@ strong, b {
 }
 
 .edit-passage-btn:hover {
-  background: white;
+  background: #fff;
   transform: scale(1.1);
 }
 
@@ -1581,7 +1581,7 @@ strong, b {
 }
 
 .vocab-item {
-  background: white;
+  background: #fff;
   border: 1px solid #dee2e6;
   border-radius: var(--border-radius);
   padding: var(--spacing-2);
@@ -1735,7 +1735,7 @@ strong, b {
   height: 80px;
   border-radius: var(--border-radius);
   overflow: hidden;
-  background: white;
+  background: #fff;
   box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
@@ -2036,7 +2036,7 @@ strong, b {
   max-width: 400px;
   height: 40px;
   border-radius: var(--border-radius);
-  background: white;
+  background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -2137,7 +2137,7 @@ strong, b {
   border-radius: var(--border-radius);
   font-size: var(--font-size-base);
   font-family: var(--font-family);
-  background: white;
+  background: #fff;
   transition: border-color 0.2s ease;
 }
 
@@ -2191,7 +2191,7 @@ strong, b {
   align-items: flex-start;
   gap: var(--spacing-2);
   padding: var(--spacing-2);
-  background: white;
+  background: #fff;
   border-radius: var(--border-radius);
   border: 1px solid #e9ecef;
   transition: all 0.2s ease;
@@ -2223,7 +2223,7 @@ strong, b {
   border-radius: var(--border-radius);
   font-size: var(--font-size-base);
   font-family: var(--font-family);
-  background: white;
+  background: #fff;
   transition: border-color 0.2s ease;
   resize: vertical;
   min-height: 60px;
@@ -2262,7 +2262,7 @@ strong, b {
   padding: var(--spacing-3);
   color: #6c757d;
   font-style: italic;
-  background: white;
+  background: #fff;
   border-radius: var(--border-radius);
   border: 1px dashed #dee2e6;
 }
@@ -2837,7 +2837,7 @@ strong, b {
 /* Card style */
 .lesson-info,
 .lesson-content {
-  background: #ffffff;
+  background: #fff;
   border-radius: 20px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.05);
   padding: 24px;
@@ -2913,7 +2913,7 @@ strong, b {
   display: flex;
   border-radius: 10px;
   overflow: hidden;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
   background: #e2e8f0;
 }
 
@@ -3191,7 +3191,7 @@ strong, b {
   padding: 10px 14px 10px 36px;
   border-radius: 10px;
   border: 1px solid #cbd5e1;
-  background: white;
+  background: #fff;
   font-size: 14px;
   transition: all 0.25s;
 }
@@ -3246,6 +3246,8 @@ strong, b {
 .tab-header {
   display: flex;
   gap: 12px;
+  margin-bottom: 0px;
+  background: #e2e8f0;
 }
 
 .tab-btn {
@@ -3272,7 +3274,7 @@ strong, b {
 }
 
 .tab-btn .badge {
-  background: white;
+  background: #fff;
   color: #2563eb;
   font-size: 12px;
   font-weight: 600;
@@ -3330,7 +3332,7 @@ strong, b {
 
 /* Lesson Card Styles */
 .lesson-card {
-  background: white;
+  background: #fff;
   border-radius: 16px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -3410,6 +3412,33 @@ strong, b {
 
 .lesson-content {
   padding: 20px;
+  background: #fff;
+}
+
+/* Vocabulary pronunciation and part of speech styling */
+.vocab-pronunciation {
+  background: #74B9FF;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  margin: 6px 0 4px 0;
+  display: inline-block;
+  font-family: 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.vocab-part-of-speech {
+  background: #6C5CE7;
+  color: white;
+  padding: 3px 8px;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  margin: 4px 0 8px 0;
+  display: inline-block;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .lesson-title {
@@ -3506,6 +3535,8 @@ strong, b {
   
   .tab-header {
     gap: 8px;
+    margin-bottom: 0px;
+    background: #e2e8f0;
   }
 }
 
@@ -3999,6 +4030,7 @@ strong, b {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2);
+  background: #fff;
 }
 
 .passage-title {
@@ -4927,7 +4959,7 @@ strong, b {
 .empty-state-topics {
   text-align: center;
   padding: var(--spacing-20) var(--spacing-12);
-  background: white;
+  background: #fff;
   border: 2px dashed var(--gray-300);
   border-radius: var(--radius-lg);
   margin: var(--spacing-6) 0;

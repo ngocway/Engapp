@@ -97,6 +97,8 @@ const ReviewPage: React.FC = () => {
         
         console.log('✅ Found learned vocabulary details:', learnedVocabDetails.length, 'words');
         console.log('📝 Learned words:', learnedVocabDetails.map(v => v.word));
+        console.log('🔍 Sample vocab data:', learnedVocabDetails[0]);
+        console.log('🔍 Pronunciation data:', learnedVocabDetails.map(v => ({ word: v.word, pronunciation: v.pronunciation, partOfSpeech: v.partOfSpeech })));
         
         setLearnedWords(learnedVocabDetails);
       } else {

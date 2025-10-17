@@ -17,7 +17,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ initialTab = 'topics' }) => {
   };
 
   return (
-    <div className="app">
+    <div className="app background">
       <Header onTabChange={handleTabChange} activeTab={activeTab} />
       
       <main className="main">

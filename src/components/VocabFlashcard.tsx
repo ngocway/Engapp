@@ -307,7 +307,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         {/* Left Column */}
         <div style={{ 
           flex: 1,
-          background: '#f9fafb',
+          background: '#f8f9fa',
           padding: '24px'
         }}>
           <div style={{ 
@@ -512,7 +512,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         <div style={{ 
           flex: 1.2,
           padding: '28px',
-          background: '#ffffff'
+          background: '#f9fafb'
         }}>
           <h3 style={{ 
             fontSize: '18px',
@@ -565,7 +565,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         display: 'flex',
         justifyContent: 'space-evenly',
         padding: '14px 0',
-        background: '#f1f5f9',
+        background: '#f8f9fa',
         borderTop: '1px solid #e2e8f0'
       }}>
         {user ? (

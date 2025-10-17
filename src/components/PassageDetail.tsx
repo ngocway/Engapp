@@ -72,17 +72,45 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const handleVocabularyClick = (word: string, event?: React.MouseEvent) => {
     console.log('🎯 handleVocabularyClick called with:', { word, hasEvent: !!event });
     
-    // Phát âm từ vựng
-    if ('speechSynthesis' in window) {
-      const utterance = new SpeechSynthesisUtterance(word);
-      utterance.lang = 'en-US';
-      utterance.rate = 0.8;
-      utterance.pitch = 1.2;
-      speechSynthesis.speak(utterance);
-    }
-    
     // Tìm từ vựng trong passage vocab để hiển thị thông tin chi tiết
     const vocabItem = passage.vocab?.find(v => v.term === word);
+    
+    // Ưu tiên phát audio thực tế từ Firebase Storage
+    if (vocabItem?.audio && (vocabItem.audio.startsWith('data:audio/') || vocabItem.audio.startsWith('http'))) {
+      try {
+        const audio = new Audio(vocabItem.audio);
+        audio.play().catch((playError) => {
+          console.error('Lỗi khi phát audio:', playError);
+          // Fallback về text-to-speech nếu audio không phát được
+          if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(word);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.8;
+            utterance.pitch = 1.2;
+            speechSynthesis.speak(utterance);
+          }
+        });
+      } catch (error) {
+        console.error('Lỗi khi tạo audio object:', error);
+        // Fallback về text-to-speech
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(word);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.8;
+          utterance.pitch = 1.2;
+          speechSynthesis.speak(utterance);
+        }
+      }
+    } else {
+      // Fallback về text-to-speech nếu không có audio
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(word);
+        utterance.lang = 'en-US';
+        utterance.rate = 0.8;
+        utterance.pitch = 1.2;
+        speechSynthesis.speak(utterance);
+      }
+    }
 
     // Hiển thị flashcard gần từ vựng được click
     if (event) {

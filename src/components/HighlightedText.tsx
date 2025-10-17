@@ -147,8 +147,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
                 }
                 setHoveredWord(firstWord);
                 setIsClickedFlashcard(false);
-                // Hiển thị flashcard khi hover
-                onVocabularyClick?.(firstWord, e);
+                // Bỏ hiển thị flashcard khi hover - chỉ highlight từ vựng
               }}
                 onMouseLeave={() => {
                   console.log('🎯 HighlightedText onMouseLeave:', { firstWord, isHoveringFlashcard, isClickedFlashcard });
@@ -170,14 +169,16 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
                   }
                 }}
                 onClick={(e) => {
-                  // Click để giữ flashcard hiển thị (không tự động ẩn)
+                  // Click để hiển thị flashcard
                   setIsClickedFlashcard(true);
                   if (hideTimeoutRef.current) {
                     clearTimeout(hideTimeoutRef.current);
                     hideTimeoutRef.current = null;
                   }
+                  // Hiển thị flashcard khi click
+                  onVocabularyClick?.(firstWord, e);
                 }}
-                title={`Click hoặc hover để xem thông tin từ vựng: ${firstWord}`}
+                title={`Click để xem thông tin từ vựng: ${firstWord}`}
               >
                 {firstWord}
               </span>
@@ -200,8 +201,7 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
                 }
                 setHoveredWord(part);
                 setIsClickedFlashcard(false);
-                // Hiển thị flashcard khi hover
-                onVocabularyClick?.(part, e);
+                // Bỏ hiển thị flashcard khi hover - chỉ highlight từ vựng
               }}
               onMouseLeave={() => {
                 // Chỉ quản lý state nội bộ nếu không có onVocabularyClick prop
@@ -221,14 +221,16 @@ const HighlightedText: React.FC<HighlightedTextProps> = ({ text, onVocabularyCli
                 }
               }}
               onClick={(e) => {
-                // Click để giữ flashcard hiển thị (không tự động ẩn)
+                // Click để hiển thị flashcard
                 setIsClickedFlashcard(true);
                 if (hideTimeoutRef.current) {
                   clearTimeout(hideTimeoutRef.current);
                   hideTimeoutRef.current = null;
                 }
+                // Hiển thị flashcard khi click
+                onVocabularyClick?.(part, e);
               }}
-              title={`Click hoặc hover để xem thông tin từ vựng: ${part}`}
+              title={`Click để xem thông tin từ vựng: ${part}`}
             >
               {part}
             </span>
