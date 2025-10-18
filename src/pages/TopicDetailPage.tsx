@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAdmin } from '../contexts/AdminContext';
 import LessonCard from '../components/LessonCard';
 import Header from '../components/Header';
+import SearchAndFilter, { DifficultyFilter } from '../components/SearchAndFilter';
 
 type TabType = 'topics' | 'review';
 
@@ -23,6 +24,63 @@ const TopicDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('topics');
   const [completedPassages, setCompletedPassages] = useState<Set<string>>(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
+  const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
+
+  // Filter passages based on search term and difficulty
+  const filterPassages = (passages: Passage[]): Passage[] => {
+    let filtered = [...passages];
+
+    // Filter by search term
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase().trim();
+      filtered = filtered.filter(passage => 
+        passage.title.toLowerCase().includes(searchLower) ||
+        passage.excerpt?.toLowerCase().includes(searchLower) ||
+        passage.vocab?.some(word => 
+          word.term?.toLowerCase().includes(searchLower) ||
+          word.meaning?.toLowerCase().includes(searchLower)
+        )
+      );
+    }
+
+    // Filter by difficulty
+    if (difficultyFilter !== 'all') {
+      filtered = filtered.filter(passage => {
+        // Map difficulty filter to English levels
+        const difficultyMap: Record<DifficultyFilter, EnglishLevel[]> = {
+          'all': [],
+          'easy': ['kids-2-4', 'kids-5-10', 'basic'],
+          'normal': ['basic', 'independent'],
+          'hard': ['independent', 'proficient']
+        };
+
+        const targetLevels = difficultyMap[difficultyFilter];
+        if (targetLevels.length === 0) return true;
+
+        // Check if passage matches any of the target levels
+        if (passage.englishLevels && passage.englishLevels.length > 0) {
+          return passage.englishLevels.some(level => targetLevels.includes(level));
+        }
+
+        if (passage.englishLevel) {
+          return targetLevels.includes(passage.englishLevel);
+        }
+
+        // Fallback to old level system
+        const levelMapping: Record<number, EnglishLevel> = {
+          1: 'basic',
+          2: 'independent', 
+          3: 'independent',
+          4: 'proficient'
+        };
+        const mappedLevel = levelMapping[passage.level] || 'basic';
+        return targetLevels.includes(mappedLevel);
+      });
+    }
+
+    return filtered;
+  };
 
   // Filter passages based on user's English level
   const filterPassagesByLevel = (passages: Passage[]): Passage[] => {
@@ -75,10 +133,10 @@ const TopicDetailPage: React.FC = () => {
       
       // Load passages for this topic
       const allPassages = await passageService.getByTopicSlug(topicSlug);
-      const filteredPassages = filterPassagesByLevel(allPassages);
-      setPassages(filteredPassages);
+      // Store all passages first, then apply filters in the render
+      setPassages(allPassages);
       
-      console.log(`📚 Loaded ${filteredPassages.length} passages for topic: ${topicDataArray[0].title}`);
+      console.log(`📚 Loaded ${allPassages.length} passages for topic: ${topicDataArray[0].title}`);
     } catch (error) {
       console.error('❌ Error loading topic:', error);
     } finally {
@@ -189,11 +247,22 @@ const TopicDetailPage: React.FC = () => {
     );
   }
 
+  // Apply all filters to passages
+  const levelFilteredPassages = filterPassagesByLevel(passages);
+  const finalFilteredPassages = filterPassages(levelFilteredPassages);
+
   return (
     <div className="app">
       <Header onTabChange={handleTabChange} activeTab={activeTab} />
       <div className="main-content">
         <div className="container">
+          {/* Search and Filter */}
+          <SearchAndFilter
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            difficultyFilter={difficultyFilter}
+            onDifficultyFilterChange={setDifficultyFilter}
+          />
 
           {/* Passages Grid */}
           {passages.length === 0 ? (
@@ -205,9 +274,18 @@ const TopicDetailPage: React.FC = () => {
                 Vui lòng liên hệ admin để thêm bài học cho chủ đề này
               </p>
             </div>
+          ) : finalFilteredPassages.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '50px' }}>
+              <h3 style={{ color: 'white', marginBottom: '20px' }}>
+                🔍 Không tìm thấy bài học nào
+              </h3>
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc độ khó
+              </p>
+            </div>
           ) : (
             <div className="lessons-grid">
-              {passages.map((passage: Passage) => (
+              {finalFilteredPassages.map((passage: Passage) => (
                 <LessonCard
                   key={passage.id}
                   passage={passage}
