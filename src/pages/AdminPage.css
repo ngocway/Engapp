@@ -105,9 +105,8 @@
 
 /* MAIN */
 .main-content {
-  margin-left: 240px;
   padding: 30px 40px;
-  width: calc(100% - 240px);
+  width: 100%;
   min-height: 100vh;
 }
 
@@ -634,8 +633,7 @@
   }
   
   .main-content {
-    margin-left: 200px;
-    width: calc(100% - 200px);
+    width: 100%;
     padding: 20px;
   }
   
@@ -686,7 +684,6 @@
   }
   
   .main-content {
-    margin-left: 0;
     width: 100%;
     padding: 15px;
   }

@@ -181,7 +181,8 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
       style={{ 
         ...flashcardStyle,
         width: 850,
-        background: '#f8f9fa',
+        background: '#e1f2f7',
+        border: '2px solid #85cbe1',
         borderRadius: 20,
         boxShadow: '0 8px 30px rgba(0, 0, 0, 0.08)',
         overflow: 'hidden',
@@ -195,7 +196,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
       {isPracticeMode && (
         <div style={{ 
           padding: '12px 20px', 
-          backgroundColor: '#f8f9fa', 
+          backgroundColor: 'transparent', 
           borderBottom: '1px solid #e2e8f0'
         }}>
           <div style={{ 
@@ -307,7 +308,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         {/* Left Column */}
         <div style={{ 
           flex: 1,
-          background: '#f8f9fa',
+          background: 'transparent',
           padding: '24px'
         }}>
           <div style={{ 
@@ -326,7 +327,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
                 left: 0,
                 right: 0,
                 bottom: 0,
-                background: 'linear-gradient(135deg, #f1f5f9, #e2e8f0)',
+                background: 'transparent',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -512,7 +513,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         <div style={{ 
           flex: 1.2,
           padding: '28px',
-          background: '#f9fafb'
+          background: 'transparent'
         }}>
           <h3 style={{ 
             fontSize: '18px',
@@ -565,7 +566,7 @@ const VocabFlashcard: React.FC<VocabFlashcardProps> = ({ term, passageVocab, onC
         display: 'flex',
         justifyContent: 'space-evenly',
         padding: '14px 0',
-        background: '#f8f9fa',
+        background: 'transparent',
         borderTop: '1px solid #e2e8f0'
       }}>
         {user ? (
