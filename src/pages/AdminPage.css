@@ -7,26 +7,40 @@
   --white: #fff;
 }
 
+/* Override body background for admin pages */
+html, body {
+  background: #f8fafc !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+}
+
 .admin-dashboard {
   font-family: 'Inter', sans-serif;
   margin: 0;
+  padding: 0;
   display: flex;
   background: var(--bg);
   min-height: 100vh;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* SIDEBAR */
 .sidebar {
-  width: 240px;
+  flex: 0 0 15%;
+  width: 15%;
   background: #1e293b;
   color: white;
   height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 20px 0;
-  position: fixed;
-  left: 0;
-  top: 0;
+  position: relative;
   z-index: 1000;
 }
 
@@ -105,9 +119,15 @@
 
 /* MAIN */
 .main-content {
+  flex: 0 0 85%;
+  width: 85%;
   padding: 30px 40px;
-  width: 100%;
   min-height: 100vh;
+  background: var(--white);
+  border-radius: var(--radius-2x1);
+  margin: var(--spacing-8) 0;
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-sm);
 }
 
 /* HEADER */
@@ -627,14 +647,28 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  .lesson-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .admin-dashboard {
+    flex-direction: column;
+    position: relative;
+  }
+  
   .sidebar {
-    width: 200px;
+    flex: 0 0 auto;
+    width: 100%;
+    height: auto;
+    position: relative;
   }
   
   .main-content {
+    flex: 1;
     width: 100%;
     padding: 20px;
+    margin: 0;
   }
   
   .admin-header {
@@ -676,6 +710,12 @@
   }
 }
 
+@media (max-width: 768px) {
+  .lesson-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 480px) {
   .sidebar {
     width: 100%;
@@ -686,6 +726,7 @@
   .main-content {
     width: 100%;
     padding: 15px;
+    margin: 0;
   }
   
   .lesson-grid {

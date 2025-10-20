@@ -10,6 +10,7 @@ import { vocabSeeds } from '../data/vocab';
 import { questionService } from '../firebase/questionService';
 import { Question } from '../types';
 import AdminPassageManager from './AdminPassageManager';
+import UpdatePassagesButton from './UpdatePassagesButton';
 import { useAdmin } from '../contexts/AdminContext';
 import { ContentGeneratorService } from '../services/contentGeneratorService';
 import '../pages/AdminPage.css';
@@ -568,21 +569,6 @@ const AdminPanel: React.FC = () => {
                   <span className="button-text">Tạo bài văn cho chủ đề cụ thể</span>
                 </button>
                 
-                <button className="admin-button warning" onClick={testGenerateOnePassage}>
-                  <span className="button-icon">🧪</span>
-                  <span className="button-text">Test tạo 1 bài văn</span>
-                </button>
-                
-                <button className="admin-button info" onClick={testFirebaseConnection}>
-                  <span className="button-icon">🔍</span>
-                  <span className="button-text">Test kết nối Firebase</span>
-                </button>
-                
-                <button className="admin-button warning" onClick={fixTopicsLevel}>
-                  <span className="button-icon">🔧</span>
-                  <span className="button-text">Sửa lỗi topics</span>
-                </button>
-                
                 <button className="admin-button info" onClick={checkPassageThumbnails}>
                   <span className="button-icon">🔍</span>
                   <span className="button-text">Kiểm tra thumbnail</span>
@@ -598,6 +584,9 @@ const AdminPanel: React.FC = () => {
                   <span className="button-text">Sửa TẤT CẢ thumbnail</span>
                 </button>
               </div>
+              
+              {/* Update Passages Section */}
+              <UpdatePassagesButton />
             </div>
 
             {/* Data Management Section */}

@@ -144,7 +144,9 @@ const AdminPage: React.FC = () => {
       text: '',
       level: 1,
       topicId: selectedTopic?.id || '',
-      topicSlug: selectedTopic?.slug || ''
+      topicSlug: selectedTopic?.slug || '',
+      lessonType: 'passage', // Default to passage
+      accessType: 'free'     // Default to free
     };
     setEditingPassage(newPassage);
     setIsEditModalOpen(true);

@@ -28,6 +28,8 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
     thumbnail: '',
     audioUrl: '',
     layoutRatio: '4:6' as '4:6' | '5:5',
+    lessonType: 'passage' as 'passage' | 'dialogue',
+    accessType: 'free' as 'free' | 'premium',
     images: [] as string[]
   });
   const [selectedEnglishLevels, setSelectedEnglishLevels] = useState<EnglishLevel[]>(['basic']);
@@ -125,6 +127,8 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
           thumbnail: dataToUse.thumbnail || '',
           audioUrl: dataToUse.audioUrl || '',
           layoutRatio: dataToUse.layoutRatio || '4:6',
+          lessonType: (dataToUse as any).lessonType || 'passage',
+          accessType: (dataToUse as any).accessType || 'free',
           images: dataToUse.images || []
         });
         setPreviewUrl(dataToUse.thumbnail || '');
@@ -160,6 +164,8 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
         thumbnail: '',
         audioUrl: '',
         layoutRatio: '4:6' as '4:6' | '5:5',
+        lessonType: 'passage' as 'passage' | 'dialogue',
+        accessType: 'free' as 'free' | 'premium',
         images: []
       });
       setPreviewUrl('');
@@ -625,7 +631,10 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passage) return;
+    if (!passage) {
+      console.log('❌ No passage data available');
+      return;
+    }
 
     // Validate English Levels
     if (selectedEnglishLevels.length === 0) {
@@ -643,11 +652,14 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       return;
     }
 
-    console.log('🔄 Starting passage update...');
+    const isNewPassage = !passage.id || passage.id === '';
+    console.log('🔄 Starting passage', isNewPassage ? 'creation' : 'update', '...');
     console.log('📝 Passage ID:', passage.id);
     console.log('📝 Form data:', formData);
     console.log('📝 Text size:', textSize, 'bytes');
     console.log('📝 Selected English Levels:', selectedEnglishLevels);
+    console.log('📝 Lesson Type:', formData.lessonType);
+    console.log('📝 Access Type:', formData.accessType);
 
     setLoading(true);
     try {
@@ -697,22 +709,24 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       // Replace image placeholders in HTML content
       const finalTextContent = replaceImagePlaceholders(formData.text);
       
-      // Prepare update data WITHOUT the id field (Firebase doesn't allow updating document ID)
-      // Ensure topicId is not undefined
-      const updateData = {
-        title: formData.title,
-        text: finalTextContent,
-        excerpt: formData.excerpt,
-        topicSlug: formData.topicSlug,
-        thumbnail: thumbnailUrl,
-        audioUrl: audioUrl,
-        level: passage.level,
-        englishLevel: selectedEnglishLevels[0] || 'basic', // Use first selected level for backward compatibility
-        englishLevels: selectedEnglishLevels, // Save all selected levels
-        topicId: passage.topicId || '', // Fallback to empty string if undefined
-        layoutRatio: formData.layoutRatio, // Add layout ratio
-        images: [...(formData.images || []), ...contentImageUrls] // Merge existing and new images
-      };
+        // Prepare update data WITHOUT the id field (Firebase doesn't allow updating document ID)
+        // Ensure topicId is not undefined
+        const updateData = {
+          title: formData.title,
+          text: finalTextContent,
+          excerpt: formData.excerpt,
+          topicSlug: formData.topicSlug,
+          thumbnail: thumbnailUrl,
+          audioUrl: audioUrl,
+          level: passage.level || 1, // Default level for new passages
+          englishLevel: selectedEnglishLevels[0] || 'basic', // Use first selected level for backward compatibility
+          englishLevels: selectedEnglishLevels, // Save all selected levels
+          topicId: passage.topicId || '', // Fallback to empty string if undefined
+          layoutRatio: formData.layoutRatio, // Add layout ratio
+          lessonType: formData.lessonType, // Add lesson type
+          accessType: formData.accessType, // Add access type
+          images: [...(formData.images || []), ...contentImageUrls] // Merge existing and new images
+        };
 
       // Remove undefined values to prevent Firebase errors
       Object.keys(updateData).forEach(key => {
@@ -724,19 +738,48 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       
       console.log('💾 Final update data after removing undefined:', updateData);
 
-      console.log('💾 Updating passage in database...');
-      console.log('💾 Update data (without id):', updateData);
-      console.log('💾 Passage ID to update:', passage.id);
-      console.log('💾 Form data text:', formData.text);
-      console.log('💾 Form data layoutRatio:', formData.layoutRatio);
+      let savedPassage: Passage;
+      
+      if (isNewPassage) {
+        // Create new passage
+        console.log('💾 Creating new passage in database...');
+        console.log('💾 Create data:', updateData);
+        
+        const newPassageId = await passageService.add(updateData);
+        if (!newPassageId) {
+          throw new Error('Failed to create new passage');
+        }
+        
+        savedPassage = {
+          id: newPassageId,
+          ...updateData
+        };
+        console.log('✅ Passage created successfully with ID:', newPassageId);
+      } else {
+        // Update existing passage
+        console.log('💾 Updating passage in database...');
+        console.log('💾 Update data (without id):', updateData);
+        console.log('💾 Passage ID to update:', passage.id);
+        console.log('💾 Form data text:', formData.text);
+        console.log('💾 Form data layoutRatio:', formData.layoutRatio);
+        console.log('💾 Form data lessonType:', formData.lessonType);
+        console.log('💾 Form data accessType:', formData.accessType);
 
-      // Update passage
-      const updateResult = await passageService.update(passage.id, updateData);
-      console.log('✅ Passage update result:', updateResult);
+        const updateResult = await passageService.update(passage.id, updateData);
+        if (!updateResult) {
+          throw new Error('Failed to update passage');
+        }
+        
+        savedPassage = {
+          ...passage,
+          ...updateData
+        };
+        console.log('✅ Passage updated successfully');
+      }
       
       // Update vocabulary (auto-processing from text)
       console.log('📚 Auto-processing vocabulary from text...');
-      await updatePassageVocabulary(passage.id);
+      await updatePassageVocabulary(savedPassage.id);
       console.log('✅ Vocabulary auto-processing completed');
       
       // 🔄 CRITICAL: Merge newly uploaded images into existing images after successful save
@@ -749,13 +792,8 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
       
       console.log('🎉 All updates completed successfully!');
       
-      // Create the updated passage object for the callback (with id)
-      const updatedPassage: Passage = {
-        ...passage,
-        ...updateData
-      };
-      
-      onSave(updatedPassage);
+      // Use the saved passage for the callback
+      onSave(savedPassage);
       onClose();
     } catch (error) {
       console.error('❌ Error updating passage:', error);
@@ -813,6 +851,32 @@ const PassageEditModal: React.FC<PassageEditModalProps> = ({
             >
               <option value="4:6">4:6 (Cột trái nhỏ hơn - Video 40%, Nội dung 60%)</option>
               <option value="5:5">5:5 (Cột bằng nhau - Video 50%, Nội dung 50%)</option>
+            </select>
+          </div>
+
+          {/* Dropdown Loại bài học */}
+          <div className="form-group">
+            <label htmlFor="lessonType">Loại bài học:</label>
+            <select
+              id="lessonType"
+              value={formData.lessonType || 'passage'}
+              onChange={(e) => setFormData({ ...formData, lessonType: e.target.value as 'passage' | 'dialogue' })}
+            >
+              <option value="passage">📖 Đoạn văn</option>
+              <option value="dialogue">💬 Hội thoại</option>
+            </select>
+          </div>
+
+          {/* Dropdown Học thử và phải đăng nhập */}
+          <div className="form-group">
+            <label htmlFor="accessType">Học thử và phải đăng nhập:</label>
+            <select
+              id="accessType"
+              value={formData.accessType || 'free'}
+              onChange={(e) => setFormData({ ...formData, accessType: e.target.value as 'free' | 'premium' })}
+            >
+              <option value="free">🆓 Miễn phí</option>
+              <option value="premium">🔒 Phải đăng nhập</option>
             </select>
           </div>
 

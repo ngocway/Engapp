@@ -46,6 +46,8 @@ export interface Passage {
   questions?: Question[]; // quiz questions for this passage
   layoutRatio?: '4:6' | '5:5'; // layout ratio for the passage detail page
   images?: string[]; // array of image URLs used in the passage content
+  lessonType?: 'passage' | 'dialogue'; // type of lesson content
+  accessType?: 'free' | 'premium'; // access level for the lesson
 }
 
 export interface Question {
