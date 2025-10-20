@@ -22,12 +22,13 @@ html, body {
   display: flex;
   background: var(--bg);
   min-height: 100vh;
-  width: 100%;
+  width: 100vw;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  box-sizing: border-box;
 }
 
 /* SIDEBAR */
@@ -42,6 +43,7 @@ html, body {
   padding: 20px 0;
   position: relative;
   z-index: 1000;
+  box-sizing: border-box;
 }
 
 .sidebar-logo {
@@ -119,15 +121,18 @@ html, body {
 
 /* MAIN */
 .main-content {
-  flex: 0 0 85%;
+  flex: 1;
   width: 85%;
   padding: 30px 40px;
   min-height: 100vh;
+  max-height: 100vh;
+  overflow-y: auto;
   background: var(--white);
   border-radius: var(--radius-2x1);
-  margin: var(--spacing-8) 0;
+  margin: 0;
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
+  box-sizing: border-box;
 }
 
 /* HEADER */
@@ -669,6 +674,9 @@ html, body {
     width: 100%;
     padding: 20px;
     margin: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
   
   .admin-header {
@@ -724,9 +732,13 @@ html, body {
   }
   
   .main-content {
+    flex: 1;
     width: 100%;
     padding: 15px;
     margin: 0;
+    max-height: 100vh;
+    overflow-y: auto;
+    box-sizing: border-box;
   }
   
   .lesson-grid {

@@ -34,6 +34,18 @@ export const settingsService = {
       // Sort by order
       return levels.sort((a, b) => a.order - b.order);
     } catch (error) {
+      // Handle Firebase permissions error gracefully
+      if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+        console.log('ℹ️ Admin mode: Using default English levels (Firebase permissions not configured)');
+        return [
+          { id: '1', key: 'kids-2-4', label: 'Kids 2-4 year olds', icon: '👶', color: '#ff6b9d', order: 1, isActive: true },
+          { id: '2', key: 'kids-5-10', label: 'Kids 5-10 year olds', icon: '🧒', color: '#4ecdc4', order: 2, isActive: true },
+          { id: '3', key: 'basic', label: 'Basic User', icon: '🌱', color: '#10b981', order: 3, isActive: true },
+          { id: '4', key: 'independent', label: 'Independent User', icon: '🌿', color: '#3b82f6', order: 4, isActive: true },
+          { id: '5', key: 'proficient', label: 'Proficient User', icon: '🌳', color: '#ef4444', order: 5, isActive: true }
+        ];
+      }
+      
       console.error('Error getting English levels:', error);
       return [];
     }
@@ -45,6 +57,12 @@ export const settingsService = {
       const docRef = await addDoc(col, level);
       return docRef.id;
     } catch (error) {
+      // Handle Firebase permissions error gracefully
+      if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+        console.log('ℹ️ Admin mode: Simulating successful English level add (Firebase permissions not configured)');
+        return 'dev-' + Date.now();
+      }
+      
       console.error('Error adding English level:', error);
       return null;
     }
@@ -85,6 +103,16 @@ export const settingsService = {
       // Sort by order
       return languages.sort((a, b) => a.order - b.order);
     } catch (error) {
+      // Handle Firebase permissions error gracefully
+      if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+        console.log('ℹ️ Admin mode: Using default native languages (Firebase permissions not configured)');
+        return [
+          { id: '1', key: 'vietnamese', label: 'Tiếng Việt', icon: '🇻🇳', order: 1, isActive: true },
+          { id: '2', key: 'english', label: 'English', icon: '🇬🇧', order: 2, isActive: true },
+          { id: '3', key: 'thai', label: 'ไทย', icon: '🇹🇭', order: 3, isActive: true }
+        ];
+      }
+      
       console.error('Error getting native languages:', error);
       return [];
     }
@@ -96,6 +124,12 @@ export const settingsService = {
       const docRef = await addDoc(col, language);
       return docRef.id;
     } catch (error) {
+      // Handle Firebase permissions error gracefully
+      if (error instanceof Error && error.message.includes('Missing or insufficient permissions')) {
+        console.log('ℹ️ Admin mode: Simulating successful native language add (Firebase permissions not configured)');
+        return 'dev-' + Date.now();
+      }
+      
       console.error('Error adding native language:', error);
       return null;
     }

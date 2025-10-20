@@ -80,11 +80,11 @@ const PassageList: React.FC<PassageListProps> = ({
 
   useEffect(() => {
     const loadPassages = async () => {
-      if (topic?.slug && user) {
+      if (topic?.slug) {
         setLoading(true);
         const data = await passageService.getByTopicSlug(topic.slug);
 
-        // Filter passages by user's English level
+        // Filter passages by user's English level (admin sees all)
         const filteredPassages = filterPassagesByLevel(data);
         setPassages(filteredPassages);
 

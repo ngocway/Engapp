@@ -23,6 +23,7 @@ const AdminPage: React.FC = () => {
   const [isVocabModalOpen, setIsVocabModalOpen] = useState(false);
   const [topics, setTopics] = useState<Topic[]>([]);
   const [loading, setLoading] = useState(true);
+  const [passageCounts, setPassageCounts] = useState<{[topicId: string]: number}>({});
 
   // Remove handleTabChange since admin doesn't need user navigation
 
@@ -42,16 +43,46 @@ const AdminPage: React.FC = () => {
       setLoading(true);
       const topicsData = await topicService.getAll();
       setTopics(topicsData);
+      
+      // Load passage counts for each topic
+      await loadPassageCounts(topicsData);
     } catch (error) {
       console.error('Error loading topics:', error);
       // Fallback to static data if Firebase fails
-      setTopics([
+      const fallbackTopics = [
         { id: '1', title: 'Thiên nhiên', name: 'Thiên nhiên', slug: 'nature', thumbnail: '', description: 'Chủ đề về thiên nhiên', level: 1 },
         { id: '2', title: 'Hoạt động hàng ngày', name: 'Hoạt động hàng ngày', slug: 'daily-activities', thumbnail: '', description: 'Chủ đề về hoạt động hàng ngày', level: 1 },
         { id: '3', title: 'Du lịch', name: 'Du lịch', slug: 'travel', thumbnail: '', description: 'Chủ đề về du lịch', level: 1 }
-      ]);
+      ];
+      setTopics(fallbackTopics);
+      await loadPassageCounts(fallbackTopics);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadPassageCounts = async (topicsData: Topic[]) => {
+    try {
+      const counts: {[topicId: string]: number} = {};
+      
+      for (const topic of topicsData) {
+        if (topic.slug) {
+          const passages = await passageService.getByTopicSlug(topic.slug);
+          counts[topic.id] = passages.length;
+        } else {
+          counts[topic.id] = 0;
+        }
+      }
+      
+      setPassageCounts(counts);
+    } catch (error) {
+      console.error('Error loading passage counts:', error);
+      // Set default counts if there's an error
+      const defaultCounts: {[topicId: string]: number} = {};
+      topicsData.forEach(topic => {
+        defaultCounts[topic.id] = 0;
+      });
+      setPassageCounts(defaultCounts);
     }
   };
 
@@ -283,7 +314,7 @@ const AdminPage: React.FC = () => {
                selectedTopic?.slug === 'daily-activities' ? <i className="fa-solid fa-person-walking"></i> :
                <i className="fa-solid fa-flask"></i>} 
               {selectedTopic?.name || selectedTopic?.title} 
-              <span>({selectedTopic ? '3 bài học' : '0 bài học'})</span>
+              <span>({selectedTopic ? `${passageCounts[selectedTopic.id] || 0} bài học` : '0 bài học'})</span>
             </h2>
             <button className="primary-btn" onClick={handleAddPassage}>
               <i className="fa-solid fa-plus"></i> Thêm bài học mới

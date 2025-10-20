@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAdmin } from '../contexts/AdminContext';
 import LessonCard from './LessonCard';
 import TopicTypeSelector, { TopicType } from './TopicTypeSelector';
+import LoginRequiredModal from './LoginRequiredModal';
 
 const TopicsSection: React.FC = () => {
   const navigate = useNavigate();
@@ -20,8 +21,9 @@ const TopicsSection: React.FC = () => {
   const [passagesLoading, setPassagesLoading] = useState<Record<string, boolean>>({});
   const [selectedTopicType, setSelectedTopicType] = useState<TopicType>('paragraph');
   const [completedPassages, setCompletedPassages] = useState<Set<string>>(new Set());
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Filter passages based on user's English level
+  // Filter passages based on user's English level (show all lessons, but mark premium ones)
   const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
     // Admin sees all passages without filtering
     if (isAdminLoggedIn) {
@@ -29,10 +31,9 @@ const TopicsSection: React.FC = () => {
       return passages;
     }
     
-    // Regular users get filtered by their English level
-    if (!user) return passages; // Show all if not logged in
-    
+    // Show all passages, but mark which ones require login
     return passages.filter(passage => {
+      // Filter by English level only
       // Check if passage has multiple English levels
       if (passage.englishLevels && passage.englishLevels.length > 0) {
         return passage.englishLevels.includes(userEnglishLevel);
@@ -53,7 +54,7 @@ const TopicsSection: React.FC = () => {
       const mappedLevel = levelMapping[passage.level] || 'basic';
       return mappedLevel === userEnglishLevel;
     });
-  }, [isAdminLoggedIn, user, userEnglishLevel]);
+  }, [isAdminLoggedIn, userEnglishLevel]);
 
   const loadPassagesForTopics = useCallback(async (topicsData: Topic[]) => {
     try {
@@ -124,6 +125,10 @@ const TopicsSection: React.FC = () => {
       } catch (error) {
         console.error('Error loading user settings:', error);
       }
+    } else {
+      // For non-logged in users, use default level
+      setUserEnglishLevel('basic');
+      console.log('📚 Default English Level for non-logged in user: basic');
     }
   }, [user]);
 
@@ -148,14 +153,13 @@ const TopicsSection: React.FC = () => {
   }, [user, loadUserSettings, loadUserProgress]);
 
   useEffect(() => {
-    if (user) {
-      loadTopics();
-    }
+    // Load topics for both logged in and logged out users
+    loadTopics();
   }, [user, userEnglishLevel, loadTopics]);
 
   // Reload passages when user English level changes
   useEffect(() => {
-    if (topics.length > 0 && user) {
+    if (topics.length > 0) {
       loadPassagesForTopics(topics);
     }
   }, [userEnglishLevel, filterPassagesByLevel, loadPassagesForTopics, topics]);
@@ -246,6 +250,19 @@ const TopicsSection: React.FC = () => {
     // TODO: Filter topics based on type if needed
   };
 
+  const handlePremiumClick = () => {
+    setShowLoginModal(true);
+  };
+
+  const handleLoginClick = () => {
+    setShowLoginModal(false);
+    // Trigger login flow
+    if (user === null) {
+      // This will trigger the login form from AuthContext
+      window.location.reload(); // Simple way to trigger login
+    }
+  };
+
   return (
     <div className="topics-section-wrapper">
       <TopicTypeSelector 
@@ -299,6 +316,8 @@ const TopicsSection: React.FC = () => {
                     key={passage.id}
                     passage={passage}
                     isLearned={completedPassages.has(passage.id)}
+                    isLoggedIn={!!user}
+                    onPremiumClick={handlePremiumClick}
                     onClick={() => navigate(`/passage/${passage.id}`)}
                   />
                 ))
@@ -314,6 +333,13 @@ const TopicsSection: React.FC = () => {
         })
       )}
       </div>
+      
+      {/* Login Required Modal */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLoginClick}
+      />
     </div>
   );
 };

@@ -105,7 +105,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess }) => {
         <div className="admin-login-info">
           <h4>📋 Thông tin đăng nhập mặc định:</h4>
           <div className="credentials-info">
-            <p><strong>Admin:</strong> admin / 12345678@Ab</p>
+            <p><strong>Admin:</strong> admin / 123456@Abc</p>
             <p><strong>Moderator:</strong> moderator / mod123</p>
           </div>
           <p className="security-note">

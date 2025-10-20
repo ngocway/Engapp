@@ -4,10 +4,18 @@ import { Passage, EnglishLevel } from '../types';
 interface LessonCardProps {
   passage: Passage;
   isLearned?: boolean;
+  isLoggedIn?: boolean;
+  onPremiumClick?: () => void;
   onClick: () => void;
 }
 
-const LessonCard: React.FC<LessonCardProps> = ({ passage, isLearned = false, onClick }) => {
+const LessonCard: React.FC<LessonCardProps> = ({ 
+  passage, 
+  isLearned = false, 
+  isLoggedIn = false, 
+  onPremiumClick,
+  onClick 
+}) => {
   const getEnglishLevelText = (englishLevels?: EnglishLevel[], englishLevel?: EnglishLevel, level?: number) => {
     if (englishLevels && englishLevels.length > 0) {
       // Show multiple levels
@@ -59,10 +67,21 @@ const LessonCard: React.FC<LessonCardProps> = ({ passage, isLearned = false, onC
     return passage.vocab?.length || 0;
   };
 
+  const isPremium = passage.accessType === 'premium';
+  const requiresLogin = isPremium && !isLoggedIn;
+
+  const handleClick = () => {
+    if (requiresLogin && onPremiumClick) {
+      onPremiumClick();
+    } else {
+      onClick();
+    }
+  };
+
   return (
     <div 
-      className={`lesson-card ${isLearned ? 'learned' : ''}`}
-      onClick={onClick}
+      className={`lesson-card ${isLearned ? 'learned' : ''} ${requiresLogin ? 'premium-locked' : ''}`}
+      onClick={handleClick}
     >
       <div className="lesson-thumb">
         {passage.thumbnail && passage.thumbnail.trim() !== '' ? (
@@ -85,6 +104,11 @@ const LessonCard: React.FC<LessonCardProps> = ({ passage, isLearned = false, onC
         <span className={`status ${getStatusClass()}`}>
           {getStatusText()}
         </span>
+        {requiresLogin && (
+          <div className="premium-lock">
+            🔒
+          </div>
+        )}
       </div>
 
       <div className="lesson-content">
