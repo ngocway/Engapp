@@ -1,0 +1,146 @@
+/* English Level Selector Styles */
+.level-selector {
+  position: relative;
+  display: inline-block;
+}
+
+.level-selector-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  padding: 8px 16px;
+  cursor: pointer;
+  outline: none;
+  min-height: 36px;
+}
+
+.dark .level-selector-trigger {
+  background-color: var(--gray-700);
+  color: var(--gray-100);
+  border-color: var(--gray-600);
+}
+
+.level-selector-trigger:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.dark .level-selector-trigger:hover {
+  background-color: var(--gray-600);
+  border-color: var(--gray-500);
+}
+
+.level-selector-trigger:focus-visible {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.level-indicator {
+  height: 12px;
+  width: 12px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
+}
+
+.level-label {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.chevron-icon {
+  height: 16px;
+  width: 16px;
+  transition: transform 0.2s ease;
+  color: var(--gray-500);
+}
+
+.dark .chevron-icon {
+  color: var(--gray-400);
+}
+
+.chevron-icon.rotate-180 {
+  transform: rotate(180deg);
+}
+
+.level-selector-options {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  animation: dropdownFadeIn 0.15s ease-out;
+  list-style: none;
+}
+
+.dark .level-selector-options {
+  background-color: var(--gray-800);
+  border-color: var(--gray-700);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.level-selector-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  position: relative;
+}
+
+.dark .level-selector-option {
+  color: var(--gray-200);
+}
+
+.level-selector-option:hover {
+  background: #f8fafc;
+}
+
+.dark .level-selector-option:hover,
+.dark .level-selector-option:focus-visible {
+  background-color: var(--gray-700);
+  color: var(--primary-color);
+}
+
+.level-selector-option.selected {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.level-selector-option.selected .level-indicator {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+}

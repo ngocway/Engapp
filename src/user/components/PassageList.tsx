@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Passage, Topic, EnglishLevel } from '../types';
-import { passageService } from '../firebase/passageService';
-import { userSettingsService } from '../firebase/userSettingsService';
-// Removed useAuth to allow using this component outside AuthProvider (e.g., Admin)
+import { Passage, Topic, EnglishLevel } from '../../types';
+import { passageService } from '../../firebase/passageService';
+import { userSettingsService } from '../../firebase/userSettingsService';
+import { useAuth } from '../contexts/AuthContext';
+// User component doesn't need admin context
 
 interface PassageListProps {
   topic: Topic;
@@ -21,7 +22,8 @@ const PassageList: React.FC<PassageListProps> = ({
   onDelete,
   onManageVocab
 }) => {
-  // Admin component - keep admin context
+  const { user } = useAuth();
+  // User component doesn't need admin context
   const [passages, setPassages] = useState<Passage[]>([]);
   const [userEnglishLevel, setUserEnglishLevel] = useState<EnglishLevel>('basic');
   const [loading, setLoading] = useState(true);
@@ -29,16 +31,53 @@ const PassageList: React.FC<PassageListProps> = ({
   // Filter passages based on user's English level
   const filterPassagesByLevel = useCallback((passages: Passage[]): Passage[] => {
     // Admin sees all passages without filtering
-    return passages;
-  }, []);
+    // User component doesn't need admin context
+    if (false) {
+      console.log('🔧 Admin mode: Showing all passages without filtering');
+      return passages;
+    }
+    
+    // Regular users get filtered by their English level
+    if (!user) return passages; // Show all if not logged in
+    
+    return passages.filter(passage => {
+      // Check if passage has multiple English levels
+      if (passage.englishLevels && passage.englishLevels.length > 0) {
+        return passage.englishLevels.includes(userEnglishLevel);
+      }
+      
+      // Fallback to single English level
+      if (passage.englishLevel) {
+        return passage.englishLevel === userEnglishLevel;
+      }
+      
+      // Fallback to old level system (convert to English level)
+      const levelMapping: Record<number, EnglishLevel> = {
+        1: 'basic',
+        2: 'independent', 
+        3: 'independent',
+        4: 'proficient'
+      };
+      const mappedLevel = levelMapping[passage.level] || 'basic';
+      return mappedLevel === userEnglishLevel;
+    });
+  }, [user, userEnglishLevel]);
 
   useEffect(() => {
     const loadUserSettings = async () => {
-      // No-op for admin mode; keep logic for future user mode reuse
-      return;
+      if (user) {
+        try {
+          const settings = await userSettingsService.getUserSettings(user.uid);
+          if (settings) {
+            setUserEnglishLevel(settings.englishLevel);
+          }
+        } catch (error) {
+          console.error('Error loading user settings:', error);
+        }
+      }
     };
     loadUserSettings();
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     const loadPassages = async () => {
@@ -54,7 +93,7 @@ const PassageList: React.FC<PassageListProps> = ({
       }
     };
     loadPassages();
-  }, [topic?.slug, filterPassagesByLevel]);
+  }, [topic?.slug, user, userEnglishLevel, filterPassagesByLevel]);
 
   // Tooltip positioning effect
   useEffect(() => {
@@ -118,6 +157,27 @@ const PassageList: React.FC<PassageListProps> = ({
       case 'travel': return '✈️';
       case 'daily-activities': return '🏠';
       default: return '📚';
+    }
+  };
+
+  const getEnglishLevelColor = (englishLevel?: EnglishLevel, level?: number) => {
+    if (englishLevel) {
+      switch (englishLevel) {
+        case 'kids-2-4': return '#ff6b9d'; // Pink for kids 2-4
+        case 'kids-5-10': return '#4ecdc4'; // Teal for kids 5-10
+        case 'basic': return '#10b981'; // Green for basic
+        case 'independent': return '#3b82f6'; // Blue for independent
+        case 'proficient': return '#ef4444'; // Red for proficient
+        default: return '#6b7280'; // Gray
+      }
+    }
+    // Fallback to old level system
+    switch (level) {
+      case 1: return '#10b981'; // Green for A1
+      case 2: return '#3b82f6'; // Blue for A2
+      case 3: return '#f59e0b'; // Orange for B1
+      case 4: return '#ef4444'; // Red for B2
+      default: return '#6b7280'; // Gray
     }
   };
 

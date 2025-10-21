@@ -102,11 +102,11 @@ const TestHtmlConversion: React.FC = () => {
         }}>
           <HighlightedText 
             text={plainText}
-            passageVocab={[
-              { term: 'mist', meaning: 'Sương mù', definitionEn: 'A cloud of tiny water droplets' },
-              { term: 'across', meaning: 'Băng qua', definitionEn: 'From one side to the other' },
-              { term: 'modern', meaning: 'Hiện đại', definitionEn: 'Relating to present or recent times' }
-            ]}
+            // passageVocab={[
+            //   { term: 'mist', meaning: 'Sương mù', definitionEn: 'A cloud of tiny water droplets' },
+            //   { term: 'across', meaning: 'Băng qua', definitionEn: 'From one side to the other' },
+            //   { term: 'modern', meaning: 'Hiện đại', definitionEn: 'Relating to present or recent times' }
+            // ]}
           />
         </div>
       </div>

@@ -1,42 +1,20 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import HomePage from './pages/HomePage';
-import AdminPage from './pages/AdminPage';
-import AdminPanel from './components/AdminPanel';
-import AdminQuestionsPage from './pages/AdminQuestionsPage';
-import AdminVocabularyPage from './pages/AdminVocabularyPage';
-import TopicSelect from './pages/TopicSelect';
-import TopicDetailPage from './pages/TopicDetailPage';
-import PassageList from './pages/PassageList';
-import PassageDetail from './pages/PassageDetail';
-import MyVocab from './pages/MyVocab';
-import ReviewPageWrapper from './pages/ReviewPageWrapper';
-import { AuthProvider } from './contexts/AuthContext';
-import { AdminProvider } from './contexts/AdminContext';
+import UserApp from './user/UserApp';
+import AdminApp from './admin/AdminApp';
 
 function App() {
   return (
-    <AuthProvider>
-      <AdminProvider>
-        <Router>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/panel" element={<AdminPanel />} />
-            <Route path="/admin/questions" element={<AdminQuestionsPage />} />
-            <Route path="/admin/questions/:passageId" element={<AdminQuestionsPage />} />
-            <Route path="/admin/vocabulary/:passageId" element={<AdminVocabularyPage />} />
-            <Route path="/topics" element={<TopicSelect />} />
-            <Route path="/topics/:topicSlug" element={<TopicDetailPage />} />
-            <Route path="/topics/:topicSlug/passages" element={<PassageList />} />
-            <Route path="/passage/:passageId" element={<PassageDetail />} />
-            <Route path="/my-vocab" element={<MyVocab />} />
-            <Route path="/review" element={<ReviewPageWrapper />} />
-          </Routes>
-        </Router>
-      </AdminProvider>
-    </AuthProvider>
+    <Router>
+      <Routes>
+        {/* User Routes */}
+        <Route path="/*" element={<UserApp />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminApp />} />
+      </Routes>
+    </Router>
   );
 }
 

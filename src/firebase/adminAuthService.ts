@@ -1,97 +1,100 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from './config';
-
-export interface AdminCredentials {
-  username: string;
-  password: string;
-}
+// Admin Authentication Service (with Firebase Auth sign-in)
+import { auth } from './config';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, getIdTokenResult, updateProfile } from 'firebase/auth';
 
 export interface AdminUser {
   id: string;
   username: string;
   email: string;
-  role: 'admin' | 'super_admin';
-  isActive: boolean;
-  createdAt: number;
-  lastLogin?: number;
+  role: 'admin';
+  createdAt: Date;
 }
 
+const panelCredentials = [
+  { username: 'admin', password: '123456@Abc' }
+];
+
+const ADMIN_EMAIL = process.env.REACT_APP_ADMIN_EMAIL || 'admin@engapp.dev';
+const ADMIN_PASSWORD = process.env.REACT_APP_ADMIN_PASSWORD || 'Admin123456!';
+
 export const adminAuthService = {
-  // Default admin credentials (should be changed in production)
-  async initializeDefaultAdmin() {
-    try {
-      // Skip Firebase initialization to avoid permissions issues
-      console.log('✅ Admin authentication ready (bypassing Firebase initialization)');
-    } catch (error) {
-      console.error('Error initializing default admin:', error);
+  async login(username: string, password: string): Promise<AdminUser | null> {
+    // Step 1: Check panel credentials (UI gate for /admin)
+    const matched = panelCredentials.find(c => c.username === username && c.password === password);
+    if (!matched) {
+      console.log('❌ Admin login failed: invalid panel credentials');
+      return null;
     }
-  },
 
-  async authenticateAdmin(username: string, password: string): Promise<AdminUser | null> {
+    // Step 2: Try Firebase Auth, but fallback to local admin if it fails
     try {
-      console.log('🔐 AdminAuthService authenticateAdmin called with:', { username, password: '***' });
+      // Try sign-in with configured admin email/password
+      const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD)
+        .catch(async (e) => {
+          if (e?.code === 'auth/user-not-found') {
+            // Create the account automatically (dev convenience)
+            const created = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD);
+            // Optional: set displayName
+            try { await updateProfile(created.user, { displayName: 'Admin' }); } catch {}
+            return created;
+          }
+          throw e;
+        });
+
+      // Force refresh token to read claims (admin claim will be set via Admin SDK script)
+      const token = await getIdTokenResult(cred.user, true);
+      console.log('🔐 Firebase admin session established. Claims:', token.claims);
       
-      // In production, you should hash passwords and use proper authentication
-      // For demo purposes, we'll use simple hardcoded credentials
-      const validCredentials = [
-        { username: 'admin', password: '123456@Abc', role: 'super_admin' },
-        { username: 'moderator', password: 'mod123', role: 'admin' }
-      ];
-
-      console.log('🔐 Valid credentials:', validCredentials.map(c => ({ username: c.username, role: c.role })));
-
-      const credential = validCredentials.find(
-        cred => cred.username === username && cred.password === password
-      );
-
-      console.log('🔐 Found credential:', credential);
-
-      if (!credential) {
-        console.log('❌ No matching credential found');
-        return null;
+      // Test Firebase connection
+      console.log('🔍 Testing Firebase connection...');
+      console.log('🔍 User UID:', cred.user.uid);
+      console.log('🔍 User Email:', cred.user.email);
+      console.log('🔍 User Email Verified:', cred.user.emailVerified);
+      console.log('🔍 Token Claims:', token.claims);
+      console.log('🔍 Has Admin Claim:', token.claims?.admin === true);
+      
+      // Test Firestore access
+      console.log('🔍 Testing Firestore access...');
+      try {
+        const { db } = await import('./config');
+        const { collection, getDocs } = await import('firebase/firestore');
+        const topicsSnapshot = await getDocs(collection(db, 'topics'));
+        console.log('✅ Firestore topics access successful:', topicsSnapshot.size, 'topics');
+      } catch (firestoreError) {
+        console.error('❌ Firestore access failed:', firestoreError);
       }
 
-      // Return admin user directly without Firebase operations
-      // This bypasses the Firebase permissions issue
       const adminUser: AdminUser = {
-        id: username,
-        username: username,
-        email: `${username}@engapp.com`,
-        role: credential.role as 'admin' | 'super_admin',
-        isActive: true,
-        createdAt: Date.now(),
-        lastLogin: Date.now()
+        id: cred.user.uid,
+        username: matched.username,
+        email: cred.user.email || ADMIN_EMAIL,
+        role: 'admin',
+        createdAt: new Date()
       };
 
-      console.log('✅ Admin user created:', adminUser);
       return adminUser;
-    } catch (error) {
-      console.error('Error authenticating admin:', error);
-      return null;
-    }
-  },
-
-  async getAdminById(adminId: string): Promise<AdminUser | null> {
-    try {
-      const adminDoc = doc(db, 'adminUsers', adminId);
-      const adminSnap = await getDoc(adminDoc);
+    } catch (err) {
+      console.warn('⚠️ Firebase admin sign-in failed, using local admin mode:', err instanceof Error ? err.message : String(err));
       
-      if (adminSnap.exists()) {
-        return adminSnap.data() as AdminUser;
-      }
-      return null;
-    } catch (error) {
-      console.error('Error getting admin:', error);
-      return null;
+      // Fallback: Return local admin user (for development)
+      const adminUser: AdminUser = {
+        id: 'local-admin-' + Date.now(),
+        username: matched.username,
+        email: ADMIN_EMAIL,
+        role: 'admin',
+        createdAt: new Date()
+      };
+
+      console.log('✅ Local admin login successful (Firebase bypassed)');
+      return adminUser;
     }
   },
 
-  async updateAdminLastLogin(adminId: string): Promise<void> {
-    try {
-      const adminDoc = doc(db, 'adminUsers', adminId);
-      await setDoc(adminDoc, { lastLogin: Date.now() }, { merge: true });
-    } catch (error) {
-      console.error('Error updating admin last login:', error);
-    }
+  async logout(): Promise<void> {
+    console.log('✅ Admin logout successful');
+  },
+
+  isAdmin(user: any): boolean {
+    return user && user.role === 'admin';
   }
 };

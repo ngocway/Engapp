@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Passage, Question, EnglishLevel } from '../types';
-import { topicService } from '../firebase/topicService';
-import { questionService } from '../firebase/questionService';
-import HighlightedText from '../components/HighlightedText';
-import QuizSection from '../components/QuizSection';
-import { VocabFlashcard } from '../components/VocabFlashcard';
+import { Passage, Question, EnglishLevel } from '../../types';
+import { topicService } from '../../firebase/topicService';
+import { questionService } from '../../firebase/questionService';
+import HighlightedText from '../../components/HighlightedText';
+import QuizSection from '../../components/QuizSection';
+import { VocabFlashcard } from '../../components/VocabFlashcard';
 
 interface PassageDetailProps {
   passage: Passage;
