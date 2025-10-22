@@ -4,40 +4,51 @@ interface LoginRequiredModalProps {
   isOpen: boolean;
   onClose: () => void;
   onLogin: () => void;
+  title?: string;
+  description?: string;
+  loginButtonIcon?: string;
+  loginButtonText?: string;
 }
 
-const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  onLogin 
+const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
+  isOpen,
+  onClose,
+  onLogin,
+  title = "🔒 Bài học Premium",
+  description = "Bài học này dành cho thành viên Premium.<br />Vui lòng đăng nhập để tiếp tục học bài này.",
+  loginButtonIcon = "🔑",
+  loginButtonText = "Đăng nhập ngay"
 }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content login-required-modal" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>🔒 Yêu cầu đăng nhập</h2>
-          <button className="close-button" onClick={onClose}>×</button>
+    <div className="popup-overlay" onClick={onClose}>
+      <div className="popup" onClick={(e) => e.stopPropagation()}>
+        <h2>{title}</h2>
+        <p className="subtitle" dangerouslySetInnerHTML={{ __html: description }}></p>
+        
+        <div className="benefits">
+          <h3>Lợi ích khi đăng nhập:</h3>
+          <ul>
+            <li>✔️ Truy cập tất cả bài học Premium</li>
+            <li>✔️ Theo dõi tiến độ học tập</li>
+            <li>✔️ Lưu từ vựng yêu thích</li>
+            <li>✔️ Nhận gợi ý bài học phù hợp</li>
+          </ul>
         </div>
         
-        <div className="modal-body">
-          <div className="login-required-content">
-            <div className="lock-icon">🔒</div>
-            <h3>Bài học này yêu cầu đăng nhập</h3>
-            <p>
-              Để truy cập bài học này, bạn cần đăng nhập vào tài khoản của mình. 
-              Đăng nhập để mở khóa tất cả nội dung premium!
-            </p>
-          </div>
-        </div>
-        
-        <div className="modal-footer">
-          <button className="btn-secondary" onClick={onClose}>
+        <div className="actions">
+          <button 
+            className="cancel-btn" 
+            onClick={onClose}
+          >
             Hủy
           </button>
-          <button className="btn-primary" onClick={onLogin}>
-            Đăng nhập
+          <button 
+            className="login-btn" 
+            onClick={onLogin}
+          >
+            {loginButtonIcon} {loginButtonText}
           </button>
         </div>
       </div>
@@ -46,4 +57,3 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
 };
 
 export default LoginRequiredModal;
-

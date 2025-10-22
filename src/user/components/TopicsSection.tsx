@@ -66,7 +66,17 @@ const TopicsSection: React.FC = () => {
           try {
             const passages = await passageService.getByTopicSlug(topic.slug);
             const filteredPassages = filterPassagesByLevel(passages);
-            passagesMap[topic.slug] = filteredPassages.slice(0, 4); // Chỉ lấy 4 passages đầu tiên
+            
+            // Chỉ lấy bài học Free cho trang chủ
+            const freePassages = filteredPassages.filter(passage => 
+              passage.accessType === 'free' || !passage.accessType
+            );
+            
+            console.log(`📚 Topic ${topic.slug}: Total passages: ${passages.length}, Filtered: ${filteredPassages.length}, Free: ${freePassages.length}`);
+            
+            // Random 4 bài học Free
+            const shuffledFreePassages = freePassages.sort(() => Math.random() - 0.5);
+            passagesMap[topic.slug] = shuffledFreePassages.slice(0, 4);
             
             // Update loading state for this topic
             setPassagesLoading(prev => ({
@@ -96,19 +106,28 @@ const TopicsSection: React.FC = () => {
     try {
       // Load topics first
       const topicsData = await topicService.getAll();
-      setTopics(topicsData);
+      console.log('🔍 Topics loaded:', topicsData);
+      
+      // Keep all topics, even if title is undefined (we'll handle display later)
+      const validTopics = topicsData;
+      console.log('🔍 Valid topics:', validTopics);
+      
+      setTopics(validTopics);
       
       // Initialize loading state for each topic
       const loadingState: Record<string, boolean> = {};
-      topicsData.forEach(topic => {
+      validTopics.forEach(topic => {
         if (topic.slug) {
           loadingState[topic.slug] = true;
         }
       });
       setPassagesLoading(loadingState);
       
+      // Load user settings to get English level
+      await loadUserSettings();
+      
       // Load passages for each topic
-      loadPassagesForTopics(topicsData);
+      loadPassagesForTopics(validTopics);
     } catch (error) {
       console.error('Error loading topics:', error);
     }
@@ -287,7 +306,7 @@ const TopicsSection: React.FC = () => {
           <section key={topic.id} className="topic-section">
             <div className="section-header">
               <h2 className="section-title">
-                {getTopicIcon(topic.slug)} {topic.name} <span className="count">
+                {getTopicIcon(topic.slug)} {topic.title || topic.name || topic.slug} <span className="count">
                   {isPassagesLoading ? '...' : `(${topicPassages.length} bài học)`}
                 </span>
               </h2>

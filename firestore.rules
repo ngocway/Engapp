@@ -6,13 +6,13 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.token.admin == true;
     }
     
-    // Allow authenticated users to read topics and passages
+    // Allow everyone (including unauthenticated users) to read topics and passages
     match /topics/{topicId} {
-      allow read: if request.auth != null;
+      allow read: if true;
     }
     
     match /passages/{passageId} {
-      allow read: if request.auth != null;
+      allow read: if true;
     }
     
     // Allow users to read/write their own progress

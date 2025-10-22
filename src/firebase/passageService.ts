@@ -24,37 +24,8 @@ export const passageService = {
       console.log('✅ passageService.getAll - Firestore access successful!');
       return passages;
     } catch (e) {
-      // Handle Firebase permissions error gracefully
-      if (e instanceof Error && e.message.includes('Missing or insufficient permissions')) {
-        console.log('ℹ️ Admin mode: Simulating passages data (Firebase permissions not configured)');
-        // Return sample passages for admin panel
-        return [
-          {
-            id: 'sample-passage-1',
-            title: 'Sample Lesson 1',
-            text: 'This is a sample lesson for admin panel.',
-            level: 1,
-            topicId: 'sample-topic-1',
-            topicSlug: 'sample-topic-1',
-            englishLevel: 'basic',
-            accessType: 'free',
-            vocab: [],
-            questions: []
-          },
-          {
-            id: 'sample-passage-2',
-            title: 'Sample Lesson 2',
-            text: 'This is another sample lesson for admin panel.',
-            level: 2,
-            topicId: 'sample-topic-1',
-            topicSlug: 'sample-topic-1',
-            englishLevel: 'independent',
-            accessType: 'premium',
-            vocab: [],
-            questions: []
-          }
-        ];
-      }
+      // Log error but don't return sample data
+      console.error('❌ Firebase permissions error:', e);
       console.error('Error fetching all passages', e);
       return [];
     }
@@ -78,37 +49,8 @@ export const passageService = {
       console.log('✅ passageService.getByTopicSlug - Firestore access successful!');
       return passages;
     } catch (e) {
-      // Handle Firebase permissions error gracefully
-      if (e instanceof Error && e.message.includes('Missing or insufficient permissions')) {
-        console.log('ℹ️ Admin mode: Simulating passages data for topic (Firebase permissions not configured)');
-        // Return sample passages for the requested topic
-        return [
-          {
-            id: 'sample-passage-1',
-            title: 'Sample Lesson 1',
-            text: 'This is a sample lesson for admin panel.',
-            level: 1,
-            topicId: topicSlug,
-            topicSlug: topicSlug,
-            englishLevel: 'basic',
-            accessType: 'free',
-            vocab: [],
-            questions: []
-          },
-          {
-            id: 'sample-passage-2',
-            title: 'Sample Lesson 2',
-            text: 'This is another sample lesson for admin panel.',
-            level: 2,
-            topicId: topicSlug,
-            topicSlug: topicSlug,
-            englishLevel: 'independent',
-            accessType: 'premium',
-            vocab: [],
-            questions: []
-          }
-        ];
-      }
+      // Log error but don't return sample data
+      console.error('❌ Firebase permissions error for topic:', topicSlug, e);
       console.error('Error fetching passages', e);
       return [];
     }

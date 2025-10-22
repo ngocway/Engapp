@@ -2705,6 +2705,132 @@ html::-webkit-scrollbar, body::-webkit-scrollbar {
   display: none; /* Webkit browsers */
 }
 
+/* =================== LOGIN REQUIRED MODAL =================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/* Overlay */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+/* Popup */
+.popup {
+  background: #fff;
+  border-radius: 22px;
+  width: 90%;
+  max-width: 420px;
+  padding: 32px 28px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  animation: popupShow 0.35s ease;
+}
+
+@keyframes popupShow {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header */
+.popup h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* Benefits box */
+.benefits {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px 18px;
+  text-align: left;
+  margin-bottom: 24px;
+}
+
+.benefits h3 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.benefits ul {
+  list-style: none;
+  color: #374151;
+  font-size: 14px;
+  padding: 0;
+  margin: 0;
+}
+
+.benefits li {
+  margin: 4px 0;
+}
+
+/* Buttons */
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.cancel-btn,
+.login-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.25s;
+  font-size: 14px;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.login-btn {
+  background: #6366f1;
+  color: #fff;
+  border: none;
+}
+
+.login-btn:hover {
+  background: #4f46e5;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .popup {
+    padding: 24px 18px;
+  }
+  
+  .popup h2 {
+    font-size: 18px;
+  }
+  
+  .benefits {
+    font-size: 13px;
+  }
+}
+
 /* Admin pages - override layout for admin */
 .admin-app .app {
   display: block;

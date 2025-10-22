@@ -9,13 +9,14 @@ import { useAuth } from '../contexts/AuthContext';
 import LessonCard from '../components/LessonCard';
 import Header from '../components/Header';
 import SearchAndFilter, { DifficultyFilter } from '../../components/SearchAndFilter';
+import LoginRequiredModal from '../components/LoginRequiredModal';
 
 type TabType = 'topics' | 'review';
 
 const TopicDetailPage: React.FC = () => {
   const { topicSlug } = useParams<{ topicSlug: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, login } = useAuth();
   // User page doesn't need admin context
   const [topic, setTopic] = useState<Topic | null>(null);
   const [passages, setPassages] = useState<Passage[]>([]);
@@ -25,6 +26,7 @@ const TopicDetailPage: React.FC = () => {
   const [completedPassages, setCompletedPassages] = useState<Set<string>>(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const [difficultyFilter, setDifficultyFilter] = useState<DifficultyFilter>('all');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Filter passages based on search term and difficulty
   const filterPassages = (passages: Passage[]): Passage[] => {
@@ -202,6 +204,11 @@ const TopicDetailPage: React.FC = () => {
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     if (tab === 'review') {
+      // Kiểm tra login khi chuyển sang tab review
+      if (!user) {
+        setShowLoginModal(true);
+        return;
+      }
       navigate('/review');
     }
   };
@@ -249,9 +256,35 @@ const TopicDetailPage: React.FC = () => {
     );
   }
 
+  // Sort passages: 4 free lessons first, then random order
+  const sortPassages = (passages: Passage[]): Passage[] => {
+    // Separate free and premium passages
+    const freePassages = passages.filter(passage => passage.accessType === 'free' || !passage.accessType);
+    const premiumPassages = passages.filter(passage => passage.accessType === 'premium');
+    
+    // Take first 4 free passages
+    const firstFourFree = freePassages.slice(0, 4);
+    
+    // Randomize remaining free passages
+    const remainingFree = freePassages.slice(4).sort(() => Math.random() - 0.5);
+    
+    // Randomize premium passages
+    const randomizedPremium = premiumPassages.sort(() => Math.random() - 0.5);
+    
+    // Combine: first 4 free + remaining free + premium
+    return [...firstFourFree, ...remainingFree, ...randomizedPremium];
+  };
+
   // Apply all filters to passages
   const levelFilteredPassages = filterPassagesByLevel(passages);
   const finalFilteredPassages = filterPassages(levelFilteredPassages);
+  const sortedPassages = sortPassages(finalFilteredPassages);
+
+  const handleLoginClick = () => {
+    setShowLoginModal(false);
+    // Show login form using AuthContext
+    login();
+  };
 
   return (
     <div className="app">
@@ -276,7 +309,7 @@ const TopicDetailPage: React.FC = () => {
                 Vui lòng liên hệ admin để thêm bài học cho chủ đề này
               </p>
             </div>
-          ) : finalFilteredPassages.length === 0 ? (
+          ) : sortedPassages.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '50px' }}>
               <h3 style={{ color: 'white', marginBottom: '20px' }}>
                 🔍 Không tìm thấy bài học nào
@@ -287,18 +320,37 @@ const TopicDetailPage: React.FC = () => {
             </div>
           ) : (
             <div className="lessons-grid">
-              {finalFilteredPassages.map((passage: Passage) => (
+              {sortedPassages.map((passage: Passage) => (
                 <LessonCard
                   key={passage.id}
                   passage={passage}
                   isLearned={completedPassages.has(passage.id)}
-                  onClick={() => navigate(`/passage/${passage.id}`)}
+                  onClick={() => {
+                    // Check if user is not logged in and trying to access premium content
+                    if (!user && passage.accessType === 'premium') {
+                      setShowLoginModal(true);
+                      return;
+                    }
+                    
+                    navigate(`/passage/${passage.id}`);
+                  }}
                 />
               ))}
             </div>
           )}
         </div>
       </div>
+      
+      {/* Login Required Modal */}
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLoginClick}
+        title="🔒 Chức năng Premium"
+        description="Chức năng Ôn tập chỉ dành cho thành viên, vui lòng đăng nhập để có thể lưu tiến trình học tập của bạn."
+        loginButtonIcon="🔑"
+        loginButtonText="Đăng nhập ngay"
+      />
     </div>
   );
 };
