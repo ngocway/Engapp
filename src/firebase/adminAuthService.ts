@@ -1,4 +1,4 @@
-// Admin Authentication Service (with Firebase Auth sign-in)
+// Admin Authentication Service (standalone, but with Firebase Auth for Firestore access)
 import { auth } from './config';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, getIdTokenResult, updateProfile } from 'firebase/auth';
 
@@ -26,7 +26,7 @@ export const adminAuthService = {
       return null;
     }
 
-    // Step 2: Try Firebase Auth, but fallback to local admin if it fails
+    // Step 2: Authenticate with Firebase for Firestore access (but isolated from user auth)
     try {
       // Try sign-in with configured admin email/password
       const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_PASSWORD)
@@ -41,20 +41,8 @@ export const adminAuthService = {
           throw e;
         });
 
-      // Force refresh token to read claims (admin claim will be set via Admin SDK script)
-      const token = await getIdTokenResult(cred.user, true);
-      console.log('🔐 Firebase admin session established. Claims:', token.claims);
-      
-      // Test Firebase connection
-      console.log('🔍 Testing Firebase connection...');
-      console.log('🔍 User UID:', cred.user.uid);
-      console.log('🔍 User Email:', cred.user.email);
-      console.log('🔍 User Email Verified:', cred.user.emailVerified);
-      console.log('🔍 Token Claims:', token.claims);
-      console.log('🔍 Has Admin Claim:', token.claims?.admin === true);
-      
       // Test Firestore access
-      console.log('🔍 Testing Firestore access...');
+      console.log('🔍 Testing Firestore access for admin...');
       try {
         const { db } = await import('./config');
         const { collection, getDocs } = await import('firebase/firestore');
@@ -72,6 +60,7 @@ export const adminAuthService = {
         createdAt: new Date()
       };
 
+      console.log('✅ Admin login successful with Firebase Auth for Firestore access');
       return adminUser;
     } catch (err) {
       console.warn('⚠️ Firebase admin sign-in failed, using local admin mode:', err instanceof Error ? err.message : String(err));

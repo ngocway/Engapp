@@ -62,13 +62,21 @@ export const passageService = {
 
   async getByTopicSlug(topicSlug: string): Promise<Passage[]> {
     try {
+      console.log('🔍 passageService.getByTopicSlug - Testing Firestore access for topic:', topicSlug);
+      console.log('🔍 Current user:', auth.currentUser?.uid);
+      console.log('🔍 Current user email:', auth.currentUser?.email);
+      
       const q = query(collection(db, PASSAGES_COLLECTION), where('topicSlug', '==', topicSlug));
       const qs = await getDocs(q);
-      return qs.docs.map(d => {
+      const passages = qs.docs.map(d => {
         const data = d.data() as any; // Use any to access internal id field for debugging
         // Use Firestore document ID, not the internal 'id' field
         return { id: d.id, ...data };
       });
+      
+      console.log('🔍 passageService.getByTopicSlug - Found passages:', passages.length);
+      console.log('✅ passageService.getByTopicSlug - Firestore access successful!');
+      return passages;
     } catch (e) {
       // Handle Firebase permissions error gracefully
       if (e instanceof Error && e.message.includes('Missing or insufficient permissions')) {

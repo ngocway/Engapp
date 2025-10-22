@@ -33,6 +33,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged((user) => {
+      // Only handle user authentication, not admin authentication
+      // Check if this is an admin user (admin uses specific email)
+      const adminEmail = process.env.REACT_APP_ADMIN_EMAIL || 'admin@engapp.dev';
+      if (user && user.email === adminEmail) {
+        // This is admin authentication, ignore it in user context
+        console.log('🔍 User AuthContext: Ignoring admin authentication');
+        setUser(null);
+        setIsAdmin(false);
+        setLoading(false);
+        return;
+      }
+      
+      // This is regular user authentication
       setUser(user);
       setIsAdmin(authService.isAdmin(user));
       setLoading(false);

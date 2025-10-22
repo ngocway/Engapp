@@ -28,7 +28,7 @@ export const AdminContextProvider: React.FC<AdminProviderProps> = ({ children })
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if admin is logged in (from sessionStorage)
+    // Check if admin is logged in (from sessionStorage - separate from user auth)
     const checkAdminSession = () => {
       try {
         const savedAdmin = sessionStorage.getItem('adminUser');
