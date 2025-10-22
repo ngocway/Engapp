@@ -213,7 +213,7 @@ const PassageList: React.FC<PassageListProps> = ({
                   </div>
                 )}
 
-                <div className="card-actions">
+                <div className={`card-actions ${passage.accessType === 'premium' ? 'premium-access' : ''}`}>
                   {onManageVocab && (
                     <div className="tooltip">
                       <button 

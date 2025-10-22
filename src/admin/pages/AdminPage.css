@@ -13,6 +13,21 @@ html, body {
   margin: 0 !important;
   padding: 0 !important;
   overflow-x: hidden;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure admin dashboard takes full width */
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden;
+}
+
+.admin-app {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden;
 }
 
 .admin-dashboard {
@@ -22,13 +37,15 @@ html, body {
   display: flex;
   background: var(--bg);
   min-height: 100vh;
-  width: 100vw;
+  width: 100vw !important;
+  max-width: 100vw !important;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* SIDEBAR */
@@ -127,11 +144,12 @@ html, body {
   min-height: 100vh;
   max-height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
   background: var(--white);
-  border-radius: var(--radius-2x1);
+  border-radius: 0;
   margin: 0;
-  border: 1px solid var(--gray-200);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: none;
   box-sizing: border-box;
 }
 
@@ -204,6 +222,8 @@ html, body {
   gap: 10px;
   flex-wrap: wrap;
   margin-bottom: 24px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-btn {
@@ -231,6 +251,8 @@ html, body {
   border-radius: 14px;
   padding: 20px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section-header {
@@ -240,6 +262,8 @@ html, body {
   margin-bottom: 20px;
   border-bottom: 1px solid #e2e8f0;
   padding-bottom: 10px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .section-header h2 {
@@ -263,6 +287,32 @@ html, body {
   gap: 18px;
 }
 
+/* PASSAGES GRID - for admin panel */
+.passages-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  padding: 0;
+  width: 100%;
+}
+
+/* TOPICS SECTION - for admin panel */
+.topics-section {
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-shadow: none;
+  box-sizing: border-box;
+}
+
+.topic-group {
+  margin-bottom: 0;
+  padding: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* Lesson Card */
 .lesson-card {
   background: #fff;
@@ -272,6 +322,7 @@ html, body {
   transition: all 0.25s ease;
   width: 100%;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .lesson-card:hover {
@@ -323,6 +374,22 @@ html, body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(8px);
   z-index: 5;
+}
+
+/* Premium access card actions - light blue background */
+.card-actions.premium-access {
+  background: rgba(59, 130, 246, 0.15); /* Light blue background */
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* Premium access button styling */
+.card-actions.premium-access button {
+  color: #1e40af; /* Darker blue for better contrast */
+}
+
+.card-actions.premium-access button:hover {
+  color: #1d4ed8; /* Even darker blue on hover */
+  transform: scale(1.15);
 }
 
 /* Tooltip wrapper */
@@ -650,10 +717,18 @@ html, body {
   .lesson-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  .passages-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 1024px) {
   .lesson-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .passages-grid {
     grid-template-columns: repeat(2, 1fr);
   }
   
@@ -722,6 +797,10 @@ html, body {
   .lesson-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  .passages-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 480px) {
@@ -742,6 +821,10 @@ html, body {
   }
   
   .lesson-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .passages-grid {
     grid-template-columns: 1fr;
   }
 }

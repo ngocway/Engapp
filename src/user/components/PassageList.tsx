@@ -266,10 +266,21 @@ const PassageList: React.FC<PassageListProps> = ({
             >
               <div className="lesson-thumbnail">
                 {passage.thumbnail ? (
-                  <img src={passage.thumbnail} alt={passage.title} />
+                  <img 
+                    src={passage.thumbnail} 
+                    alt={passage.title}
+                    className={passage.accessType === 'premium' && !user ? 'premium-locked' : ''}
+                  />
                 ) : (
-                  <div className="thumbnail-placeholder">
+                  <div className={`thumbnail-placeholder ${passage.accessType === 'premium' && !user ? 'premium-locked' : ''}`}>
                     {getTopicIcon(topic.slug)}
+                  </div>
+                )}
+
+                {/* Premium lock overlay for non-logged users */}
+                {passage.accessType === 'premium' && !user && (
+                  <div className="premium-lock-overlay">
+                    <i className="fa-solid fa-lock"></i>
                   </div>
                 )}
 
@@ -323,7 +334,14 @@ const PassageList: React.FC<PassageListProps> = ({
                 </div>
               </div>
 
-              <div className="lesson-info" onClick={() => onOpen(passage)}>
+              <div className="lesson-info" onClick={() => {
+                if (passage.accessType === 'premium' && !user) {
+                  // Show login modal or redirect to login
+                  alert('Vui lòng đăng nhập để học bài học premium này!');
+                  return;
+                }
+                onOpen(passage);
+              }}>
                 <div className="lesson-tags">
                   <span className="tag-count">
                     <i className="fa-solid fa-book"></i> {passage.vocab?.length || 0} từ vựng

@@ -57,7 +57,7 @@ const AdminPage: React.FC = () => {
       setTopics(topicsData);
       
       // Load passage counts for each topic
-      // await loadPassageCounts(topicsData); // Temporarily disabled
+      await loadPassageCounts(topicsData);
       console.log('🔍 loadTopics - Completed successfully');
     } catch (error) {
       console.error('❌ Error loading topics:', error);
