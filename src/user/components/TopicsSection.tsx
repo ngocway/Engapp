@@ -338,7 +338,12 @@ const TopicsSection: React.FC = () => {
                     isLearned={completedPassages.has(passage.id)}
                     isLoggedIn={!!user}
                     onPremiumClick={handlePremiumClick}
-                    onClick={() => navigate(`/passage/${passage.id}`)}
+                    onClick={() => {
+                      console.log('🔍 Clicking on passage:', passage.title);
+                      console.log('🔍 Passage ID:', passage.id);
+                      console.log('🔍 Full passage object:', passage);
+                      navigate(`/passage/${passage.id}`);
+                    }}
                   />
                 ))
               ) : (

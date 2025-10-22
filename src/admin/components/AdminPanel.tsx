@@ -13,6 +13,7 @@ import AdminPassageManager from './AdminPassageManager';
 // UpdatePassagesButton component not found
 import { useAdmin } from '../contexts/AdminContext';
 import { ContentGeneratorService } from '../../services/contentGeneratorService';
+import { uploadPassageData } from '../../scripts/uploadPassageData';
 import '../pages/AdminPage.css';
 
 const AdminPanel: React.FC = () => {
@@ -596,6 +597,11 @@ const AdminPanel: React.FC = () => {
                 <button className="admin-button primary" onClick={uploadSampleData}>
                   <span className="button-icon">📤</span>
                   <span className="button-text">Upload dữ liệu mẫu</span>
+                </button>
+                
+                <button className="admin-button primary" onClick={uploadPassageData}>
+                  <span className="button-icon">📖</span>
+                  <span className="button-text">Upload Passages mẫu</span>
                 </button>
                 
                 <button className="admin-button primary" onClick={uploadTopicsAndPassages}>

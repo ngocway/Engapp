@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Question } from '../types';
 import { progressService } from '../firebase/progressService';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../user/contexts/AuthContext';
 
 interface QuizSectionProps {
   questions: Question[];
