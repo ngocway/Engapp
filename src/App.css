@@ -281,13 +281,18 @@ strong, b {
   min-height: 100vh;
   background-color: var(--gray-50);
   color: var(--gray-800);
+  display: flex;
+  flex-direction: column;
 }
 
 /* Modern Header - Parroto style */
 .modern-header {
   position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
+  height: 84px;
   z-index: 1000;
   padding: 10px 0;
   background: rgba(255, 255, 255, 0.95);
@@ -2664,10 +2669,50 @@ strong, b {
   background: var(--white);
   border-radius: var(--radius-2xl);
   padding: var(--spacing-8);
-  margin: var(--spacing-8) 0;
-  margin-top: calc(var(--spacing-8) + 84px); /* Add header height to top margin */
+  margin: var(--spacing-8);
+  margin-top: calc(var(--spacing-8) + 84px) !important; /* Add exact header height to top margin */
   border: 1px solid var(--gray-200);
   box-shadow: var(--shadow-sm);
+  flex: 1;
+  overflow-y: auto;
+  /* Hide scrollbar but keep scroll functionality */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+/* Hide scrollbar for Webkit browsers (Chrome, Safari, Edge) */
+.main-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Global scrollbar hiding - for entire page */
+html, body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  display: none; /* Webkit browsers */
+}
+
+/* Hide scrollbar for all scrollable elements */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Webkit browsers */
+}
+
+/* Admin pages - override layout for admin */
+.admin-app .app {
+  display: block;
+}
+
+.admin-app .main-content {
+  margin-top: 0 !important;
+  flex: none;
 }
 
 .section-title {
@@ -5060,6 +5105,8 @@ strong, b {
   .main-content,
   .topics-section {
     padding: var(--spacing-6);
+    margin: var(--spacing-6);
+    margin-top: calc(var(--spacing-6) + 84px) !important;
   }
   
   .menu-card,
@@ -5251,10 +5298,17 @@ strong, b {
   gap: 20px;
   align-items: center;
   margin-bottom: 30px;
+  margin-left: -20px;
+  margin-right: -20px;
   padding: 20px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 12px;
   backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: calc(100% + 40px);
+  min-width: calc(100% + 40px);
 }
 
 .search-container {
@@ -5299,6 +5353,8 @@ strong, b {
   justify-content: left;
   gap: 10px;
   flex-wrap: nowrap;
+  position: relative;
+  z-index: 11;
 }
 
 .filter-btn {
@@ -5340,6 +5396,10 @@ strong, b {
     gap: 15px;
     padding: 15px;
     margin-bottom: 20px;
+    margin-left: -15px;
+    margin-right: -15px;
+    width: calc(100% + 30px);
+    min-width: calc(100% + 30px);
   }
   
   .search-bar {
