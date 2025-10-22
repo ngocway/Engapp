@@ -1,0 +1,208 @@
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* Review Options Modal */
+.review-options-modal {
+  background: white;
+  border-radius: 20px;
+  padding: 28px 24px;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Modal Header */
+.modal-header {
+  display: none; /* Hide header since we don't need it in this design */
+}
+
+/* Modal Body */
+.modal-body {
+  padding: 0;
+}
+
+/* Intro text */
+.modal-description {
+  color: #374151;
+  font-size: 15px;
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+
+.modal-description strong {
+  color: #374151;
+  font-weight: 600;
+}
+
+/* Options Container */
+.options-container {
+  margin-bottom: 16px;
+}
+
+/* Option Cards */
+.option-card {
+  display: flex;
+  align-items: center;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.option-card:hover {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+/* Selected state */
+.option-card.selected {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+/* Option Icon */
+.option-icon {
+  font-size: 26px;
+  margin-right: 12px;
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  color: inherit;
+  transition: none;
+  flex-shrink: 0;
+}
+
+/* Option Content */
+.option-content {
+  flex: 1;
+  text-align: left;
+}
+
+.option-content h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 3px 0;
+}
+
+.option-content p {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Option Features - now used as badges */
+.option-features {
+  margin-left: auto;
+  display: flex;
+  gap: 0;
+}
+
+.feature-tag {
+  background: #eef2ff;
+  color: #4338ca;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Option Arrow - hide since we don't use it in this design */
+.option-arrow {
+  display: none;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cancel-btn,
+.start-btn {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.cancel-btn {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.cancel-btn:hover {
+  background: #e5e7eb;
+}
+
+.start-btn {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+}
+
+.start-btn:hover {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed);
+}
+
+.start-btn:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+  .review-options-modal {
+    padding: 24px 18px;
+    width: 95%;
+  }
+  
+  .option-card {
+    padding: 12px 14px;
+  }
+  
+  .option-icon {
+    font-size: 22px;
+    margin-right: 10px;
+  }
+  
+  .option-content h4 {
+    font-size: 14px;
+  }
+  
+  .option-content p {
+    font-size: 12px;
+  }
+  
+  .feature-tag {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}

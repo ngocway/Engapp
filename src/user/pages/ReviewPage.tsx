@@ -10,6 +10,7 @@ import { VocabFlashcard } from '../../components/VocabFlashcard';
 import { PassageVocab } from '../../types';
 import LessonCard from '../components/LessonCard';
 import VocabCard from '../../components/VocabCard';
+import ReviewOptionsModal from '../components/ReviewOptionsModal';
 
 const ReviewPage: React.FC = () => {
   const navigate = useNavigate();
@@ -33,6 +34,9 @@ const ReviewPage: React.FC = () => {
   const [selectedVocabTerm, setSelectedVocabTerm] = useState<string>('');
   const [flashcardPosition, setFlashcardPosition] = useState<{ x: number; y: number } | undefined>(undefined);
   const [passageVocab, setPassageVocab] = useState<PassageVocab[]>([]);
+  
+  // State for review options modal
+  const [showReviewOptionsModal, setShowReviewOptionsModal] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -224,6 +228,48 @@ const ReviewPage: React.FC = () => {
     await loadLearnedVocabulary();
   };
 
+  // Hàm xử lý khi click nút Ôn tập từ vựng - hiển thị modal chọn phương thức
+  const handleReviewVocabularyClick = () => {
+    const filteredVocab = getFilteredVocabulary();
+    if (filteredVocab.length > 0) {
+      setShowReviewOptionsModal(true);
+    }
+  };
+
+  // Hàm xử lý khi chọn ôn tập bằng flashcard
+  const handleFlashcardOptionClick = () => {
+    const filteredVocab = getFilteredVocabulary();
+    if (filteredVocab.length > 0) {
+      // Create practice session with filtered learned words
+      const practiceVocab: PassageVocab[] = filteredVocab.map(vocab => ({
+        term: vocab.word,
+        meaning: vocab.meaning || '',
+        definitionEn: vocab.definitionEn || '',
+        pronunciation: vocab.pronunciation || '',
+        partOfSpeech: vocab.partOfSpeech || '',
+        image: vocab.image || '',
+        audio: '', // Vocabulary type doesn't have audio property
+        examples: vocab.examples || [],
+        phonetics: {
+          us: vocab.pronunciation || '',
+          uk: vocab.pronunciation || ''
+        }
+      }));
+      
+      setPassageVocab(practiceVocab);
+      setSelectedVocabTerm(practiceVocab[0]?.term || '');
+      setFlashcardPosition(undefined); // Center the flashcard
+      setShowVocabFlashcard(true);
+    }
+  };
+
+  // Hàm xử lý khi chọn trả lời câu hỏi (placeholder - chưa implement)
+  const handleQuizOptionClick = () => {
+    // TODO: Implement quiz functionality
+    console.log('Quiz option clicked - feature coming soon!');
+    alert('Tính năng trả lời câu hỏi sẽ được phát triển trong phiên bản tiếp theo!');
+  };
+
   // Filter functions
   const getFilteredPassages = () => {
     let filtered = completedPassages;
@@ -351,32 +397,7 @@ const ReviewPage: React.FC = () => {
 
               <button 
                 className="review-all-btn"
-                onClick={() => {
-                  // Start practice with filtered learned words
-                  const filteredVocab = getFilteredVocabulary();
-                  if (filteredVocab.length > 0) {
-                    // Create practice session with filtered learned words
-                    const practiceVocab: PassageVocab[] = filteredVocab.map(vocab => ({
-                      term: vocab.word,
-                      meaning: vocab.meaning || '',
-                      definitionEn: vocab.definitionEn || '',
-                      pronunciation: vocab.pronunciation || '',
-                      partOfSpeech: vocab.partOfSpeech || '',
-                      image: vocab.image || '',
-                      audio: '', // Vocabulary type doesn't have audio property
-                      examples: vocab.examples || [],
-                      phonetics: {
-                        us: vocab.pronunciation || '',
-                        uk: vocab.pronunciation || ''
-                      }
-                    }));
-                    
-                    setPassageVocab(practiceVocab);
-                    setSelectedVocabTerm(practiceVocab[0]?.term || '');
-                    setFlashcardPosition(undefined); // Center the flashcard
-                    setShowVocabFlashcard(true);
-                  }
-                }}
+                onClick={handleReviewVocabularyClick}
               >
                 <i className="fa-solid fa-bullseye"></i>
                 Ôn tập từ vựng ({getFilteredVocabulary().length} từ)
@@ -459,6 +480,15 @@ const ReviewPage: React.FC = () => {
             </div>
           </div>
         
+        {/* Review Options Modal */}
+        <ReviewOptionsModal
+          isOpen={showReviewOptionsModal}
+          onClose={() => setShowReviewOptionsModal(false)}
+          onFlashcardClick={handleFlashcardOptionClick}
+          onQuizClick={handleQuizOptionClick}
+          vocabularyCount={getFilteredVocabulary().length}
+        />
+
         {/* Vocabulary Flashcard for Review */}
         {showVocabFlashcard && selectedVocabTerm && (
           <VocabFlashcard
