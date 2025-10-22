@@ -15,7 +15,7 @@ const UserApp: React.FC = () => {
       <div className="user-app">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/topic/:slug" element={<TopicDetailPage />} />
+          <Route path="/topics/:topicSlug" element={<TopicDetailPage />} />
           <Route path="/passage/:id" element={<PassageDetail />} />
           <Route path="/passages" element={<PassageList />} />
           <Route path="/my-vocab" element={<MyVocab />} />
