@@ -325,6 +325,7 @@ const TopicDetailPage: React.FC = () => {
                   key={passage.id}
                   passage={passage}
                   isLearned={completedPassages.has(passage.id)}
+                  isLoggedIn={!!user}
                   onClick={() => {
                     // Check if user is not logged in and trying to access premium content
                     if (!user && passage.accessType === 'premium') {
@@ -349,7 +350,7 @@ const TopicDetailPage: React.FC = () => {
         title="🔒 Chức năng Premium"
         description="Chức năng Ôn tập chỉ dành cho thành viên, vui lòng đăng nhập để có thể lưu tiến trình học tập của bạn."
         loginButtonIcon="🔑"
-        loginButtonText="Đăng nhập ngay"
+        loginButtonText="Đăng nhập"
       />
     </div>
   );

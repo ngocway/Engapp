@@ -49,7 +49,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ initialTab = 'topics' }) => {
         title="🔒 Chức năng Premium"
         description="Chức năng Ôn tập chỉ dành cho thành viên, vui lòng đăng nhập để có thể lưu tiến trình học tập của bạn."
         loginButtonIcon="🔑"
-        loginButtonText="Đăng nhập ngay"
+        loginButtonText="Đăng nhập"
       />
     </div>
   );

@@ -17,7 +17,7 @@ const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
   title = "🔒 Bài học Premium",
   description = "Bài học này dành cho thành viên Premium.<br />Vui lòng đăng nhập để tiếp tục học bài này.",
   loginButtonIcon = "🔑",
-  loginButtonText = "Đăng nhập ngay"
+  loginButtonText = "Đăng nhập"
 }) => {
   if (!isOpen) return null;
 

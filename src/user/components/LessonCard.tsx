@@ -98,9 +98,11 @@ const LessonCard: React.FC<LessonCardProps> = ({
         <div className={`thumbnail-placeholder ${passage.thumbnail && passage.thumbnail.trim() !== '' ? 'hidden' : ''}`}>
           📚
         </div>
-        <span className="level">
-          {getEnglishLevelText(passage.englishLevels, passage.englishLevel, passage.level)}
-        </span>
+        {!isLoggedIn && (
+          <span className="level">
+            {getEnglishLevelText(passage.englishLevels, passage.englishLevel, passage.level)}
+          </span>
+        )}
         <span className={`status ${getStatusClass()}`}>
           {getStatusText()}
         </span>

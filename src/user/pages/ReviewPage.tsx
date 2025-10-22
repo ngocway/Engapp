@@ -405,6 +405,7 @@ const ReviewPage: React.FC = () => {
                       key={passage.id}
                       passage={passage}
                       isLearned={true}
+                      isLoggedIn={!!user}
                       onClick={() => handlePassageClick(passage.id)}
                     />
                   ))}
