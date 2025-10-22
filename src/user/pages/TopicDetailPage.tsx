@@ -156,6 +156,10 @@ const TopicDetailPage: React.FC = () => {
       } catch (error) {
         console.error('Error loading user settings:', error);
       }
+    } else {
+      // Set default level for non-logged in users
+      setUserEnglishLevel('basic');
+      console.log('📚 Non-logged user, using default level: basic');
     }
   };
 
@@ -180,9 +184,7 @@ const TopicDetailPage: React.FC = () => {
   }, [user]);
 
   useEffect(() => {
-    if (user) {
-      loadTopic();
-    }
+    loadTopic();
   }, [user, userEnglishLevel, topicSlug]);
 
   // Refresh progress when returning to this page
