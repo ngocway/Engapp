@@ -1,8 +1,8 @@
 import React from 'react';
-import MainLayout from '../components/MainLayout';
+import NewHomePage from './NewHomePage';
 
 const HomePage: React.FC = () => {
-  return <MainLayout />;
+  return <NewHomePage />;
 };
 
 export default HomePage;

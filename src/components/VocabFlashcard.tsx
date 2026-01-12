@@ -29,9 +29,17 @@ export const VocabFlashcard: React.FC<VocabFlashcardProps> = ({
   difficulty = 'easy',
   onNext,
   onPrevious,
-  onComplete
+  onComplete,
+  onClose
 }) => {
-  const { user } = useAuth();
+  // Make useAuth optional to prevent errors when not wrapped in AuthProvider
+  let user: any = null;
+  try {
+    const authContext = useAuth();
+    user = authContext?.user || null;
+  } catch (error) {
+    console.log('Auth context not available, continuing without user');
+  }
   const [showDefinition, setShowDefinition] = useState(false);
   const [isLearned, setIsLearned] = useState(false);
 
@@ -70,11 +78,18 @@ export const VocabFlashcard: React.FC<VocabFlashcardProps> = ({
     <div className="vocab-flashcard">
       <div className="flashcard-header">
         <span className="difficulty-badge">{difficulty}</span>
-        {audio && (
-          <button onClick={playAudio} className="audio-button">
-            🔊
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {audio && (
+            <button onClick={playAudio} className="audio-button">
+              🔊
+            </button>
+          )}
+          {onClose && (
+            <button onClick={onClose} className="audio-button" style={{ fontSize: '18px' }}>
+              ✕
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="flashcard-content" onClick={handleFlip}>

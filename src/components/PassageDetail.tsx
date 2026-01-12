@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Passage, Question, EnglishLevel } from '../types';
+import { Passage, Question, EnglishLevel, PassageVocab } from '../types';
 import { topicService } from '../firebase/topicService';
 import { questionService } from '../firebase/questionService';
 import HighlightedText from '../components/HighlightedText';
 import QuizSection from '../components/QuizSection';
-import { VocabFlashcard } from '../components/VocabFlashcard';
+import VocabPopup from '../components/VocabPopup';
+import ImageUpdateButton from '../components/ImageUpdateButton';
 
 interface PassageDetailProps {
   passage: Passage;
@@ -20,11 +21,14 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const [topicName, setTopicName] = useState<string>('');
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingQuestions, setLoadingQuestions] = useState(false);
-  
-  // State for vocabulary flashcard
-  const [showVocabFlashcard, setShowVocabFlashcard] = useState(false);
-  const [selectedVocabTerm, setSelectedVocabTerm] = useState<string>('');
-  const [flashcardPosition, setFlashcardPosition] = useState<{ x: number; y: number } | undefined>(undefined);
+
+  // State for vocabulary popup
+  const [showVocabPopup, setShowVocabPopup] = useState(false);
+  const [selectedVocab, setSelectedVocab] = useState<PassageVocab | null>(null);
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+
+  // State for related passages
+  const [relatedPassages, setRelatedPassages] = useState<Passage[]>([]);
 
   const getEnglishLevelColor = (englishLevel?: EnglishLevel, level?: number) => {
     if (englishLevel) {
@@ -71,139 +75,38 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   // Hàm xử lý khi click vào từ vựng được highlight
   const handleVocabularyClick = (word: string, event?: React.MouseEvent) => {
     console.log('🎯 handleVocabularyClick called with:', { word, hasEvent: !!event });
-    
+
     // Tìm từ vựng trong passage vocab để hiển thị thông tin chi tiết
     const vocabItem = passage.vocab?.find(v => v.term === word);
-    
-    // Ưu tiên phát audio thực tế từ Firebase Storage
-    if (vocabItem?.audio && (vocabItem.audio.startsWith('data:audio/') || vocabItem.audio.startsWith('http'))) {
-      try {
-        const audio = new Audio(vocabItem.audio);
-        audio.play().catch((playError) => {
-          console.error('Lỗi khi phát audio:', playError);
-          // Fallback về text-to-speech nếu audio không phát được
-          if ('speechSynthesis' in window) {
-            const utterance = new SpeechSynthesisUtterance(word);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.8;
-            utterance.pitch = 1.2;
-            speechSynthesis.speak(utterance);
-          }
-        });
-      } catch (error) {
-        console.error('Lỗi khi tạo audio object:', error);
-        // Fallback về text-to-speech
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(word);
-          utterance.lang = 'en-US';
-          utterance.rate = 0.8;
-          utterance.pitch = 1.2;
-          speechSynthesis.speak(utterance);
-        }
-      }
-    } else {
-      // Fallback về text-to-speech nếu không có audio
-      if ('speechSynthesis' in window) {
-        const utterance = new SpeechSynthesisUtterance(word);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.8;
-        utterance.pitch = 1.2;
-        speechSynthesis.speak(utterance);
-      }
-    }
 
-    // Hiển thị flashcard gần từ vựng được click
-    if (event) {
-      console.log('🎯 Setting flashcard state...');
-      setSelectedVocabTerm(word);
-      
-      // Tính toán vị trí thông minh cho flashcard
+    if (vocabItem && event) {
+      // Hiển thị popup gần từ vựng được click
       const rect = event.currentTarget.getBoundingClientRect();
-      const position = calculateSmartPosition(rect);
-      
-      setFlashcardPosition(position);
-      setShowVocabFlashcard(true);
-      console.log('🎯 Flashcard state set:', { word, position, showFlashcard: true });
+      setAnchorRect(rect);
+      setSelectedVocab(vocabItem);
+      setShowVocabPopup(true);
+      console.log('🎯 VocabPopup state set:', { vocabItem, rect });
     }
   };
 
-  // Hàm tính toán vị trí thông minh cho flashcard để không che từ vựng
-  const calculateSmartPosition = (rect: DOMRect) => {
-    const flashcardWidth = 850;
-    const flashcardHeight = 600; // Tăng chiều cao để chứa full nội dung
-    const padding = 20;
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // Tính toán vị trí ngang - ưu tiên đặt flashcard gần từ vựng
-    let x = rect.right + 10; // Đặt bên phải từ vựng với khoảng cách 10px
-    
-    // Kiểm tra xem có đủ không gian bên phải không
-    if (x + flashcardWidth > viewportWidth - padding) {
-      // Không đủ không gian bên phải, thử đặt bên trái
-      x = rect.left - flashcardWidth - 10;
-      
-      // Nếu vẫn không đủ không gian bên trái, đặt ở vị trí gần nhất có thể
-      if (x < padding) {
-        // Đặt flashcard ở vị trí gần từ vựng nhất có thể
-        if (rect.left < viewportWidth / 2) {
-          // Từ vựng ở bên trái, đặt flashcard sát bên phải màn hình
-          x = viewportWidth - flashcardWidth - padding;
-        } else {
-          // Từ vựng ở bên phải, đặt flashcard sát bên trái màn hình
-          x = padding;
-        }
-      }
-    }
-    
-    // Tính toán vị trí dọc - ưu tiên đặt flashcard gần từ vựng
-    let y = rect.bottom + 10; // Mặc định đặt phía dưới từ vựng với khoảng cách 10px
-    
-    const spaceBelow = viewportHeight - rect.bottom;
-    const spaceAbove = rect.top;
-    
-    // Kiểm tra xem có đủ không gian phía dưới không
-    if (spaceBelow >= flashcardHeight + padding) {
-      // Có đủ không gian phía dưới, hiển thị phía dưới từ vựng
-      y = rect.bottom + 10;
-    } else if (spaceAbove >= flashcardHeight + padding) {
-      // Có đủ không gian phía trên, hiển thị phía trên từ vựng
-      y = rect.top - flashcardHeight - 10;
-    } else {
-      // Không đủ không gian ở cả hai phía, đặt ở vị trí gần nhất có thể
-      if (spaceBelow > spaceAbove) {
-        // Phía dưới có nhiều không gian hơn, đặt flashcard ở phía dưới
-        y = Math.min(viewportHeight - flashcardHeight - padding, rect.bottom + 10);
-      } else {
-        // Phía trên có nhiều không gian hơn, đặt flashcard ở phía trên
-        y = Math.max(padding, rect.top - flashcardHeight - 10);
-      }
-    }
-    
-    // Đảm bảo flashcard không vượt ra ngoài viewport
-    x = Math.max(padding, Math.min(x, viewportWidth - flashcardWidth - padding));
-    y = Math.max(padding, Math.min(y, viewportHeight - flashcardHeight - padding));
-    
-    return { x, y };
-  };
 
   // Hàm xử lý khi click vào từ vựng trong phần "Từ mới"
   const handleNewWordClick = (term: string, event: React.MouseEvent) => {
-    setSelectedVocabTerm(term);
-    
-    // Tính toán vị trí thông minh cho flashcard
-    const rect = event.currentTarget.getBoundingClientRect();
-    const position = calculateSmartPosition(rect);
-    
-    setFlashcardPosition(position);
-    setShowVocabFlashcard(true);
+    const vocabItem = passage.vocab?.find(v => v.term === term);
+
+    if (vocabItem) {
+      const rect = event.currentTarget.getBoundingClientRect();
+      setAnchorRect(rect);
+      setSelectedVocab(vocabItem);
+      setShowVocabPopup(true);
+    }
   };
 
-  // Hàm đóng flashcard
-  const handleCloseFlashcard = () => {
-    setShowVocabFlashcard(false);
-    setSelectedVocabTerm('');
-    setFlashcardPosition(undefined);
+  // Hàm đóng popup
+  const handleClosePopup = () => {
+    setShowVocabPopup(false);
+    setSelectedVocab(null);
+    setAnchorRect(null);
   };
 
   // Load questions when transcript tab is active
@@ -227,53 +130,33 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
 
   // Debug log để theo dõi state
   useEffect(() => {
-    console.log('🎯 Render check:', { showVocabFlashcard, selectedVocabTerm, flashcardPosition });
-  }, [showVocabFlashcard, selectedVocabTerm, flashcardPosition]);
-
-  // Cập nhật vị trí flashcard khi window resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (showVocabFlashcard && selectedVocabTerm) {
-        // Tìm lại element từ vựng đang được chọn và tính toán lại vị trí
-        const vocabElements = document.querySelectorAll('.clickable-vocab');
-        vocabElements.forEach((element) => {
-          if (element.textContent?.trim() === selectedVocabTerm) {
-            const rect = element.getBoundingClientRect();
-            const position = calculateSmartPosition(rect);
-            setFlashcardPosition(position);
-          }
-        });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [showVocabFlashcard, selectedVocabTerm]);
+    console.log('🎯 Render check:', { showVocabPopup, selectedVocab, anchorRect });
+  }, [showVocabPopup, selectedVocab, anchorRect]);
 
   // Load topic name
   useEffect(() => {
     const loadTopicName = async () => {
       console.log('Loading topic name for passage:', passage);
       console.log('Passage topicId:', passage.topicId);
-      
+
       try {
         const topics = await topicService.getAll();
         console.log('All topics:', topics);
-        
+
         let topic = null;
-        
+
         // Try to find by topicId first
         if (passage.topicId) {
           topic = topics.find(t => t.id === passage.topicId);
           console.log('Found topic by ID:', topic);
         }
-        
+
         // Fallback: try to find by slug if not found by ID
         if (!topic && passage.topicSlug) {
           topic = topics.find(t => t.slug === passage.topicSlug);
           console.log('Found topic by slug:', topic);
         }
-        
+
         // If still no topic found, try to infer from passage title or use default
         if (!topic) {
           // Try to match by common patterns in passage titles
@@ -287,7 +170,7 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
           }
           console.log('Found topic by inference:', topic);
         }
-        
+
         if (topic && (topic.name || topic.title)) {
           const topicName = topic.name || topic.title;
           console.log('Setting topic name:', topicName);
@@ -303,6 +186,26 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
     };
     loadTopicName();
   }, [passage.topicId]);
+
+  // Load related passages from the same topic
+  useEffect(() => {
+    const loadRelatedPassages = async () => {
+      if (passage.topicSlug) {
+        try {
+          const { passageService } = await import('../firebase/passageService');
+          const allPassages = await passageService.getByTopicSlug(passage.topicSlug);
+          // Filter out current passage and get up to 4 related ones
+          const related = allPassages
+            .filter(p => p.id !== passage.id)
+            .slice(0, 4);
+          setRelatedPassages(related);
+        } catch (error) {
+          console.error('Error loading related passages:', error);
+        }
+      }
+    };
+    loadRelatedPassages();
+  }, [passage.id, passage.topicSlug]);
 
   // Audio player functionality - chỉ khởi tạo khi có audio
   useEffect(() => {
@@ -366,153 +269,231 @@ const PassageDetail: React.FC<PassageDetailProps> = ({ passage, onBack }) => {
   const maskedWords = words.map(word => '*'.repeat(word.length));
 
   return (
-    <main className="lesson-container">
+    <main className="max-w-7xl mx-auto px-6 py-8">
       {/* Breadcrumb */}
-      <nav className="breadcrumb">
-        <a href="#" onClick={() => navigate('/topics')}>{topicName || 'Chủ đề'}</a> › <span>{passage.title}</span>
+      <nav className="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500 mb-8">
+        <a href="#" onClick={(e) => { e.preventDefault(); navigate('/topics'); }} className="hover:text-primary transition-colors">
+          {topicName || 'Chủ đề'}
+        </a>
+        <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+        <span className="text-slate-600 dark:text-slate-300 font-medium">{passage.title}</span>
       </nav>
 
-      <div className="lesson-layout">
-        {/* LEFT PANEL */}
-        <aside className="lesson-info">
-          <h2 className="lesson-title">{passage.title}</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* LEFT SIDEBAR - Image & Vocabulary */}
+        <aside className="lg:col-span-3 space-y-6">
+          <div className="bg-card-light dark:bg-card-dark p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+            <h1 className="text-xl font-bold mb-4 text-slate-900 dark:text-white leading-tight">{passage.title}</h1>
 
-          <div className="lesson-thumb">
-            {passage.thumbnail ? (
-              <img src={passage.thumbnail} alt="Lesson Thumbnail" />
-            ) : (
-              <img src="https://i.ibb.co/nrRJLwH/dogs.jpg" alt="Lesson Thumbnail" />
-            )}
-          </div>
+            <div className="aspect-video w-full rounded-xl overflow-hidden mb-6 relative shadow-md">
+              <img
+                alt={passage.title}
+                className="object-cover w-full h-full transform hover:scale-105 transition-transform duration-700"
+                src={passage.thumbnail || "https://images.unsplash.com/photo-1501854140884-074cf2b2c7c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"}
+                onError={(e) => {
+                  const el = e.currentTarget as HTMLImageElement;
+                  el.src = 'https://images.unsplash.com/photo-1501854140884-074cf2b2c7c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80';
+                }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
 
-          <div className="vocab-section">
-            <h3>Từ mới</h3>
-            <div className="vocab-list">
-              {(() => {
-                // Use passage.vocab if available, otherwise fallback to extracting from text
-                if (passage.vocab && passage.vocab.length > 0) {
-                  return passage.vocab.map((vocab, index) => (
-                    <button 
-                      key={index} 
-                      className="vocab-btn clickable-vocab"
-                      onClick={(e) => handleNewWordClick(vocab.term, e)}
-                    >
-                      {vocab.term}
-                    </button>
-                  ));
-                } else {
-                  // Fallback: Extract vocabulary from text (same logic as HighlightedText)
-                  const bracketRegex = /\[([^\]]+)\]/g;
-                  const matches = passage.text.match(bracketRegex);
-                  
-                  if (matches && matches.length > 0) {
-                    const vocabularyWords = matches.map(match => {
-                      const word = match.slice(1, -1).trim(); // Remove brackets
-                      return word;
-                    }).filter(word => word.length > 0);
-                    
-                    // Remove duplicates
-                    const uniqueWords = Array.from(new Set(vocabularyWords));
-                    
-                    return uniqueWords.map((word, index) => (
-                      <button 
-                        key={index} 
-                        className="vocab-btn clickable-vocab"
-                        onClick={(e) => handleNewWordClick(word, e)}
+              {/* Image Updater Trigger */}
+              <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
+                <ImageUpdateButton />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">Vocabulary</h2>
+                <span className="text-[10px] font-bold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded text-slate-500">
+                  {passage.vocab?.length || 0} WORDS
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {(() => {
+                  if (passage.vocab && passage.vocab.length > 0) {
+                    return passage.vocab.map((vocab, index) => (
+                      <span
+                        key={index}
+                        className="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-primary hover:text-white dark:hover:bg-primary transition-all cursor-pointer"
+                        onClick={(e) => handleNewWordClick(vocab.term, e)}
                       >
-                        {word}
-                      </button>
+                        {vocab.term}
+                      </span>
                     ));
                   } else {
-                    return (
-                      <div className="no-vocabulary">
-                        <p>Không có từ vựng nào được định nghĩa trong bài học này.</p>
-                        <p><small>💡 Để thêm từ vựng, sử dụng chức năng "Quản lý từ vựng" trong admin</small></p>
-                      </div>
-                    );
+                    // Fallback extraction
+                    const bracketRegex = /\[([^\]]+)\]/g;
+                    const matches = passage.text.match(bracketRegex);
+                    if (matches && matches.length > 0) {
+                      const uniqueWords = Array.from(new Set(matches.map(m => m.slice(1, -1).trim()).filter(w => w.length > 0)));
+                      return uniqueWords.map((word, index) => (
+                        <span
+                          key={index}
+                          className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-sm font-medium hover:bg-primary hover:text-white transition-all cursor-pointer"
+                          onClick={(e) => handleNewWordClick(word, e)}
+                        >
+                          {word}
+                        </span>
+                      ));
+                    }
+                    return <p className="text-sm text-gray-400 italic">No vocabulary words marked.</p>;
                   }
-                }
-              })()}
+                })()}
+              </div>
             </div>
           </div>
         </aside>
 
-        {/* RIGHT PANEL */}
-        <section className="lesson-content">
-          <div className="tab-header">
-            <button 
-              className={`tab-btn ${activeTab === 'dictation' ? 'active' : ''}`} 
-              data-tab="reading"
-              onClick={() => setActiveTab('dictation')}
-            >
-              Đọc bài
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'transcript' ? 'active' : ''}`} 
-              data-tab="questions"
-              onClick={() => setActiveTab('transcript')}
-            >
-              Câu hỏi
-            </button>
-          </div>
+        {/* CENTER CONTENT - Reading/Questions */}
+        <div className="lg:col-span-6">
+          <div className="bg-card-light dark:bg-card-dark rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col">
 
-          {/* Tab: Reading */}
-          <div className={`tab-body ${activeTab === 'dictation' ? 'active' : ''}`} id="reading">
-            <h3>Nội dung bài học</h3>
+            {/* Tabs & Audio Header */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 bg-white dark:bg-slate-900">
+              <div className="flex">
+                <button
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'dictation' ? 'text-primary border-primary' : 'text-slate-400 dark:text-slate-500 border-transparent hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  onClick={() => setActiveTab('dictation')}
+                >
+                  Reading
+                </button>
+                <button
+                  className={`px-6 py-4 text-sm font-bold border-b-2 transition-colors ${activeTab === 'transcript' ? 'text-primary border-primary' : 'text-slate-400 dark:text-slate-500 border-transparent hover:text-slate-600 dark:hover:text-slate-300'}`}
+                  onClick={() => setActiveTab('transcript')}
+                >
+                  Questions
+                </button>
+              </div>
 
-            {/* Chỉ hiển thị audio player nếu có audio */}
-            {passage.audioUrl && (
-              <>
-                <div className="audio-player">
-                  <button id="play-pause" className="play-btn">
-                    <i className="fa-solid fa-play"></i>
+              {/* Audio Player (Visible only when Reading tab is active and audio exists) */}
+              {activeTab === 'dictation' && passage.audioUrl && (
+                <div className="py-2 md:py-0 flex items-center gap-3 flex-1 max-w-[280px] ml-auto audio-player-container">
+                  <button id="play-pause" className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                    <i className="fas fa-play text-sm"></i>
                   </button>
-                  <div className="progress-wrapper">
-                    <div className="progress-bar"><div id="progress"></div></div>
-                    <div className="time">
-                      <span id="current-time">0:00</span>
-                      <span id="duration">0:00</span>
+                  <div className="flex-1 flex items-center gap-2">
+                    <span id="current-time" className="text-[10px] font-medium text-slate-400 font-mono min-w-[30px]">0:00</span>
+                    <div className="flex-1 relative h-1 flex items-center bg-slate-100 dark:bg-slate-700 rounded-full cursor-pointer group">
+                      <div id="progress" className="absolute left-0 top-0 h-full bg-primary rounded-full pointer-events-none" style={{ width: '0%' }}></div>
                     </div>
+                    <span id="duration" className="text-[10px] font-medium text-slate-400 font-mono min-w-[30px]">0:00</span>
                   </div>
-                  <button id="speed-btn" className="speed-btn">1x</button>
+                  <button id="speed-btn" className="text-xs font-bold text-slate-500 hover:text-primary px-2 py-1 rounded border border-slate-200 dark:border-slate-700">1x</button>
+                  {passage.audioUrl && <audio id="lesson-audio" src={passage.audioUrl} className="hidden"></audio>}
                 </div>
+              )}
+            </div>
 
-                <audio id="lesson-audio" src={passage.audioUrl}></audio>
-              </>
-            )}
+            {/* Tab Content */}
+            <div className="p-6 md:p-10 flex-1 relative">
+              {activeTab === 'dictation' && (
+                <div className="reading-pane text-sm leading-[1.8] text-slate-700 dark:text-slate-300 space-y-6 font-serif">
+                  <HighlightedText
+                    text={passage.text}
+                    onWordClick={handleVocabularyClick}
+                    highlightedWords={passage.vocab?.map(v => v.term) || []}
+                    passageVocab={passage.vocab}
+                  />
 
-            <div className="lesson-text">
-              <HighlightedText 
-                text={passage.text}
-                onWordClick={handleVocabularyClick}
-                highlightedWords={[]}
-              />
+                  <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
+                    <button
+                      onClick={() => navigate('/passages')}
+                      className="px-8 py-2.5 bg-primary text-white font-bold rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all flex items-center gap-2 text-sm shadow-md hover:scale-105 active:scale-95"
+                    >
+                      Finish Reading
+                      <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'transcript' && (
+                <div className="animate-fadeIn">
+                  {loadingQuestions ? (
+                    <div className="flex flex-col items-center justify-center py-20">
+                      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mb-4"></div>
+                      <p className="text-slate-500">Đang tải câu hỏi...</p>
+                    </div>
+                  ) : (
+                    <QuizSection questions={questions} passageId={passage.id} />
+                  )}
+                </div>
+              )}
             </div>
           </div>
+        </div>
 
-          {/* Tab: Questions */}
-          <div className={`tab-body ${activeTab === 'transcript' ? 'active' : ''}`} id="questions">
-            <h3>Câu hỏi ôn tập</h3>
-            {loadingQuestions ? (
-              <div style={{ textAlign: 'center', padding: '40px' }}>
-                <p style={{ color: '#666', fontSize: '1.2rem' }}>
-                  🔄 Đang tải câu hỏi...
-                </p>
+        {/* RIGHT SIDEBAR - Related Lessons */}
+        <aside className="lg:col-span-3 space-y-6">
+          {relatedPassages.length > 0 && (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wide">Bài học liên quan</h2>
+                <a
+                  href="#"
+                  onClick={(e) => { e.preventDefault(); navigate(`/topics/${passage.topicSlug}`); }}
+                  className="text-xs font-semibold text-primary hover:underline"
+                >
+                  See all
+                </a>
               </div>
-            ) : (
-              <QuizSection questions={questions} passageId={passage.id} />
-            )}
+              <div className="space-y-4">
+                {relatedPassages.map((relatedPassage) => (
+                  <div
+                    key={relatedPassage.id}
+                    onClick={() => navigate(`/passage/${relatedPassage.id}`)}
+                    className="group flex gap-4 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                  >
+                    <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+                      <img
+                        alt={relatedPassage.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        src={relatedPassage.thumbnail || "https://images.unsplash.com/photo-1501854140884-074cf2b2c7c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80"}
+                        onError={(e) => {
+                          const el = e.currentTarget as HTMLImageElement;
+                          el.src = 'https://images.unsplash.com/photo-1501854140884-074cf2b2c7c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1470&q=80';
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col justify-center min-w-0">
+                      <span className="text-[9px] font-extrabold text-indigo-500 uppercase tracking-tighter mb-1">
+                        {relatedPassage.englishLevel || 'Basic'}
+                      </span>
+                      <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200 line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+                        {relatedPassage.title}
+                      </h3>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Practice CTA Card */}
+          <div className="bg-indigo-600 rounded-2xl p-5 text-white relative overflow-hidden">
+            <div className="relative z-10">
+              <h4 className="font-bold text-sm mb-2">Practice makes perfect</h4>
+              <p className="text-xs text-indigo-100 mb-4">Complete this lesson to unlock the vocabulary quiz.</p>
+              <button
+                onClick={() => navigate('/review')}
+                className="bg-white text-indigo-600 text-[11px] font-bold px-4 py-2 rounded-full hover:bg-indigo-50 transition-colors"
+              >
+                Go to Quiz
+              </button>
+            </div>
+            <span className="material-symbols-outlined absolute -bottom-4 -right-4 text-white/10 text-[100px] select-none">quiz</span>
           </div>
-        </section>
+        </aside>
       </div>
 
-      {/* VocabFlashcard hiển thị khi click vào từ vựng trong phần "Từ mới" */}
-      {showVocabFlashcard && selectedVocabTerm && (
-        <VocabFlashcard
-          term={selectedVocabTerm}
-          // passageVocab={passage.vocab || []}
-          onClose={handleCloseFlashcard}
-          position={flashcardPosition}
+      {/* VocabPopup */}
+      {showVocabPopup && selectedVocab && (
+        <VocabPopup
+          anchorRect={anchorRect}
+          vocab={selectedVocab}
+          onClose={handleClosePopup}
         />
       )}
     </main>

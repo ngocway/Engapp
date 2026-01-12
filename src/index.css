@@ -2049,6 +2049,146 @@ body {
   gap: 8px;
 }
 
+/* VocabFlashcard Styles */
+.vocab-flashcard {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  max-width: 90vw;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  overflow: hidden;
+  animation: flashcardSlideIn 0.3s ease-out;
+}
+
+@keyframes flashcardSlideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.flashcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.difficulty-badge {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.audio-button {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s ease;
+}
+
+.audio-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.flashcard-content {
+  padding: 24px;
+  cursor: pointer;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.flashcard-image {
+  margin-bottom: 16px;
+}
+
+.flashcard-image img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.flashcard-text h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2d3436;
+  margin: 0;
+}
+
+.flashcard-text p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #636e72;
+  margin: 8px 0;
+}
+
+.flashcard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+.flashcard-actions button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.prev-button, .next-button {
+  background: #6c757d;
+  color: white;
+}
+
+.prev-button:hover, .next-button:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.learned-button {
+  background: #28a745;
+  color: white;
+}
+
+.learned-button:hover:not(:disabled) {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.learned-button:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
 .checkbox-icon {
   font-size: 1.2rem;
 }
